@@ -57,20 +57,18 @@ bool websrv::SvWebServer::init()
 
   if (!m_web_server->listen(QHostAddress::Any, m_params.port))
   {
-    qDebug() << "NOT listen";
     p_last_error = QString("Ошибка запуска сервера %1: %2").arg(p_config.name).arg(m_web_server->errorString());
 
     return false;
 
   };
-qDebug() << "listen";
+
   return true;
 
 }
 
 void websrv::SvWebServer::start()
 {
-  qDebug() << "start";
   connect(m_web_server, &QTcpServer::newConnection, this, &websrv::SvWebServer::newConnection);
 }
 

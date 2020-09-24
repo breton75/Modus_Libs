@@ -220,32 +220,30 @@ void pgsp::pgStoredProcThread::stop()
 
 void pgsp::pgStoredProcThread::run()
 {
-  auto getStr = [=](QVariant value) -> QString {
-
-      QString  result = "н/д";
+  auto Var2Str = [](QVariant value) -> QString {
 
       if(value.isValid())
       {
         switch (value.type()) {
           case QMetaType::Int:
 
-            result = QString::number(value.toInt());
+            return QString::number(value.toInt());
             break;
 
           case QMetaType::Double:
 
-            result = QString::number(value.toInt());
+            return QString::number(value.toDouble());
             break;
 
           default:
-            result = "н/д";
+            return "-1";
 
         }
       }
 
-      return result;
+      return "-1";
 
-    };
+  };
 
   QTime elapsed_time = QTime::currentTime();
 
@@ -266,7 +264,7 @@ void pgsp::pgStoredProcThread::run()
     elapsed_time.restart();
 
     QMap<QString, QString> signals_values;  //  = {{T_GEN, QString()}, {T_XDR, QString()}};
-    QMap<QString, QString> signals_reserv; // = {{T_GEN, QString()}, {T_XDR, QString()}};
+//    QMap<QString, QString> signals_reserv; // = {{T_GEN, QString()}, {T_XDR, QString()}};
 
     for(SvSignal* signal: *p_signals) {
 
@@ -282,48 +280,47 @@ void pgsp::pgStoredProcThread::run()
 //        qDebug() << signal->value();
 #endif
 
-      if((signal->config()->timeout >  0 && signal->isAlive()) ||
-         (signal->config()->timeout == 0 && signal->isDeviceAlive()))
+//      if((signal->config()->timeout >  0 && signal->isAlive()) ||
+//         (signal->config()->timeout == 0 && signal->isDeviceAlive()))
       {
         if(signals_values.contains(signal->config()->type))
-          signals_values[signal->config()->type] += QString("%1;%2|").arg(signal->id()).arg(getStr(signal->value()));
+          signals_values[signal->config()->type] += QString("%1;%2|").arg(signal->id()).arg(Var2Str(signal->value()));
 
         else
-          signals_values.insert(signal->config()->type, QString("%1;%2|").arg(signal->id()).arg(getStr(signal->value())));
+          signals_values.insert(signal->config()->type, QString("%1;%2|").arg(signal->id()).arg(Var2Str(signal->value())));
 
       }
-
       /* алгоритм при потере сигнала:
        * 1) если для сигнала назначен резервный сигнал, то сигналу присваивается значение резервного сигнала
        * 2) если резервного сигнала нет, то присваиваем сигналу значение timeout_value,
        * 3) в первый раз зписываем в базу через функцию set_values. таким образом фиксируем в базе время потери связи
        * 4) впоследующем, если сигнал уже имеет значение timeout_value, то пропускаем его фиксацию в базе, для экономии ресурсов
        */
-      else {
+//      else {
 
-        if(signal->config()->timeout_signal_id > 0)
-        {
-          if(signals_reserv.contains(signal->config()->type))
-            signals_reserv[signal->config()->type] += QString("%1;%2|").arg(signal->id()).arg(signal->config()->timeout_signal_id);
+//        if(signal->config()->timeout_signal_id > 0)
+//        {
+//          if(signals_reserv.contains(signal->config()->type))
+//            signals_reserv[signal->config()->type] += QString("%1;%2|").arg(signal->id()).arg(signal->config()->timeout_signal_id);
 
-          else
-            signals_reserv.insert(signal->config()->type, QString("%1;%2|").arg(signal->id()).arg(signal->config()->timeout_signal_id));
-        }
+//          else
+//            signals_reserv.insert(signal->config()->type, QString("%1;%2|").arg(signal->id()).arg(signal->config()->timeout_signal_id));
+//        }
 
 
-        else
-        {
-          /* если сигналу уже назначено значение timeout_value, то не добавляем сигнал к скрипту */
-          if(signal->previousValue() != signal->value())
-          {
-            if(signals_values.contains(signal->config()->type))
-              signals_values[signal->config()->type] += QString("%1;%2|").arg(signal->id()).arg("NULL"); // signal->config()->timeout_value);
+//        else
+//        {
+//          /* если сигналу уже назначено значение timeout_value, то не добавляем сигнал к скрипту */
+////          if(signal->previousValue() != signal->value())
+//          {
+//            if(signals_values.contains(signal->config()->type))
+//              signals_values[signal->config()->type] += QString("%1;%2|").arg(signal->id()).arg(Var2Str(signal->value())); // signal->config()->timeout_value);
 
-            else
-              signals_values.insert(signal->config()->type, QString("%1;%2|").arg(signal->id()).arg("NULL")); // signal->config()->timeout_value));
-          }
-        }
-      }
+//            else
+//              signals_values.insert(signal->config()->type, QString("%1;%2|").arg(signal->id()).arg(Var2Str(signal->value()))); // signal->config()->timeout_value));
+//          }
+//        }
+//      }
     }
 
     /** здесь проверяем флаг p_started. если p_started = false, то есть пришел внешний сигнал на завершение потока,
@@ -336,10 +333,10 @@ void pgsp::pgStoredProcThread::run()
       for(SvSignal* signal: *p_signals) {
 
         if(signals_values.contains(signal->config()->type))
-          signals_values[signal->config()->type] += QString("%1;%2|").arg(signal->id()).arg("NULL"); // signal->config()->timeout_value);
+          signals_values[signal->config()->type] += QString("%1;%2|").arg(signal->id()).arg(Var2Str(QVariant())); // signal->config()->timeout_value);
 
         else
-          signals_values.insert(signal->config()->type, QString("%1;%2|").arg(signal->id()).arg("NULL")); // signal->config()->timeout_value));
+          signals_values.insert(signal->config()->type, QString("%1;%2|").arg(signal->id()).arg(Var2Str(QVariant()))); // signal->config()->timeout_value));
 
       }
 
@@ -366,21 +363,21 @@ void pgsp::pgStoredProcThread::run()
         }
       }
 
-      foreach (QString type, signals_reserv.keys()) {
+//      foreach (QString type, signals_reserv.keys()) {
 
-        if(!signals_reserv.value(type).isEmpty()) {
+//        if(!signals_reserv.value(type).isEmpty()) {
 
-          signals_reserv[type].chop(1);
+//          signals_reserv[type].chop(1);
 
-          QSqlError serr = PGDB->execSQL(QString(PG_FUNC_SET_RESERVE_VALUES)
-                                         .arg(m_params.func_set_reserv)
-                                         .arg(type).arg(signals_reserv.value(type)));
+//          QSqlError serr = PGDB->execSQL(QString(PG_FUNC_SET_RESERVE_VALUES)
+//                                         .arg(m_params.func_set_reserv)
+//                                         .arg(type).arg(signals_reserv.value(type)));
 
-          if(serr.type() != QSqlError::NoError)
-            throw SvException(serr.text());
+//          if(serr.type() != QSqlError::NoError)
+//            throw SvException(serr.text());
 
-        }
-      }
+//        }
+//      }
     }
 
     catch(SvException& e) {

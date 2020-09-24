@@ -6,8 +6,8 @@
 
 #include "conning_kongsber_device_global.h"
 
-#include "../../../WIDEN/global/sv_abstract_device.h"
-#include "../../../WIDEN/global/sv_signal.h"
+#include "../../../Modus/global/sv_abstract_device.h"
+#include "../../../Modus/global/sv_signal.h"
 
 #include "../../../svlib/sv_abstract_logger.h"
 #include "../../../svlib/sv_exception.h"

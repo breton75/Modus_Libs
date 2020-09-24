@@ -15,9 +15,9 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-#include "../../../global/sv_abstract_storage.h"
+#include "../../../Modus/global/sv_abstract_storage.h"
 
-#include "../../../../svlib/sv_pgdb.h"
+#include "../../../svlib/sv_pgdb.h"
 
 #define DB_IMPERMISSIBLE_VALUE "Недопустимое значение параметра %1: %2.\n%3"
 

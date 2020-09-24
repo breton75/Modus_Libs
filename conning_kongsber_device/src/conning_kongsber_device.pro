@@ -8,7 +8,7 @@ QT       += network dbus serialport
 
 QT       -= gui
 
-TARGET = /home/user/widen/lib/conning_kongsber
+TARGET = /home/user/Modus/lib/conning_kongsber
 TEMPLATE = lib
 
 CONFIG += c++11 plugin
@@ -21,18 +21,18 @@ DEFINES += CONNING_KONGSBER_LIBRARY
 
 SOURCES += conning_kongsber_device.cpp \
     ../../../svlib/sv_abstract_logger.cpp \
-    ../../../WIDEN/global/sv_signal.cpp
+    ../../../Modus/global/sv_signal.cpp
 
 HEADERS += conning_kongsber_device.h\
         conning_kongsber_device_global.h \
-    ../../../WIDEN/global/sv_abstract_device.h \
+    ../../../Modus/global/sv_abstract_device.h \
     ../../../svlib/sv_abstract_logger.h \
     device_params.h \
     ifc_udp_params.h \
     ifc_serial_params.h \
     ifc_test_params.h \
     signal_params.h \
-    ../../../WIDEN/global/sv_signal.h
+    ../../../Modus/global/sv_signal.h
 
 unix {
     target.path = /usr/lib
