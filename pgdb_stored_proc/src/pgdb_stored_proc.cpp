@@ -236,12 +236,12 @@ void pgsp::pgStoredProcThread::run()
             break;
 
           default:
-            return "-1";
+            return "NULL";
 
         }
       }
 
-      return "-1";
+      return "NULL";
 
   };
 
