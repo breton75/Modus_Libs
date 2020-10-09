@@ -13,8 +13,7 @@ TEMPLATE = lib
 
 CONFIG += c++11 plugin
 
-#чтобы не цеплять версию к имени файла
-#CONFIG += plugin
+VERSION += 1.1.0
 
 DEFINES += CONNING_KONGSBER_LIBRARY
 #DEFINES += VERSION_2

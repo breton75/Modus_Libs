@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += network
+QT       += network serialport
 
 QT       -= gui
 
@@ -16,17 +16,16 @@ TEMPLATE = lib
 DEFINES += PROJ_12700_OPA_LIBRARY
 
 SOURCES += sv_opa.cpp \
-    ../../../Modus/global/sv_signal.cpp \
-    ../sv_opa_origin.cpp \
-    ../sv_opa_thread.cpp
+    ../../../Modus/global/sv_signal.cpp
 
 HEADERS += sv_opa.h \
     proj_12700_opa_global.h \
     ../../../Modus/global/sv_abstract_device.h \
     ../../../Modus/global/sv_signal.h \
-    ../opa_defs.h \
-    ../sv_opa_origin.h \
-    ../sv_opa_thread.h
+    opa_defs.h \
+    device_params.h \
+    ifc_udp_params.h \
+    ifc_serial_params.h
 
 unix {
     target.path = /usr/lib
