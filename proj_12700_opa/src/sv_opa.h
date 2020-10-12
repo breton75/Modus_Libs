@@ -19,6 +19,8 @@
 //#include "ifc_test_params.h"
 #include "signal_params.h"
 #include "opa_defs.h"
+#include "type_0x02.h"
+
 
 extern "C" {
 
@@ -131,6 +133,8 @@ private:
   void func_0x03(ad::SvAbstractDevice* device, ad::DATA* data);
   void func_0x04(ad::SvAbstractDevice* device, ad::DATA* data);
   void func_0x19(ad::SvAbstractDevice* device, ad::DATA* data);
+
+
 
   void func_set_line_status(ad::SvAbstractDevice* device, ad::DATA* data);
 

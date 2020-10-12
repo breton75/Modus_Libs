@@ -7,7 +7,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-#include "../../svlib/sv_exception.h"
+#include "../../../svlib/sv_exception.h"
 
 #define RESET_INTERVAL  10
 

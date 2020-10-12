@@ -16,7 +16,8 @@ TEMPLATE = lib
 DEFINES += PROJ_12700_OPA_LIBRARY
 
 SOURCES += sv_opa.cpp \
-    ../../../Modus/global/sv_signal.cpp
+    ../../../Modus/global/sv_signal.cpp \
+    type_0x02.cpp
 
 HEADERS += sv_opa.h \
     proj_12700_opa_global.h \
@@ -25,7 +26,8 @@ HEADERS += sv_opa.h \
     opa_defs.h \
     device_params.h \
     ifc_udp_params.h \
-    ifc_serial_params.h
+    ifc_serial_params.h \
+    type_0x02.h
 
 unix {
     target.path = /usr/lib

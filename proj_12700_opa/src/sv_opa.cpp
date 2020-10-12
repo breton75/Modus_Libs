@@ -67,13 +67,13 @@ void opa::SvOPA::addSignal(SvSignal* signal) throw(SvException)
 {
   ad::SvAbstractDevice::addSignal(signal);
 
-//  ckng::SignalParams p = ckng::SignalParams::fromSignal(signal);
+  ckng::SignalParams p = ckng::SignalParams::fromSignal(signal);
 
-//  if(signal->config()->type == "GEN")
-//    SignalsGEN.insert(p.group * 16 + p.word, signal->config()->name);
+  if(signal->config()->type == "GEN")
+    SignalsGEN.insert(p.group * 16 + p.word, signal->config()->name);
 
-//  else if(signal->config()->type == "XDR")
-//    SignalsXDR.insert(p.group * 16 + p.word, signal->config()->name);
+  else if(signal->config()->type == "XDR")
+    SignalsXDR.insert(p.group * 16 + p.word, signal->config()->name);
 
 }
 
@@ -180,6 +180,12 @@ void opa::UDPThread::conform(const QString& jsonDevParams, const QString& jsonIf
 
     dev_params = DeviceParams::fromJson(jsonDevParams);
     ifc_params = UdpParams::fromJsonString(jsonIfcParams);
+
+    foreach (SvSignal* signal, p_device->Signals()->values()) {
+
+
+
+    }
 
   }
   catch(SvException& e) {
@@ -615,7 +621,7 @@ void opa::GenericThread::func_set_line_status(ad::SvAbstractDevice* device, ad::
 void opa::GenericThread::func_0x77(ad::SvAbstractDevice* device)
 {
   foreach (SvSignal* signal, device->Signals()->values())
-    signal->setValue(QVariant());
+    signal->setValue(0);
 }
 
 void opa::GenericThread::func_0x19(ad::SvAbstractDevice* device, ad::DATA* data)
