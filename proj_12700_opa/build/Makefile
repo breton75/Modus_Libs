@@ -50,17 +50,39 @@ OBJECTS_DIR   = ./
 
 SOURCES       = ../src/sv_opa.cpp \
 		../../../Modus/global/sv_signal.cpp \
-		../src/type_0x02.cpp moc_sv_opa.cpp \
+		../src/collection_0x02.cpp \
+		../src/collection_status.cpp \
+		../src/collection_0x03.cpp \
+		../src/collection_0x04.cpp \
+		../src/collection_0x19.cpp \
+		../src/collection_0x33.cpp moc_sv_opa.cpp \
 		moc_sv_abstract_device.cpp \
 		moc_sv_signal.cpp \
-		moc_type_0x02.cpp
+		moc_sv_abstract_signal_collection.cpp \
+		moc_collection_status.cpp \
+		moc_collection_0x02.cpp \
+		moc_collection_0x03.cpp \
+		moc_collection_0x04.cpp \
+		moc_collection_0x19.cpp \
+		moc_collection_0x33.cpp
 OBJECTS       = sv_opa.o \
 		sv_signal.o \
-		type_0x02.o \
+		collection_0x02.o \
+		collection_status.o \
+		collection_0x03.o \
+		collection_0x04.o \
+		collection_0x19.o \
+		collection_0x33.o \
 		moc_sv_opa.o \
 		moc_sv_abstract_device.o \
 		moc_sv_signal.o \
-		moc_type_0x02.o
+		moc_sv_abstract_signal_collection.o \
+		moc_collection_status.o \
+		moc_collection_0x02.o \
+		moc_collection_0x03.o \
+		moc_collection_0x04.o \
+		moc_collection_0x19.o \
+		moc_collection_0x33.o
 DIST          = /opt/Qt5.5.1/5.5/gcc_64/mkspecs/features/spec_pre.prf \
 		/opt/Qt5.5.1/5.5/gcc_64/mkspecs/common/unix.conf \
 		/opt/Qt5.5.1/5.5/gcc_64/mkspecs/common/linux.conf \
@@ -198,15 +220,26 @@ DIST          = /opt/Qt5.5.1/5.5/gcc_64/mkspecs/features/spec_pre.prf \
 		../src/proj_12700_opa_global.h \
 		../../../Modus/global/sv_abstract_device.h \
 		../../../Modus/global/sv_signal.h \
+		../../../Modus/global/sv_abstract_signal_collection.h \
 		../src/opa_defs.h \
 		../src/device_params.h \
 		../src/ifc_udp_params.h \
 		../src/ifc_serial_params.h \
-		../src/type_0x02.h ../src/sv_opa.cpp \
+		../src/collection_status.h \
+		../src/collection_0x02.h \
+		../src/collection_0x03.h \
+		../src/collection_0x04.h \
+		../src/collection_0x19.h \
+		../src/collection_0x33.h ../src/sv_opa.cpp \
 		../../../Modus/global/sv_signal.cpp \
-		../src/type_0x02.cpp
+		../src/collection_0x02.cpp \
+		../src/collection_status.cpp \
+		../src/collection_0x03.cpp \
+		../src/collection_0x04.cpp \
+		../src/collection_0x19.cpp \
+		../src/collection_0x33.cpp
 QMAKE_TARGET  = proj_12700_opa
-DESTDIR       = #avoid trailing-slash linebreak
+DESTDIR       = ../../../../Modus/lib/#avoid trailing-slash linebreak
 TARGET        = libproj_12700_opa.so
 TARGETD       = libproj_12700_opa.so
 
@@ -233,9 +266,11 @@ first: all
 
 ####### Build rules
 
-$(TARGET):  $(OBJECTS) $(SUBLIBS) $(OBJCOMP)  
+../../../../Modus/lib/$(TARGET):  $(OBJECTS) $(SUBLIBS) $(OBJCOMP)  
+	@test -d ../../../../Modus/lib/ || mkdir -p ../../../../Modus/lib/
 	-$(DEL_FILE) $(TARGET)
 	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS) $(LIBS) $(OBJCOMP)
+	-$(MOVE) $(TARGET) ../../../../Modus/lib/ 
 
 
 
@@ -520,7 +555,7 @@ qmake: FORCE
 qmake_all: FORCE
 
 
-all: Makefile $(TARGET)
+all: Makefile ../../../../Modus/lib/$(TARGET)
 
 dist: distdir FORCE
 	(cd `dirname $(DISTDIR)` && $(TAR) $(DISTNAME).tar $(DISTNAME) && $(COMPRESS) $(DISTNAME).tar) && $(MOVE) `dirname $(DISTDIR)`/$(DISTNAME).tar.gz . && $(DEL_FILE) -r $(DISTDIR)
@@ -528,8 +563,8 @@ dist: distdir FORCE
 distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
-	$(COPY_FILE) --parents ../src/sv_opa.h ../src/proj_12700_opa_global.h ../../../Modus/global/sv_abstract_device.h ../../../Modus/global/sv_signal.h ../src/opa_defs.h ../src/device_params.h ../src/ifc_udp_params.h ../src/ifc_serial_params.h ../src/type_0x02.h $(DISTDIR)/
-	$(COPY_FILE) --parents ../src/sv_opa.cpp ../../../Modus/global/sv_signal.cpp ../src/type_0x02.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents ../src/sv_opa.h ../src/proj_12700_opa_global.h ../../../Modus/global/sv_abstract_device.h ../../../Modus/global/sv_signal.h ../../../Modus/global/sv_abstract_signal_collection.h ../src/opa_defs.h ../src/device_params.h ../src/ifc_udp_params.h ../src/ifc_serial_params.h ../src/collection_status.h ../src/collection_0x02.h ../src/collection_0x03.h ../src/collection_0x04.h ../src/collection_0x19.h ../src/collection_0x33.h $(DISTDIR)/
+	$(COPY_FILE) --parents ../src/sv_opa.cpp ../../../Modus/global/sv_signal.cpp ../src/collection_0x02.cpp ../src/collection_status.cpp ../src/collection_0x03.cpp ../src/collection_0x04.cpp ../src/collection_0x19.cpp ../src/collection_0x33.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -538,7 +573,7 @@ clean: compiler_clean
 
 
 distclean: clean 
-	-$(DEL_FILE) $(TARGET) 
+	-$(DEL_FILE) ../../../../Modus/lib/$(TARGET) 
 	-$(DEL_FILE) Makefile
 
 
@@ -552,9 +587,9 @@ check: first
 
 compiler_rcc_make_all:
 compiler_rcc_clean:
-compiler_moc_header_make_all: moc_sv_opa.cpp moc_sv_abstract_device.cpp moc_sv_signal.cpp moc_type_0x02.cpp
+compiler_moc_header_make_all: moc_sv_opa.cpp moc_sv_abstract_device.cpp moc_sv_signal.cpp moc_sv_abstract_signal_collection.cpp moc_collection_status.cpp moc_collection_0x02.cpp moc_collection_0x03.cpp moc_collection_0x04.cpp moc_collection_0x19.cpp moc_collection_0x33.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) moc_sv_opa.cpp moc_sv_abstract_device.cpp moc_sv_signal.cpp moc_type_0x02.cpp
+	-$(DEL_FILE) moc_sv_opa.cpp moc_sv_abstract_device.cpp moc_sv_signal.cpp moc_sv_abstract_signal_collection.cpp moc_collection_status.cpp moc_collection_0x02.cpp moc_collection_0x03.cpp moc_collection_0x04.cpp moc_collection_0x19.cpp moc_collection_0x33.cpp
 moc_sv_opa.cpp: /opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QRegularExpression \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qregularexpression.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qglobal.h \
@@ -784,6 +819,13 @@ moc_sv_opa.cpp: /opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QRegularExpression \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtNetwork/QHostAddress \
 		../src/signal_params.h \
 		../src/opa_defs.h \
+		../src/collection_0x02.h \
+		../../../Modus/global/sv_abstract_signal_collection.h \
+		../src/collection_0x03.h \
+		../src/collection_0x04.h \
+		../src/collection_0x33.h \
+		../src/collection_0x19.h \
+		../src/collection_status.h \
 		../src/sv_opa.h
 	/opt/Qt5.5.1/5.5/gcc_64/bin/moc $(DEFINES) -I/opt/Qt5.5.1/5.5/gcc_64/mkspecs/linux-g++ -I/home/user/c++/Modus_Libs/proj_12700_opa/src -I/opt/Qt5.5.1/5.5/gcc_64/include -I/opt/Qt5.5.1/5.5/gcc_64/include/QtNetwork -I/opt/Qt5.5.1/5.5/gcc_64/include/QtSerialPort -I/opt/Qt5.5.1/5.5/gcc_64/include/QtCore -I. ../src/sv_opa.h -o moc_sv_opa.cpp
 
@@ -978,7 +1020,7 @@ moc_sv_signal.cpp: /opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QObject \
 		../../../Modus/global/sv_signal.h
 	/opt/Qt5.5.1/5.5/gcc_64/bin/moc $(DEFINES) -I/opt/Qt5.5.1/5.5/gcc_64/mkspecs/linux-g++ -I/home/user/c++/Modus_Libs/proj_12700_opa/src -I/opt/Qt5.5.1/5.5/gcc_64/include -I/opt/Qt5.5.1/5.5/gcc_64/include/QtNetwork -I/opt/Qt5.5.1/5.5/gcc_64/include/QtSerialPort -I/opt/Qt5.5.1/5.5/gcc_64/include/QtCore -I. ../../../Modus/global/sv_signal.h -o moc_sv_signal.cpp
 
-moc_type_0x02.cpp: /opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QObject \
+moc_sv_abstract_signal_collection.cpp: /opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QObject \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qobject.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qobjectdefs.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qnamespace.h \
@@ -1031,10 +1073,216 @@ moc_type_0x02.cpp: /opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QObject \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qcontainerfwd.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qisenum.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qobject_impl.h \
-		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QPair \
+		../../../Modus/global/sv_signal.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDateTime \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qdatetime.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qshareddata.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qhash.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qpair.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QList \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDebug \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qdebug.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qmap.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qtextstream.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qiodevice.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qlocale.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qvariant.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qvector.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qpoint.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qset.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qcontiguouscache.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QJsonDocument \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qjsondocument.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qjsonvalue.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QJsonObject \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qjsonobject.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QJsonArray \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qjsonarray.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QFile \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qfile.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qfiledevice.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QMutex \
+		../../../Modus/global/params_defs.h \
+		../../../svlib/sv_exception.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QString \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QException \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qexception.h \
+		../../../Modus/global/sv_abstract_device.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QRunnable \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qrunnable.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QThread \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qthread.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QTimer \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qtimer.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qbasictimer.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QHash \
+		../../../svlib/sv_abstract_logger.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QStringList \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDate \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QTime \
+		../../../Modus/global/sv_abstract_signal_collection.h
+	/opt/Qt5.5.1/5.5/gcc_64/bin/moc $(DEFINES) -I/opt/Qt5.5.1/5.5/gcc_64/mkspecs/linux-g++ -I/home/user/c++/Modus_Libs/proj_12700_opa/src -I/opt/Qt5.5.1/5.5/gcc_64/include -I/opt/Qt5.5.1/5.5/gcc_64/include/QtNetwork -I/opt/Qt5.5.1/5.5/gcc_64/include/QtSerialPort -I/opt/Qt5.5.1/5.5/gcc_64/include/QtCore -I. ../../../Modus/global/sv_abstract_signal_collection.h -o moc_sv_abstract_signal_collection.cpp
+
+moc_collection_status.cpp: /opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QObject \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qobject.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qobjectdefs.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qnamespace.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qglobal.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qconfig.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qfeatures.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qsystemdetection.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qprocessordetection.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qcompilerdetection.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qtypeinfo.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qtypetraits.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qsysinfo.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qlogging.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qflags.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qbasicatomic.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_bootstrap.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qgenericatomic.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_cxx11.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_gcc.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_msvc.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_armv7.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_armv6.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_armv5.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_ia64.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_mips.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_x86.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_unix.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qglobalstatic.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qmutex.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qnumeric.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qobjectdefs_impl.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qstring.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qchar.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qbytearray.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qrefcount.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qarraydata.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qstringbuilder.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qlist.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qalgorithms.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qiterator.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qbytearraylist.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qstringlist.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qregexp.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qstringmatcher.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qcoreevent.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qscopedpointer.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qmetatype.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qvarlengtharray.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qcontainerfwd.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qisenum.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qobject_impl.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QList \
+		../../../Modus/global/sv_abstract_signal_collection.h \
+		../../../Modus/global/sv_signal.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDateTime \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qdatetime.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qshareddata.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qhash.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qpair.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDebug \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qdebug.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qmap.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qtextstream.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qiodevice.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qlocale.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qvariant.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qvector.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qpoint.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qset.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qcontiguouscache.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QJsonDocument \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qjsondocument.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qjsonvalue.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QJsonObject \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qjsonobject.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QJsonArray \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qjsonarray.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QFile \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qfile.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qfiledevice.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QMutex \
+		../../../Modus/global/params_defs.h \
+		../../../svlib/sv_exception.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QString \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QException \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qexception.h \
+		../../../Modus/global/sv_abstract_device.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QRunnable \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qrunnable.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QThread \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qthread.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QTimer \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qtimer.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qbasictimer.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QHash \
+		../../../svlib/sv_abstract_logger.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QStringList \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDate \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QTime \
+		../src/collection_status.h
+	/opt/Qt5.5.1/5.5/gcc_64/bin/moc $(DEFINES) -I/opt/Qt5.5.1/5.5/gcc_64/mkspecs/linux-g++ -I/home/user/c++/Modus_Libs/proj_12700_opa/src -I/opt/Qt5.5.1/5.5/gcc_64/include -I/opt/Qt5.5.1/5.5/gcc_64/include/QtNetwork -I/opt/Qt5.5.1/5.5/gcc_64/include/QtSerialPort -I/opt/Qt5.5.1/5.5/gcc_64/include/QtCore -I. ../src/collection_status.h -o moc_collection_status.cpp
+
+moc_collection_0x02.cpp: /opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QObject \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qobject.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qobjectdefs.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qnamespace.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qglobal.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qconfig.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qfeatures.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qsystemdetection.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qprocessordetection.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qcompilerdetection.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qtypeinfo.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qtypetraits.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qsysinfo.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qlogging.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qflags.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qbasicatomic.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_bootstrap.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qgenericatomic.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_cxx11.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_gcc.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_msvc.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_armv7.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_armv6.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_armv5.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_ia64.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_mips.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_x86.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_unix.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qglobalstatic.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qmutex.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qnumeric.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qobjectdefs_impl.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qstring.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qchar.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qbytearray.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qrefcount.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qarraydata.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qstringbuilder.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qlist.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qalgorithms.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qiterator.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qbytearraylist.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qstringlist.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qregexp.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qstringmatcher.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qcoreevent.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qscopedpointer.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qmetatype.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qvarlengtharray.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qcontainerfwd.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qisenum.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qobject_impl.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QMap \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qmap.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qpair.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qdebug.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qhash.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qtextstream.h \
@@ -1046,6 +1294,8 @@ moc_type_0x02.cpp: /opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QObject \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qpoint.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qset.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qcontiguouscache.h \
+		../src/opa_defs.h \
+		../../../Modus/global/sv_abstract_signal_collection.h \
 		../../../Modus/global/sv_signal.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDateTime \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qdatetime.h \
@@ -1067,29 +1317,23 @@ moc_type_0x02.cpp: /opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QObject \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QString \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QException \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qexception.h \
-		../src/type_0x02.h
-	/opt/Qt5.5.1/5.5/gcc_64/bin/moc $(DEFINES) -I/opt/Qt5.5.1/5.5/gcc_64/mkspecs/linux-g++ -I/home/user/c++/Modus_Libs/proj_12700_opa/src -I/opt/Qt5.5.1/5.5/gcc_64/include -I/opt/Qt5.5.1/5.5/gcc_64/include/QtNetwork -I/opt/Qt5.5.1/5.5/gcc_64/include/QtSerialPort -I/opt/Qt5.5.1/5.5/gcc_64/include/QtCore -I. ../src/type_0x02.h -o moc_type_0x02.cpp
+		../../../Modus/global/sv_abstract_device.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QRunnable \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qrunnable.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QThread \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qthread.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QTimer \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qtimer.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qbasictimer.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QHash \
+		../../../svlib/sv_abstract_logger.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QStringList \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDate \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QTime \
+		../src/collection_0x02.h
+	/opt/Qt5.5.1/5.5/gcc_64/bin/moc $(DEFINES) -I/opt/Qt5.5.1/5.5/gcc_64/mkspecs/linux-g++ -I/home/user/c++/Modus_Libs/proj_12700_opa/src -I/opt/Qt5.5.1/5.5/gcc_64/include -I/opt/Qt5.5.1/5.5/gcc_64/include/QtNetwork -I/opt/Qt5.5.1/5.5/gcc_64/include/QtSerialPort -I/opt/Qt5.5.1/5.5/gcc_64/include/QtCore -I. ../src/collection_0x02.h -o moc_collection_0x02.cpp
 
-compiler_moc_source_make_all:
-compiler_moc_source_clean:
-compiler_yacc_decl_make_all:
-compiler_yacc_decl_clean:
-compiler_yacc_impl_make_all:
-compiler_yacc_impl_clean:
-compiler_lex_make_all:
-compiler_lex_clean:
-compiler_clean: compiler_moc_header_clean 
-
-####### Compile
-
-sv_opa.o: ../src/sv_opa.cpp 
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o sv_opa.o ../src/sv_opa.cpp
-
-sv_signal.o: ../../../Modus/global/sv_signal.cpp 
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o sv_signal.o ../../../Modus/global/sv_signal.cpp
-
-type_0x02.o: ../src/type_0x02.cpp ../src/type_0x02.h \
-		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QObject \
+moc_collection_0x03.cpp: /opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QObject \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qobject.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qobjectdefs.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qnamespace.h \
@@ -1142,10 +1386,9 @@ type_0x02.o: ../src/type_0x02.cpp ../src/type_0x02.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qcontainerfwd.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qisenum.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qobject_impl.h \
-		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QPair \
-		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qpair.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QMap \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qmap.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qpair.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qdebug.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qhash.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qtextstream.h \
@@ -1157,6 +1400,8 @@ type_0x02.o: ../src/type_0x02.cpp ../src/type_0x02.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qpoint.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qset.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qcontiguouscache.h \
+		../src/opa_defs.h \
+		../../../Modus/global/sv_abstract_signal_collection.h \
 		../../../Modus/global/sv_signal.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDateTime \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qdatetime.h \
@@ -1177,8 +1422,376 @@ type_0x02.o: ../src/type_0x02.cpp ../src/type_0x02.h \
 		../../../svlib/sv_exception.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QString \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QException \
-		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qexception.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o type_0x02.o ../src/type_0x02.cpp
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qexception.h \
+		../../../Modus/global/sv_abstract_device.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QRunnable \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qrunnable.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QThread \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qthread.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QTimer \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qtimer.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qbasictimer.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QHash \
+		../../../svlib/sv_abstract_logger.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QStringList \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDate \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QTime \
+		../src/collection_0x03.h
+	/opt/Qt5.5.1/5.5/gcc_64/bin/moc $(DEFINES) -I/opt/Qt5.5.1/5.5/gcc_64/mkspecs/linux-g++ -I/home/user/c++/Modus_Libs/proj_12700_opa/src -I/opt/Qt5.5.1/5.5/gcc_64/include -I/opt/Qt5.5.1/5.5/gcc_64/include/QtNetwork -I/opt/Qt5.5.1/5.5/gcc_64/include/QtSerialPort -I/opt/Qt5.5.1/5.5/gcc_64/include/QtCore -I. ../src/collection_0x03.h -o moc_collection_0x03.cpp
+
+moc_collection_0x04.cpp: /opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QObject \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qobject.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qobjectdefs.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qnamespace.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qglobal.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qconfig.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qfeatures.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qsystemdetection.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qprocessordetection.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qcompilerdetection.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qtypeinfo.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qtypetraits.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qsysinfo.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qlogging.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qflags.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qbasicatomic.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_bootstrap.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qgenericatomic.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_cxx11.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_gcc.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_msvc.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_armv7.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_armv6.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_armv5.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_ia64.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_mips.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_x86.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_unix.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qglobalstatic.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qmutex.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qnumeric.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qobjectdefs_impl.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qstring.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qchar.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qbytearray.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qrefcount.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qarraydata.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qstringbuilder.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qlist.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qalgorithms.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qiterator.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qbytearraylist.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qstringlist.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qregexp.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qstringmatcher.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qcoreevent.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qscopedpointer.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qmetatype.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qvarlengtharray.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qcontainerfwd.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qisenum.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qobject_impl.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QList \
+		../src/opa_defs.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QMap \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qmap.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qpair.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qdebug.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qhash.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qtextstream.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qiodevice.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qlocale.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qvariant.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qshareddata.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qvector.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qpoint.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qset.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qcontiguouscache.h \
+		../../../Modus/global/sv_abstract_signal_collection.h \
+		../../../Modus/global/sv_signal.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDateTime \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qdatetime.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDebug \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QJsonDocument \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qjsondocument.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qjsonvalue.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QJsonObject \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qjsonobject.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QJsonArray \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qjsonarray.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QFile \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qfile.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qfiledevice.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QMutex \
+		../../../Modus/global/params_defs.h \
+		../../../svlib/sv_exception.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QString \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QException \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qexception.h \
+		../../../Modus/global/sv_abstract_device.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QRunnable \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qrunnable.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QThread \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qthread.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QTimer \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qtimer.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qbasictimer.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QHash \
+		../../../svlib/sv_abstract_logger.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QStringList \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDate \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QTime \
+		../src/collection_0x04.h
+	/opt/Qt5.5.1/5.5/gcc_64/bin/moc $(DEFINES) -I/opt/Qt5.5.1/5.5/gcc_64/mkspecs/linux-g++ -I/home/user/c++/Modus_Libs/proj_12700_opa/src -I/opt/Qt5.5.1/5.5/gcc_64/include -I/opt/Qt5.5.1/5.5/gcc_64/include/QtNetwork -I/opt/Qt5.5.1/5.5/gcc_64/include/QtSerialPort -I/opt/Qt5.5.1/5.5/gcc_64/include/QtCore -I. ../src/collection_0x04.h -o moc_collection_0x04.cpp
+
+moc_collection_0x19.cpp: /opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QObject \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qobject.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qobjectdefs.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qnamespace.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qglobal.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qconfig.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qfeatures.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qsystemdetection.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qprocessordetection.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qcompilerdetection.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qtypeinfo.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qtypetraits.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qsysinfo.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qlogging.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qflags.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qbasicatomic.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_bootstrap.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qgenericatomic.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_cxx11.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_gcc.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_msvc.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_armv7.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_armv6.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_armv5.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_ia64.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_mips.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_x86.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_unix.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qglobalstatic.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qmutex.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qnumeric.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qobjectdefs_impl.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qstring.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qchar.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qbytearray.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qrefcount.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qarraydata.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qstringbuilder.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qlist.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qalgorithms.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qiterator.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qbytearraylist.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qstringlist.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qregexp.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qstringmatcher.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qcoreevent.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qscopedpointer.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qmetatype.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qvarlengtharray.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qcontainerfwd.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qisenum.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qobject_impl.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QList \
+		../src/opa_defs.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QMap \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qmap.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qpair.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qdebug.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qhash.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qtextstream.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qiodevice.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qlocale.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qvariant.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qshareddata.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qvector.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qpoint.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qset.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qcontiguouscache.h \
+		../../../Modus/global/sv_abstract_signal_collection.h \
+		../../../Modus/global/sv_signal.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDateTime \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qdatetime.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDebug \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QJsonDocument \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qjsondocument.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qjsonvalue.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QJsonObject \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qjsonobject.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QJsonArray \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qjsonarray.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QFile \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qfile.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qfiledevice.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QMutex \
+		../../../Modus/global/params_defs.h \
+		../../../svlib/sv_exception.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QString \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QException \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qexception.h \
+		../../../Modus/global/sv_abstract_device.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QRunnable \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qrunnable.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QThread \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qthread.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QTimer \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qtimer.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qbasictimer.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QHash \
+		../../../svlib/sv_abstract_logger.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QStringList \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDate \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QTime \
+		../src/collection_0x19.h
+	/opt/Qt5.5.1/5.5/gcc_64/bin/moc $(DEFINES) -I/opt/Qt5.5.1/5.5/gcc_64/mkspecs/linux-g++ -I/home/user/c++/Modus_Libs/proj_12700_opa/src -I/opt/Qt5.5.1/5.5/gcc_64/include -I/opt/Qt5.5.1/5.5/gcc_64/include/QtNetwork -I/opt/Qt5.5.1/5.5/gcc_64/include/QtSerialPort -I/opt/Qt5.5.1/5.5/gcc_64/include/QtCore -I. ../src/collection_0x19.h -o moc_collection_0x19.cpp
+
+moc_collection_0x33.cpp: /opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QObject \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qobject.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qobjectdefs.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qnamespace.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qglobal.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qconfig.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qfeatures.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qsystemdetection.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qprocessordetection.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qcompilerdetection.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qtypeinfo.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qtypetraits.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qsysinfo.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qlogging.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qflags.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qbasicatomic.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_bootstrap.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qgenericatomic.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_cxx11.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_gcc.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_msvc.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_armv7.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_armv6.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_armv5.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_ia64.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_mips.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_x86.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_unix.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qglobalstatic.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qmutex.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qnumeric.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qobjectdefs_impl.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qstring.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qchar.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qbytearray.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qrefcount.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qarraydata.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qstringbuilder.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qlist.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qalgorithms.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qiterator.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qbytearraylist.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qstringlist.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qregexp.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qstringmatcher.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qcoreevent.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qscopedpointer.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qmetatype.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qvarlengtharray.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qcontainerfwd.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qisenum.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qobject_impl.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QList \
+		../src/opa_defs.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QMap \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qmap.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qpair.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qdebug.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qhash.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qtextstream.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qiodevice.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qlocale.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qvariant.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qshareddata.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qvector.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qpoint.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qset.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qcontiguouscache.h \
+		../../../Modus/global/sv_abstract_signal_collection.h \
+		../../../Modus/global/sv_signal.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDateTime \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qdatetime.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDebug \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QJsonDocument \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qjsondocument.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qjsonvalue.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QJsonObject \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qjsonobject.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QJsonArray \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qjsonarray.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QFile \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qfile.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qfiledevice.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QMutex \
+		../../../Modus/global/params_defs.h \
+		../../../svlib/sv_exception.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QString \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QException \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qexception.h \
+		../../../Modus/global/sv_abstract_device.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QRunnable \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qrunnable.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QThread \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qthread.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QTimer \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qtimer.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qbasictimer.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QHash \
+		../../../svlib/sv_abstract_logger.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QStringList \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDate \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QTime \
+		../src/collection_0x33.h
+	/opt/Qt5.5.1/5.5/gcc_64/bin/moc $(DEFINES) -I/opt/Qt5.5.1/5.5/gcc_64/mkspecs/linux-g++ -I/home/user/c++/Modus_Libs/proj_12700_opa/src -I/opt/Qt5.5.1/5.5/gcc_64/include -I/opt/Qt5.5.1/5.5/gcc_64/include/QtNetwork -I/opt/Qt5.5.1/5.5/gcc_64/include/QtSerialPort -I/opt/Qt5.5.1/5.5/gcc_64/include/QtCore -I. ../src/collection_0x33.h -o moc_collection_0x33.cpp
+
+compiler_moc_source_make_all:
+compiler_moc_source_clean:
+compiler_yacc_decl_make_all:
+compiler_yacc_decl_clean:
+compiler_yacc_impl_make_all:
+compiler_yacc_impl_clean:
+compiler_lex_make_all:
+compiler_lex_clean:
+compiler_clean: compiler_moc_header_clean 
+
+####### Compile
+
+sv_opa.o: ../src/sv_opa.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o sv_opa.o ../src/sv_opa.cpp
+
+sv_signal.o: ../../../Modus/global/sv_signal.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o sv_signal.o ../../../Modus/global/sv_signal.cpp
+
+collection_0x02.o: ../src/collection_0x02.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o collection_0x02.o ../src/collection_0x02.cpp
+
+collection_status.o: ../src/collection_status.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o collection_status.o ../src/collection_status.cpp
+
+collection_0x03.o: ../src/collection_0x03.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o collection_0x03.o ../src/collection_0x03.cpp
+
+collection_0x04.o: ../src/collection_0x04.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o collection_0x04.o ../src/collection_0x04.cpp
+
+collection_0x19.o: ../src/collection_0x19.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o collection_0x19.o ../src/collection_0x19.cpp
+
+collection_0x33.o: ../src/collection_0x33.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o collection_0x33.o ../src/collection_0x33.cpp
 
 moc_sv_opa.o: moc_sv_opa.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_sv_opa.o moc_sv_opa.cpp
@@ -1189,14 +1802,32 @@ moc_sv_abstract_device.o: moc_sv_abstract_device.cpp
 moc_sv_signal.o: moc_sv_signal.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_sv_signal.o moc_sv_signal.cpp
 
-moc_type_0x02.o: moc_type_0x02.cpp 
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_type_0x02.o moc_type_0x02.cpp
+moc_sv_abstract_signal_collection.o: moc_sv_abstract_signal_collection.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_sv_abstract_signal_collection.o moc_sv_abstract_signal_collection.cpp
+
+moc_collection_status.o: moc_collection_status.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_collection_status.o moc_collection_status.cpp
+
+moc_collection_0x02.o: moc_collection_0x02.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_collection_0x02.o moc_collection_0x02.cpp
+
+moc_collection_0x03.o: moc_collection_0x03.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_collection_0x03.o moc_collection_0x03.cpp
+
+moc_collection_0x04.o: moc_collection_0x04.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_collection_0x04.o moc_collection_0x04.cpp
+
+moc_collection_0x19.o: moc_collection_0x19.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_collection_0x19.o moc_collection_0x19.cpp
+
+moc_collection_0x33.o: moc_collection_0x33.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_collection_0x33.o moc_collection_0x33.cpp
 
 ####### Install
 
 install_target: first FORCE
 	@test -d $(INSTALL_ROOT)/usr/lib || mkdir -p $(INSTALL_ROOT)/usr/lib
-	-$(INSTALL_PROGRAM) $(TARGET) $(INSTALL_ROOT)/usr/lib/$(TARGET)
+	-$(INSTALL_PROGRAM) ../../../../Modus/lib/$(TARGET) $(INSTALL_ROOT)/usr/lib/$(TARGET)
 	-$(STRIP) --strip-unneeded $(INSTALL_ROOT)/usr/lib/$(TARGET)
 
 uninstall_target: FORCE

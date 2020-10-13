@@ -9,15 +9,15 @@
 
 #include "../../../svlib/sv_exception.h"
 
-#define RESET_INTERVAL  10
+#define OPA_RESET_INTERVAL  10
 
 // имена параметров устройств
-#define P_START_REGISTER  "start_register"
-#define P_LAST_REGISTER  "last_register"
-#define P_RESET_TIMEOUT   "reset_timeout"
+#define P_OPA_START_REGISTER  "start_register"
+#define P_OPA_LAST_REGISTER   "last_register"
+#define P_OPA_RESET_TIMEOUT   "reset_timeout"
 
-#define DEV_IMPERMISSIBLE_VALUE "Недопустимое значение параметра %1: %2.\n%3"
-#define DEV_NO_PARAM  "Для устройства не задан обязательный параметр \"%1\""
+#define OPA_DEV_IMPERMISSIBLE_VALUE "Недопустимое значение параметра %1: %2.\n%3"
+#define OPA_DEV_NO_PARAM  "Для устройства не задан обязательный параметр \"%1\""
 
 namespace opa {
 
@@ -25,7 +25,7 @@ namespace opa {
 
     quint16   start_register = 0;
     quint16   last_register = 0;
-    quint16   reset_interval = RESET_INTERVAL;
+    quint16   reset_interval = OPA_RESET_INTERVAL;
 
     static DeviceParams fromJson(const QString& json_string) throw (SvException)
     {
@@ -50,7 +50,7 @@ namespace opa {
       DeviceParams p;
       QString P;
 
-      P = P_START_REGISTER;
+      P = P_OPA_START_REGISTER;
       if(object.contains(P)) {
 
         QByteArray h = object.value(P).toString().toUtf8();
@@ -59,7 +59,7 @@ namespace opa {
         p.start_register = h.toUShort(&ok, 0);
 
         if(!ok)
-          throw SvException(QString(DEV_IMPERMISSIBLE_VALUE)
+          throw SvException(QString(OPA_DEV_IMPERMISSIBLE_VALUE)
                             .arg(P)
                             .arg(object.value(P).toVariant().toString())
                             .arg("Стартовый регистр должен быть двухбайтовым целым числом в шестнадцатиречном, восьмеричном или десятичном формате: [0xFFFF | 0177777 | 65535]"));
@@ -68,7 +68,7 @@ namespace opa {
       else
         throw SvException(QString(DEV_NO_PARAM).arg(P));
 
-      P = P_LAST_REGISTER;
+      P = P_OPA_LAST_REGISTER;
       if(object.contains(P)) {
 
         QByteArray h = object.value(P).toString().toUtf8();
@@ -77,7 +77,7 @@ namespace opa {
         p.last_register = h.toUShort(&ok, 0);
 
         if(!ok)
-          throw SvException(QString(DEV_IMPERMISSIBLE_VALUE)
+          throw SvException(QString(OPA_DEV_IMPERMISSIBLE_VALUE)
                             .arg(P)
                             .arg(object.value(P).toVariant().toString())
                             .arg("Конечный регистр должен быть двухбайтовым целым числом в шестнадцатиречном, восьмеричном или десятичном формате: [0xFFFF | 0177777 | 65535]"));
@@ -87,20 +87,20 @@ namespace opa {
         throw SvException(QString(DEV_NO_PARAM).arg(P));
 
 
-      P = P_RESET_TIMEOUT;
+      P = P_OPA_RESET_TIMEOUT;
       if(object.contains(P)) {
 
         if(object.value(P).toInt(-1) < 1)
-          throw SvException(QString(DEV_IMPERMISSIBLE_VALUE)
+          throw SvException(QString(OPA_DEV_IMPERMISSIBLE_VALUE)
                                  .arg(P)
                                  .arg(object.value(P).toVariant().toString())
                                  .arg("Период сброса не может быть меньше 1 мсек."));
 
-        p.reset_interval = object.value(P).toInt(RESET_INTERVAL);
+        p.reset_interval = object.value(P).toInt(OPA_RESET_INTERVAL);
 
       }
       else
-        p.reset_interval = RESET_INTERVAL;
+        p.reset_interval = OPA_RESET_INTERVAL;
 
 
       return p;
@@ -136,9 +136,9 @@ namespace opa {
       QString last_r = QString("0x%1").arg(r.length() % 2 ? "0" + r : r);
 
 
-      j.insert(P_START_REGISTER, QJsonValue(start_r).toString());
-      j.insert(P_LAST_REGISTER, QJsonValue(last_r).toString());
-      j.insert(P_RESET_TIMEOUT, QJsonValue(reset_timeout).toInt());
+      j.insert(P_OPA_START_REGISTER, QJsonValue(start_r).toString());
+      j.insert(P_OPA_LAST_REGISTER, QJsonValue(last_r).toString());
+      j.insert(P_OPA_RESET_TIMEOUT, QJsonValue(reset_interval).toInt());
 
       return j;
 

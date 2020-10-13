@@ -4,8 +4,7 @@
 opa::SvOPA::SvOPA(sv::SvAbstractLogger *logger):
   ad::SvAbstractDevice(logger)
 {
-//  SignalsGEN.clear();
-//  SignalsXDR.clear();
+
 }
 
 opa::SvOPA::~SvOPA()
@@ -39,9 +38,9 @@ bool opa::SvOPA::configure(const ad::DeviceConfig &cfg)
 
         break;
 
-      case AvailableIfces::TEST:
-        TestParams::fromJsonString(p_config.ifc_params);
-        break;
+//      case AvailableIfces::TEST:
+//        TestParams::fromJsonString(p_config.ifc_params);
+//        break;
 
       default:
         p_exception.raise(QString("Неизвестный тип интерфейса: %1").arg(p_config.ifc_name));
@@ -67,13 +66,13 @@ void opa::SvOPA::addSignal(SvSignal* signal) throw(SvException)
 {
   ad::SvAbstractDevice::addSignal(signal);
 
-  ckng::SignalParams p = ckng::SignalParams::fromSignal(signal);
+//  ckng::SignalParams p = ckng::SignalParams::fromSignal(signal);
 
-  if(signal->config()->type == "GEN")
-    SignalsGEN.insert(p.group * 16 + p.word, signal->config()->name);
+//  if(signal->config()->type == "GEN")
+//    SignalsGEN.insert(p.group * 16 + p.word, signal->config()->name);
 
-  else if(signal->config()->type == "XDR")
-    SignalsXDR.insert(p.group * 16 + p.word, signal->config()->name);
+//  else if(signal->config()->type == "XDR")
+//    SignalsXDR.insert(p.group * 16 + p.word, signal->config()->name);
 
 }
 
@@ -85,8 +84,6 @@ bool opa::SvOPA::open()
       p_exception.raise(QString("Для устройства '%1' не задана конфигурация").arg(p_config.name));
 
     create_new_thread();
-
-    p_thread->conform(p_config.dev_params, p_config.ifc_params);
 
     connect(p_thread, &ad::SvAbstractDeviceThread::finished, this, &opa::SvOPA::deleteThread);
     connect(this, &opa::SvOPA::stopThread, p_thread, &ad::SvAbstractDeviceThread::stop);
@@ -137,11 +134,12 @@ void opa::SvOPA::create_new_thread() throw(SvException)
 
     }
 
-//    static_cast<opa::GenericThread*>(p_thread)->setSignalsMap(&SignalsGEN, &SignalsXDR);
+    p_thread->conform(p_config.dev_params, p_config.ifc_params);
+    static_cast<opa::GenericThread*>(p_thread)->initSignalsMap();
 
   }
 
-  catch(SvException& e) {
+  catch(SvException e) {
 
     throw e;
 
@@ -181,12 +179,6 @@ void opa::UDPThread::conform(const QString& jsonDevParams, const QString& jsonIf
     dev_params = DeviceParams::fromJson(jsonDevParams);
     ifc_params = UdpParams::fromJsonString(jsonIfcParams);
 
-    foreach (SvSignal* signal, p_device->Signals()->values()) {
-
-
-
-    }
-
   }
   catch(SvException& e) {
 
@@ -200,7 +192,7 @@ void opa::UDPThread::open() throw(SvException)
     throw SvException(socket.errorString());
 
   // с заданным интервалом сбрасываем буфер, чтобы отсекать мусор и битые пакеты
-  p_reset_timer.setInterval(dev_params.reset_timeout);
+  p_reset_timer.setInterval(dev_params.reset_interval);
   p_reset_timer.setSingleShot(true);
 
   connect(&socket, SIGNAL(readyRead()), &p_reset_timer, SLOT(start()));
@@ -314,7 +306,7 @@ void opa::SerialThread::open() throw(SvException)
     throw p_exception.assign(port.errorString());
 
   // с заданным интервалом сбрасываем буфер, чтобы отсекать мусор и битые пакеты
-  p_reset_timer.setInterval(dev_params.reset_timeout);
+  p_reset_timer.setInterval(dev_params.reset_interval);
 
   connect(&port, SIGNAL(readyRead()), &p_reset_timer, SLOT(start()));
   connect(&p_reset_timer, &QTimer::timeout, this, &ad::SvAbstractDeviceThread::reset_buffer);
@@ -376,7 +368,7 @@ void opa::SerialThread::stop()
 
 
 /** ******* Test THREAD ************* **/
-
+/*
 //ConningKongsberTestThread::ConningKongsberTestThread(ad::SvAbstractDevice *device, sv::SvAbstractLogger* logger):
 //  opa::GenericThread(device, logger)
 //{
@@ -445,28 +437,47 @@ void opa::SerialThread::stop()
 //{
 //  p_is_active = false;
 //}
-
+*/
 
 /** **** GENERIC FUNCTIONS **** **/
-//void opa::GenericThread::setSignalsMap(ckng::SignalsMap *smapGEN, ckng::SignalsMap *smapXDR)
-//{
-//  SignalsGEN = smapGEN;
-//  SignalsXDR = smapXDR;
+opa::GenericThread::~GenericThread()
+{
+  foreach (SvAbstractSignalCollection* ds, signal_collections.values())
+    delete ds;
 
-////  signals_by_reference = smap;
-////  return sv::log::sender::make(p_logger->options().log_sender_name_format,
-////                               p_info.name,
-////                               p_info.index);
-//}
+}
 
-//void opa::GenericThread::process_signals()
-//{
-//  foreach (SvSignal* signal, p_device->Signals()->values()) {
-//    if((signal->config()->timeout > 0 && !signal->isAlive()) ||
-//       (signal->config()->timeout == 0 && !signal->isDeviceAlive()))
-//          signal->setLostValue();
-//  }
-//}
+void opa::GenericThread::initSignalsMap() throw(SvException)
+{
+  try {
+
+    signal_collections.insert(static_cast<quint8>(TYPE_0x33), &type0x33_signals);
+    signal_collections.insert(static_cast<quint8>(TYPE_0x02), &type0x02_signals);
+    signal_collections.insert(static_cast<quint8>(TYPE_0x03), &type0x03_signals);
+    signal_collections.insert(static_cast<quint8>(TYPE_0x04), &type0x04_signals);
+    signal_collections.insert(static_cast<quint8>(TYPE_0x19), &type0x19_signals);
+
+    bool ok;
+    foreach (SvSignal* signal, p_device->Signals()->values()) {
+
+      if(signal->config()->tag.toUpper() == "STATUS")
+        line_status_signals.addSignal(signal);
+
+      else {
+
+        quint8 t = signal->config()->tag.toUInt(&ok, 0);
+
+        if(ok && signal_collections.contains(t))
+          signal_collections.value(t)->addSignal(signal);
+
+      }
+    }
+  }
+
+  catch(SvException e) {
+    throw e;
+  }
+}
 
 void opa::GenericThread::process_data()
 {
@@ -505,7 +516,7 @@ void opa::GenericThread::process_data()
         p_device->setNewLostEpoch();
 
         // ставим состояние данной линии
-        func_set_line_status(p_device, &p_data);
+        line_status_signals.updateSignals();
 
         switch (current_register - dev_params.start_register)
         {
@@ -516,8 +527,10 @@ void opa::GenericThread::process_data()
               // здесь просто отправляем ответ-квитирование
               write(confirmation());
 
-              if(p_data.data_type == 0x77)
-                func_0x77(p_device);
+              if(p_data.data_type == 0x77) {
+                foreach (SvSignal* signal, p_device->Signals()->values())
+                  signal->setValue(0);
+              }
 
               break;
 
@@ -527,7 +540,7 @@ void opa::GenericThread::process_data()
             case 0x90:
             {
               // парсим и проверяем crc
-              quint16 calc_crc = parse_data(&p_buff, &p_data, &_header);
+              quint16 calc_crc = parse_data(&p_buff, &p_data, &m_header);
 
 
               if(calc_crc != p_data.crc)
@@ -548,14 +561,17 @@ void opa::GenericThread::process_data()
                   write(confirmation());
 
                   // раскидываем данные по сигналам, в зависимости от типа данных
-                  switch (p_data.data_type) {
+                  if(signal_collections.contains(p_data.data_type))
+                    signal_collections.value(p_data.data_type)->updateSignals(&p_data);
 
-                    case 0x19: opa::func_0x19(p_device, &p_data); break;
-                    case 0x02: opa::func_0x02(p_device, &p_data); break;
-                    case 0x03: opa::func_0x03(p_device, &p_data); break;
-                    case 0x04: opa::func_0x04(p_device, &p_data); break;
+//                  switch (p_data.data_type) {
 
-                  }
+//                    case 0x19: opa::func_0x19(p_device, &p_data); break;
+//                    case 0x02: opa::func_0x02(p_device, &p_data); break;
+//                    case 0x03: opa::func_0x03(p_device, &p_data); break;
+//                    case 0x04: opa::func_0x04(p_device, &p_data); break;
+
+//                  }
                 }
 
               break;
@@ -610,261 +626,263 @@ QByteArray opa::GenericThread::confirmation()
 }
 
 /** в результате несогласованности, получилось 2 набора сигналов состояния линии **/
-void opa::GenericThread::func_set_line_status(ad::SvAbstractDevice* device, ad::DATA* data)
-{
-  Q_UNUSED(data);
+//void opa::GenericThread::func_set_line_status(ad::SvAbstractDevice* device, ad::DATA* data)
+//{
+//  Q_UNUSED(data);
 
-  if(reg2STATUS.contains(dev_params.start_register))
-    device->setSignalValue(reg2STATUS.value(dev_params.start_register), 1);
-}
+//  if(reg2STATUS.contains(dev_params.start_register))
+//    device->setSignalValue(reg2STATUS.value(dev_params.start_register), 1);
+//}
 
-void opa::GenericThread::func_0x77(ad::SvAbstractDevice* device)
-{
-  foreach (SvSignal* signal, device->Signals()->values())
-    signal->setValue(0);
-}
+/*
+//void opa::GenericThread::func_0x77(ad::SvAbstractDevice* device)
+//{
+//  foreach (SvSignal* signal, device->Signals()->values())
+//    signal->setValue(0);
+//}
 
-void opa::GenericThread::func_0x19(ad::SvAbstractDevice* device, ad::DATA* data)
-{
-  if(reg2FI.contains(dev_params.start_register))
-    device->setSignalValue(reg2FI.value(dev_params.start_register), data->data[0]);
-}
+//void opa::GenericThread::func_0x19(ad::SvAbstractDevice* device, ad::DATA* data)
+//{
+//  if(reg2FI.contains(dev_params.start_register))
+//    device->setSignalValue(reg2FI.value(dev_params.start_register), data->data[0]);
+//}
 
-void opa::GenericThread::func_0x02(ad::SvAbstractDevice* device, ad::DATA* data)
-{
-  quint8 data_begin = 0;
-  quint16 detector_num;
-  quint8  factor;
-  QString signal_name;
+//void opa::GenericThread::func_0x02(ad::SvAbstractDevice* device, ad::DATA* data)
+//{
+//  quint8 data_begin = 0;
+//  quint16 detector_num;
+//  quint8  factor;
+//  QString signal_name;
 
-  while(data_begin < data->data_length) {
+//  while(data_begin < data->data_length) {
 
-    memcpy(&detector_num, &data->data[data_begin], sizeof(quint16));
-    memcpy(&factor, &data->data[data_begin + sizeof(quint16)], sizeof(quint8));
+//    memcpy(&detector_num, &data->data[data_begin], sizeof(quint16));
+//    memcpy(&factor, &data->data[data_begin + sizeof(quint16)], sizeof(quint8));
 
-    if(factor & 0x7F) {
+//    if(factor & 0x7F) {
 
-      if(SIGNALS_TABLE.contains(factor)) {
+//      if(SIGNALS_TABLE.contains(factor)) {
 
-        signals_by_detector* sbd = SIGNALS_TABLE.value(factor);
+//        signals_by_detector* sbd = SIGNALS_TABLE.value(factor);
 
-        if(sbd->contains(detector_num)) {
+//        if(sbd->contains(detector_num)) {
 
-          signal_name = sbd->value(detector_num);
-//          qDebug() << QString("detector_num: %1   factor: %2  signal_name: %3").arg(detector_num).arg(factor).arg(signal_name);
+//          signal_name = sbd->value(detector_num);
+////          qDebug() << QString("detector_num: %1   factor: %2  signal_name: %3").arg(detector_num).arg(factor).arg(signal_name);
 
-          QString prefix = opa::GenericThread::getPrefix(dev_params.start_register);
-          signal_name.push_front(prefix);
+//          QString prefix = opa::GenericThread::getPrefix(dev_params.start_register);
+//          signal_name.push_front(prefix);
 
-          device->setSignalValue(signal_name, 1.0);
+//          device->setSignalValue(signal_name, 1.0);
 
-        }
-      }
+//        }
+//      }
+*/
 
+//        /* здесь применяем следующее решение
+//         * есть датчики, у которых только один порог срабатывания. НО выяснилось, что
+//         * у некоторых (или у всех) это ВТОРОЙ порог. соответственно, те сигналы,
+//         * которые сидят в таблицах для первого порога, должны сидеть в таблицах
+//         * второго. поэтому, если пришла сработка по второму порогу, ищем нужный сигнал
+//         * в таблицах второго порога. если там его нет, то пытаемся найти его в таблицах
+//         * первого. если находим, то фиксируем сработку */
+/*
+//        // если сработка по 2ому порогу, и не нашли в таблицах 2го порога, то ищем в таблицах для 1го порога
+//        else if (factor & 0x80) {
 
-        /* здесь применяем следующее решение
-         * есть датчики, у которых только один порог срабатывания. НО выяснилось, что
-         * у некоторых (или у всех) это ВТОРОЙ порог. соответственно, те сигналы,
-         * которые сидят в таблицах для первого порога, должны сидеть в таблицах
-         * второго. поэтому, если пришла сработка по второму порогу, ищем нужный сигнал
-         * в таблицах второго порога. если там его нет, то пытаемся найти его в таблицах
-         * первого. если находим, то фиксируем сработку */
 
-        // если сработка по 2ому порогу, и не нашли в таблицах 2го порога, то ищем в таблицах для 1го порога
-        else if (factor & 0x80) {
+//          factor &= 0x7F;
+//          if(SIGNALS_TABLE.contains(factor)) {
 
+//            signals_by_detector* sbd = SIGNALS_TABLE.value(factor);
 
-          factor &= 0x7F;
-          if(SIGNALS_TABLE.contains(factor)) {
+//            if(sbd->contains(detector_num)) {
 
-            signals_by_detector* sbd = SIGNALS_TABLE.value(factor);
+//              signal_name = sbd->value(detector_num);
+//      //        qDebug() << QString("detector_num: %1   factor: %2  signal_name: %3").arg(detector_num).arg(factor).arg(signal_name);
 
-            if(sbd->contains(detector_num)) {
+//              QString prefix = opa::getPrefix(dev_params.start_register);
+//              signal_name.push_front(prefix);
 
-              signal_name = sbd->value(detector_num);
-      //        qDebug() << QString("detector_num: %1   factor: %2  signal_name: %3").arg(detector_num).arg(factor).arg(signal_name);
+//              device->setSignalValue(signal_name, 1.0);
 
-              QString prefix = opa::getPrefix(dev_params.start_register);
-              signal_name.push_front(prefix);
+//            }
+//          }
+//      }
 
-              device->setSignalValue(signal_name, 1.0);
+//      /// теперь все то же самое делаем для дублирующих сигналов Z
+//      if(SIGNALS_Z_TABLE.contains(factor)) {
 
-            }
-          }
-      }
+//        signals_by_detector* sbd = SIGNALS_Z_TABLE.value(factor);
 
-      /* теперь все то же самое делаем для дублирующих сигналов Z */
-      if(SIGNALS_Z_TABLE.contains(factor)) {
+//        if(sbd->contains(detector_num)) {
 
-        signals_by_detector* sbd = SIGNALS_Z_TABLE.value(factor);
+//          signal_name = sbd->value(detector_num);
+////          qDebug() << QString("detector_num: %1   factor: %2  signal_name: %3").arg(detector_num).arg(factor).arg(signal_name);
 
-        if(sbd->contains(detector_num)) {
+//          QString prefix = opa::getPrefix(dev_params.start_register);
+//          signal_name.push_front(prefix);
 
-          signal_name = sbd->value(detector_num);
-//          qDebug() << QString("detector_num: %1   factor: %2  signal_name: %3").arg(detector_num).arg(factor).arg(signal_name);
+//          device->setSignalValue(signal_name, 1.0);
 
-          QString prefix = opa::getPrefix(dev_params.start_register);
-          signal_name.push_front(prefix);
+//        }
 
-          device->setSignalValue(signal_name, 1.0);
+//        // если сработка по 2ому порогу, и не нашли в таблицах 2го порога, то ищем в таблицах для 1го порога
+//        else if (factor & 0x80) {
 
-        }
+//          factor &= 0x7F;
 
-        // если сработка по 2ому порогу, и не нашли в таблицах 2го порога, то ищем в таблицах для 1го порога
-        else if (factor & 0x80) {
+//          if(SIGNALS_Z_TABLE.contains(factor)) {
 
-          factor &= 0x7F;
+//            signals_by_detector* sbd = SIGNALS_Z_TABLE.value(factor);
 
-          if(SIGNALS_Z_TABLE.contains(factor)) {
+//            if(sbd->contains(detector_num)) {
 
-            signals_by_detector* sbd = SIGNALS_Z_TABLE.value(factor);
+//              signal_name = sbd->value(detector_num);
+//      //        qDebug() << QString("detector_num: %1   factor: %2  signal_name: %3").arg(detector_num).arg(factor).arg(signal_name);
 
-            if(sbd->contains(detector_num)) {
+//              QString prefix = opa::getPrefix(dev_params.start_register);
+//              signal_name.push_front(prefix);
 
-              signal_name = sbd->value(detector_num);
-      //        qDebug() << QString("detector_num: %1   factor: %2  signal_name: %3").arg(detector_num).arg(factor).arg(signal_name);
+//              device->setSignalValue(signal_name, 1.0);
 
-              QString prefix = opa::getPrefix(dev_params.start_register);
-              signal_name.push_front(prefix);
+//            }
+//          }
+//        }
+//      }
 
-              device->setSignalValue(signal_name, 1.0);
+//    }
 
-            }
-          }
-        }
-      }
+//    else {
 
-    }
+//      foreach (signals_by_detector* sbd, SIGNALS_TABLE.values()) {
 
-    else {
+//        foreach (quint16 dn, sbd->keys()) {
 
-      foreach (signals_by_detector* sbd, SIGNALS_TABLE.values()) {
+//          if(dn == detector_num) {
 
-        foreach (quint16 dn, sbd->keys()) {
+//            signal_name = sbd->value(dn);
 
-          if(dn == detector_num) {
+//            QString prefix = opa::getPrefix(dev_params.start_register);
+//            signal_name.push_front(prefix);
 
-            signal_name = sbd->value(dn);
+//            device->setSignalValue(signal_name, 0.0);
 
-            QString prefix = opa::getPrefix(dev_params.start_register);
-            signal_name.push_front(prefix);
+//          }
+//        }
+//      }
 
-            device->setSignalValue(signal_name, 0.0);
+//      foreach (signals_by_detector* sbd, SIGNALS_Z_TABLE.values()) {
 
-          }
-        }
-      }
+//        foreach (quint16 dn, sbd->keys()) {
 
-      foreach (signals_by_detector* sbd, SIGNALS_Z_TABLE.values()) {
+//          if(dn == detector_num) {
 
-        foreach (quint16 dn, sbd->keys()) {
+//            signal_name = sbd->value(dn);
 
-          if(dn == detector_num) {
+//            QString prefix = opa::getPrefix(dev_params.start_register);
+//            signal_name.push_front(prefix);
 
-            signal_name = sbd->value(dn);
+//            device->setSignalValue(signal_name, 0.0);
 
-            QString prefix = opa::getPrefix(dev_params.start_register);
-            signal_name.push_front(prefix);
+//          }
+//        }
+//      }
+//    }
 
-            device->setSignalValue(signal_name, 0.0);
+//    data_begin += 4; // 4 байта данных на один извещатель
 
-          }
-        }
-      }
-    }
+//  }
+//}
 
-    data_begin += 4; // 4 байта данных на один извещатель
+//void opa::GenericThread::func_0x03(ad::SvAbstractDevice* device, ad::DATA* data)
+//{
+//  quint8 data_begin = 0;
+//  quint16 room_num;
+//  quint8  level;
+//  QString signal_name;
 
-  }
-}
+//  while(data_begin < data->data_length) {
 
-void opa::GenericThread::func_0x03(ad::SvAbstractDevice* device, ad::DATA* data)
-{
-  quint8 data_begin = 0;
-  quint16 room_num;
-  quint8  level;
-  QString signal_name;
+//    memcpy(&room_num, &data->data[data_begin], sizeof(quint16));
+//    memcpy(&level, &data->data[data_begin + sizeof(quint16)], sizeof(quint8));
 
-  while(data_begin < data->data_length) {
+//    if(SIGNALS_BY_ROOMS.contains(room_num)) {
 
-    memcpy(&room_num, &data->data[data_begin], sizeof(quint16));
-    memcpy(&level, &data->data[data_begin + sizeof(quint16)], sizeof(quint8));
+//      signal_name = SIGNALS_BY_ROOMS.value(room_num);
 
-    if(SIGNALS_BY_ROOMS.contains(room_num)) {
+//      QString prefix = opa::getPrefix(dev_params.start_register);
+//      signal_name.push_front(prefix);
 
-      signal_name = SIGNALS_BY_ROOMS.value(room_num);
+//      device->setSignalValue(signal_name, static_cast<qreal>(level));
 
-      QString prefix = opa::getPrefix(dev_params.start_register);
-      signal_name.push_front(prefix);
+////      if(config()->debug)
+////        qDebug() << QString("sig: %1  room: %2  lvl: %3").arg(signal_name).arg(room_num).arg(level);
 
-      device->setSignalValue(signal_name, static_cast<qreal>(level));
+//    }
 
-//      if(config()->debug)
-//        qDebug() << QString("sig: %1  room: %2  lvl: %3").arg(signal_name).arg(room_num).arg(level);
 
-    }
+//    if(SIGNALS_Z_BY_ROOMS.contains(room_num)) {
 
+//      signal_name = SIGNALS_Z_BY_ROOMS.value(room_num);
 
-    if(SIGNALS_Z_BY_ROOMS.contains(room_num)) {
+//      QString prefix = opa::getPrefix(dev_params.start_register);
+//      signal_name.push_front(prefix);
 
-      signal_name = SIGNALS_Z_BY_ROOMS.value(room_num);
+//      device->setSignalValue(signal_name, static_cast<qreal>(level));
 
-      QString prefix = opa::getPrefix(dev_params.start_register);
-      signal_name.push_front(prefix);
+////      if(config()->debug)
+////        qDebug() << QString("sig: %1  room: %2  lvl: %3").arg(signal_name).arg(room_num).arg(level);
 
-      device->setSignalValue(signal_name, static_cast<qreal>(level));
+//    }
 
-//      if(config()->debug)
-//        qDebug() << QString("sig: %1  room: %2  lvl: %3").arg(signal_name).arg(room_num).arg(level);
+//    data_begin += 4; // 4 байта данных на один извещатель
 
-    }
+//  }
+//}
 
-    data_begin += 4; // 4 байта данных на один извещатель
+//void opa::GenericThread::func_0x04(ad::SvAbstractDevice* device, ad::DATA* data)
+//{
+//  QString prefix = opa::getPrefix(dev_params.start_register);
 
-  }
-}
+//  device->setSignalValue(QString("%1%2").arg(prefix).arg(BI25_5SS1_VD1), qreal(CALC_BI25_5SS1_VD1( data->data[0] ) ));
+//  device->setSignalValue(QString("%1%2").arg(prefix).arg(BI25_5SS1_VD2), qreal(CALC_BI25_5SS1_VD2( data->data[0] ) ));
+//  device->setSignalValue(QString("%1%2").arg(prefix).arg(BI26_6SS1_VD1), qreal(CALC_BI26_6SS1_VD1( data->data[0] ) ));
+//}
 
-void opa::GenericThread::func_0x04(ad::SvAbstractDevice* device, ad::DATA* data)
-{
-  QString prefix = opa::getPrefix(dev_params.start_register);
+//inline QString opa::getPrefix(quint16 start_register)
+//{
+//  QString prefix = "";
 
-  device->setSignalValue(QString("%1%2").arg(prefix).arg(BI25_5SS1_VD1), qreal(CALC_BI25_5SS1_VD1( data->data[0] ) ));
-  device->setSignalValue(QString("%1%2").arg(prefix).arg(BI25_5SS1_VD2), qreal(CALC_BI25_5SS1_VD2( data->data[0] ) ));
-  device->setSignalValue(QString("%1%2").arg(prefix).arg(BI26_6SS1_VD1), qreal(CALC_BI26_6SS1_VD1( data->data[0] ) ));
-}
+//  switch (start_register) {
 
-inline QString opa::getPrefix(quint16 start_register)
-{
-  QString prefix = "";
+//    case 0x04A0:
+//      prefix = "C122_";
+//      break;
 
-  switch (start_register) {
+//    case 0x0540:
+//      prefix = "C8_";
 
-    case 0x04A0:
-      prefix = "C122_";
-      break;
+//    case 0x0680:
+//      prefix = "C38_";
 
-    case 0x0540:
-      prefix = "C8_";
+//    case 0x0720:
+//      prefix = "C67_";
 
-    case 0x0680:
-      prefix = "C38_";
+//    case 0x07C0:
+//      prefix = "C93_";
 
-    case 0x0720:
-      prefix = "C67_";
+//    case 0x0860:
+//      prefix = "C123_";
 
-    case 0x07C0:
-      prefix = "C93_";
+//    case 0x0900:
+//      prefix = "C150_";
 
-    case 0x0860:
-      prefix = "C123_";
+//  }
 
-    case 0x0900:
-      prefix = "C150_";
-
-  }
-
-  return prefix;
-}
+//  return prefix;
+//}
+*/
 
 /** ********** EXPORT ************ **/
 ad::SvAbstractDevice* create()

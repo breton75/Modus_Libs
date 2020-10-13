@@ -10,24 +10,35 @@ QT       -= gui
 
 CONFIG += c++11 plugin
 
-TARGET = proj_12700_opa
+TARGET = /home/user/Modus/lib/proj_12700_opa
 TEMPLATE = lib
 
 DEFINES += PROJ_12700_OPA_LIBRARY
 
 SOURCES += sv_opa.cpp \
     ../../../Modus/global/sv_signal.cpp \
-    type_0x02.cpp
+    collection_0x02.cpp \
+    collection_status.cpp \
+    collection_0x03.cpp \
+    collection_0x04.cpp \
+    collection_0x19.cpp \
+    collection_0x33.cpp
 
 HEADERS += sv_opa.h \
     proj_12700_opa_global.h \
     ../../../Modus/global/sv_abstract_device.h \
     ../../../Modus/global/sv_signal.h \
+    ../../../Modus/global/sv_abstract_signal_collection.h \
     opa_defs.h \
     device_params.h \
     ifc_udp_params.h \
     ifc_serial_params.h \
-    type_0x02.h
+    collection_status.h \
+    collection_0x02.h \
+    collection_0x03.h \
+    collection_0x04.h \
+    collection_0x19.h \
+    collection_0x33.h
 
 unix {
     target.path = /usr/lib

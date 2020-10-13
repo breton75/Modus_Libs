@@ -19,8 +19,13 @@
 //#include "ifc_test_params.h"
 #include "signal_params.h"
 #include "opa_defs.h"
-#include "type_0x02.h"
 
+#include "collection_0x02.h"
+#include "collection_0x03.h"
+#include "collection_0x04.h"
+#include "collection_0x33.h"
+#include "collection_0x19.h"
+#include "collection_status.h"
 
 extern "C" {
 
@@ -51,6 +56,7 @@ namespace opa {
   class UDPThread;
   class SerialThread;
 
+  typedef QMap<quint8, SvAbstractSignalCollection*> SignalCollections;
 
   bool parse_signal(SvSignal* signal);
 
@@ -110,6 +116,10 @@ public:
     me = sv::log::sender(device->config()->name);
   }
 
+  ~GenericThread();
+
+  void initSignalsMap() throw(SvException);
+
 protected:
   opa::DeviceParams dev_params;
 
@@ -118,27 +128,32 @@ protected:
 
   sv::log::sender me;
 
-//  opa::SignalsMap* SignalsGEN;
-//  opa::SignalsMap* SignalsXDR;
+  opa::Type0x02   type0x02_signals;
+  opa::Type0x03   type0x03_signals;
+  opa::Type0x04   type0x04_signals;
+  opa::Type0x19   type0x19_signals;
+  opa::Type0x33   type0x33_signals;
+  opa::LineStatus line_status_signals;
+
+  opa::SignalCollections signal_collections;
 
   void process_data();
-//  void process_signals();
 
 private:
   quint16 parse_data(ad::BUFF* buff, ad::DATA* data, opa::Header* header);
 
-  void func_reset(ad::SvAbstractDevice* device);
-  void func_0x77(ad::SvAbstractDevice* device);
-  void func_0x02(ad::SvAbstractDevice* device, ad::DATA* data);
-  void func_0x03(ad::SvAbstractDevice* device, ad::DATA* data);
-  void func_0x04(ad::SvAbstractDevice* device, ad::DATA* data);
-  void func_0x19(ad::SvAbstractDevice* device, ad::DATA* data);
+//  void func_reset(ad::SvAbstractDevice* device);
+//  void func_0x77(ad::SvAbstractDevice* device);
+//  void func_0x02(ad::SvAbstractDevice* device, ad::DATA* data);
+//  void func_0x03(ad::SvAbstractDevice* device, ad::DATA* data);
+//  void func_0x04(ad::SvAbstractDevice* device, ad::DATA* data);
+//  void func_0x19(ad::SvAbstractDevice* device, ad::DATA* data);
 
 
 
-  void func_set_line_status(ad::SvAbstractDevice* device, ad::DATA* data);
+//  void func_set_line_status(ad::SvAbstractDevice* device, ad::DATA* data);
 
-  QString getPrefix(quint16 start_register);
+//  QString getPrefix(quint16 start_register);
 
 //  void parseNlog(const QString &message);
 //  void parse_GEN(const QString& message);

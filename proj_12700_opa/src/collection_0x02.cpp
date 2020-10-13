@@ -1,15 +1,16 @@
-﻿#include "type_0x02.h"
+﻿#include "collection_0x02.h"
 
-Type0x02::Type0x02(QObject *parent) : QObject(parent)
+opa::Type0x02::Type0x02():
+  SvAbstractSignalCollection()
 {
 
 }
 
-void Type0x02::addSignal(const SvSignal* signal) throw (SvException)
+void opa::Type0x02::addSignal(SvSignal* signal) throw (SvException)
 {
   try
   {
-    SignalParams_0x02 p = SignalParams_0x02::fromJson(signal->config()->params);
+    opa::SignalParams_0x02 p = opa::SignalParams_0x02::fromJson(signal->config()->params);
 
     quint32 uniq_index = (static_cast<quint32>(p.sensor) << 8) + static_cast<quint32>(p.faktor);
 
@@ -18,7 +19,7 @@ void Type0x02::addSignal(const SvSignal* signal) throw (SvException)
                         .arg(signal->config()->name)
                         .arg(signal->config()->params));
 
-    m_signals.insert(uniq_index, signal->config()->name);
+    m_signals.insert(uniq_index, signal);
 
   }
   catch(SvException e)
@@ -27,24 +28,26 @@ void Type0x02::addSignal(const SvSignal* signal) throw (SvException)
   }
 }
 
-void Type0x02::updateSignals(const ad::DATA* data)
+void opa::Type0x02::updateSignals(const ad::DATA* data)
 {
+  if(!data)
+    return;
+
   quint8  data_begin = 0;
   quint16 sensor;
-  quint8  factor;
-//  QString signal_name;
+  quint8  faktor;
 
   while(data_begin < data->data_length) {
 
     memcpy(&sensor, &data->data[data_begin], 2);
-    memcpy(&factor, &data->data[data_begin + 2], 1);
+    memcpy(&faktor, &data->data[data_begin + 2], 1);
 
-    if(factor) {
+    if(faktor) {
 
       quint32 uniq_index = (static_cast<quint32>(sensor) << 8) + static_cast<quint32>(faktor);
 
       if(m_signals.contains(uniq_index))
-        device->setSignalValue(m_signals.value(uniq_index), 1);
+        m_signals.value(uniq_index)->setValue(1);
 
     }
 
@@ -53,7 +56,7 @@ void Type0x02::updateSignals(const ad::DATA* data)
       foreach (quint32 index, m_signals.keys()) {
 
         if((index >> 8) == sensor)
-          device->setSignalValue(m_signals.value(index), 0);
+          m_signals.value(index)->setValue(0);
 
       }
     }
