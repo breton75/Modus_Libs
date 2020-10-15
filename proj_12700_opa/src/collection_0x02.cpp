@@ -15,8 +15,7 @@ void opa::Type0x02::addSignal(SvSignal* signal) throw (SvException)
     quint32 uniq_index = (static_cast<quint32>(p.sensor) << 8) + static_cast<quint32>(p.faktor);
 
     if(m_signals.contains(uniq_index))
-      throw SvException(QString("Сигнал %1: не уникальные значения параметров: '%2'")
-                        .arg(signal->config()->name)
+      throw SvException(QString("Не уникальные значения параметров: '%1'")
                         .arg(signal->config()->params));
 
     m_signals.insert(uniq_index, signal);
@@ -24,7 +23,7 @@ void opa::Type0x02::addSignal(SvSignal* signal) throw (SvException)
   }
   catch(SvException e)
   {
-    throw e;
+    throw SvException(QString("Сигнал %1: %2").arg(signal->config()->name).arg(e.error));
   }
 }
 

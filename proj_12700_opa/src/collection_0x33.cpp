@@ -17,7 +17,7 @@ void opa::Type0x33::addSignal(SvSignal* signal) throw (SvException)
   }
   catch(SvException e)
   {
-    throw e;
+    throw SvException(QString("Сигнал %1: %2").arg(signal->config()->name).arg(e.error));
   }
 }
 

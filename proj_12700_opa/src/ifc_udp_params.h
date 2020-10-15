@@ -7,8 +7,8 @@
  *  автор Свиридов С.А. Авиационные и Морская Электроника
  * *********************************************************************/
 
-#ifndef VIRTUAL_DEVICE_UDP_PARAMS
-#define VIRTUAL_DEVICE_UDP_PARAMS
+#ifndef OPA_IFC_UDP_PARAMS
+#define OPA_IFC_UDP_PARAMS
 
 #include <QtGlobal>
 #include <QtCore/QCommandLineParser>
@@ -26,6 +26,9 @@
 #define P_UDP_RECV_PORT "recv_port"
 #define P_UDP_SEND_PORT "send_port"
 
+#define DEFAULT_RECV_PORT 6001
+#define DEFAULT_SEND_PORT 5001
+
 #define UDP_IMPERMISSIBLE_VALUE "Недопустимое значение параметра \"%1\": %2.\n%3"
 
 const QMap<QString, QHostAddress::SpecialAddress> SpecialHosts = {{"localhost", QHostAddress::LocalHost},
@@ -37,15 +40,13 @@ struct UdpParams {
 
   QString      ifc  = "";
   QHostAddress host = QHostAddress::Any;
-  quint16 recv_port = 6001;
-  quint16 send_port = 5001;
+  quint16 recv_port = DEFAULT_RECV_PORT;
+  quint16 send_port = DEFAULT_SEND_PORT;
 
   static UdpParams fromJsonString(const QString& json_string) throw (SvException)
   {
     QJsonParseError err;
     QJsonDocument jd = QJsonDocument::fromJson(json_string.toUtf8(), &err);
-
-//    SvException excpt;
 
     if(err.error != QJsonParseError::NoError)
       throw SvException(err.errorString());
@@ -61,7 +62,6 @@ struct UdpParams {
   static UdpParams fromJsonObject(const QJsonObject &object) throw (SvException)
   {
     UdpParams p;
-    SvException excpt;
     QString P;
 
     /* host */
@@ -73,43 +73,45 @@ struct UdpParams {
       if(SpecialHosts.contains(host)) p.host = QHostAddress(SpecialHosts.value(host));
 
       else
-      if(QHostAddress(host).toIPv4Address() != 0) p.host = QHostAddress(host);
+        if(QHostAddress(host).toIPv4Address() != 0) p.host = QHostAddress(host);
 
       else
-        throw excpt.assign(QString(UDP_IMPERMISSIBLE_VALUE)
+        throw SvException(QString(UDP_IMPERMISSIBLE_VALUE)
                            .arg(P).arg(object.value(P).toVariant().toString())
-                           .arg("Допускаются ip адреса в формате 129.168.1.1, а также слова localhost, any, broadcast"));
+                           .arg("Допускаются ip адреса в формате 192.168.1.1, а также слова \"localhost\", \"any\", \"broadcast\""));
     }
-    p.host = QHostAddress::Any;
+    else
+      p.host = QHostAddress::Any;
 
     /* receive port */
     P = P_UDP_RECV_PORT;
-    if(object.contains(P)) {
-
-      p.recv_port = object.value(P).toInt(0);
-
-      if(p.recv_port == 0)
-        throw excpt.assign(QString(UDP_IMPERMISSIBLE_VALUE)
+    if(object.contains(P))
+    {
+      if(object.value(P).toInt(-1) < 1)
+        throw SvException(QString(UDP_IMPERMISSIBLE_VALUE)
                            .arg(P).arg(object.value(P).toVariant().toString())
-                           .arg("Допускаются тоьлко числовые значения"));
+                           .arg("Номер порта должен быть задан целым положительным числом в диапазоне [1..65535]"));
+
+      p.recv_port = object.value(P).toInt(DEFAULT_RECV_PORT);
 
     }
-    p.recv_port = 6001;
+    else
+      p.recv_port = DEFAULT_RECV_PORT;
 
     /* send port */
     P = P_UDP_SEND_PORT;
     if(object.contains(P))
     {
-
-      p.send_port = object.value(P).toInt(0);
-
-      if(p.send_port == 0)
-        throw excpt.assign(QString(UDP_IMPERMISSIBLE_VALUE)
+      if(object.value(P).toInt(-1) < 1)
+        throw SvException(QString(UDP_IMPERMISSIBLE_VALUE)
                            .arg(P).arg(object.value(P).toVariant().toString())
-                           .arg("Допускаются тоьлко числовые значения"));
+                           .arg("Номер порта должен быть задан целым положительным числом в диапазоне [1..65535]"));
+
+      p.send_port = object.value(P).toInt(DEFAULT_SEND_PORT);
 
     }
-    p.send_port = 5001;
+    else
+      p.send_port = DEFAULT_SEND_PORT;
 
     /* ifc */
     P = P_UDP_IFC;
@@ -142,5 +144,5 @@ struct UdpParams {
 };
 
 
-#endif // VIRTUAL_DEVICE_UDP_PARAMS
+#endif // OPA_IFC_UDP_PARAMS
 

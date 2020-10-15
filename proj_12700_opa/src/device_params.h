@@ -1,5 +1,5 @@
-﻿#ifndef DEVICEPARAMS
-#define DEVICEPARAMS
+﻿#ifndef OPA_DEVICE_PARAMS
+#define OPA_DEVICE_PARAMS
 
 #include <QString>
 #include <QtCore>

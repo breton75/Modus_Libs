@@ -52,7 +52,8 @@ namespace opa {
           throw SvException(QString(E_IMPERMISSIBLE_VALUE)
                             .arg(P)
                             .arg(object.value(P).toVariant().toString())
-                            .arg("Номер помещения должен быть задан двухбайтовым целым числом в шестнадцатиречном, восьмеричном или десятичном формате: [0xFFFF | 0177777 | 65535]"));
+                            .arg("Номер помещения должен быть задан двухбайтовым целым числом в шестнадцатиречном, "
+                                 "восьмеричном или десятичном формате в кавычках: \"0xFFFF\" | \"0177777\" | \"65535\""));
 
       }
       else
@@ -70,7 +71,8 @@ namespace opa {
           throw SvException(QString(E_IMPERMISSIBLE_VALUE)
                             .arg(P)
                             .arg(object.value(P).toVariant().toString())
-                            .arg("Уровень пожарной опасности должен быть задан однобайтовым целым числом в шестнадцатиречном, восьмеричном или десятичном формате: [0xFF | 01777 | 255]"));
+                            .arg("Уровень пожарной опасности должен быть задан однобайтовым целым числом в шестнадцатиречном, "
+                                 "восьмеричном или десятичном формате в кавычках: \"0xFF\" | \"0377\" | \"255\""));
 
       }
       else
@@ -92,17 +94,9 @@ namespace opa {
     QJsonObject toJsonObject() const
     {
       QJsonObject j;
-      QString r;
 
-      r = QString::number(space, 16);
-      QString space_r = QString("0x%1").arg(r.length() % 2 ? "0" + r : r);
-
-      r = QString::number(level, 16);
-      QString level_r = QString("0x%1").arg(r.length() % 2 ? "0" + r : r);
-
-
-      j.insert(P_OPA_SPACE, QJsonValue(space_r).toString());
-      j.insert(P_OPA_LEVEL, QJsonValue(level_r).toString());
+      j.insert(P_OPA_SPACE, QJsonValue(space).toString());
+      j.insert(P_OPA_LEVEL, QJsonValue(level).toString());
 
       return j;
 

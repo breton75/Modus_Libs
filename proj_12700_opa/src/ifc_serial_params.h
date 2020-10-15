@@ -7,8 +7,8 @@
  *  автор Свиридов С.А. Авиационные и Морская Электроника
  * *********************************************************************/
 
-#ifndef VIRTUAL_DEVICE_SERIAL_PARAMS
-#define VIRTUAL_DEVICE_SERIAL_PARAMS
+#ifndef OPA_IFC_SERIAL_PARAMS
+#define OPA_IFC_SERIAL_PARAMS
 
 #include <QtGlobal>
 #include <QtSerialPort/QSerialPort>
@@ -191,5 +191,5 @@ struct SerialParams {
 };
 
 
-#endif // VIRTUAL_DEVICE_SERIAL_PARAMS
+#endif // OPA_IFC_SERIAL_PARAMS
 

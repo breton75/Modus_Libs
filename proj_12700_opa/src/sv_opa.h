@@ -56,7 +56,7 @@ namespace opa {
   class UDPThread;
   class SerialThread;
 
-  typedef QMap<quint8, SvAbstractSignalCollection*> SignalCollections;
+  typedef QMap<QString, SvAbstractSignalCollection*> SignalCollections;
 
   bool parse_signal(SvSignal* signal);
 
@@ -70,6 +70,13 @@ namespace opa {
   const QMap<QString, AvailableIfces> ifcesMap = {{"RS",    AvailableIfces::RS},
                                                   {"RS485", AvailableIfces::RS485},
                                                   {"UDP",   AvailableIfces::UDP}};
+
+//  const QMap<quint8, QString> datatypeByTag = {{0x02, "0x02"},
+//                                               {0x03, "0x03"},
+//                                               {0x04, "0x04"},
+//                                               {0x33, "0x33"},
+//                                               {0x19, "0x19"}};
+
 }
 
 
@@ -118,7 +125,7 @@ public:
 
   ~GenericThread();
 
-  void initSignalsMap() throw(SvException);
+  void initSignalsCollections() throw(SvException);
 
 protected:
   opa::DeviceParams dev_params;

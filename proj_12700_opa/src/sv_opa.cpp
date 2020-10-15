@@ -96,7 +96,6 @@ bool opa::SvOPA::open()
   } catch(SvException& e) {
 
     p_last_error = e.error;
-//    p_log << sv::log::mtError << sv::log::llError << e.error << sv::log::endl;
 
     deleteThread();
 
@@ -129,18 +128,17 @@ void opa::SvOPA::create_new_thread() throw(SvException)
 //        break;
 
     default:
-      p_exception.raise(QString("Неизвестный тип интерфейса: %1").arg(config()->ifc_name));
+      p_exception.raise(QString("Устройство %1. Неизвестный тип интерфейса: %2").arg(p_config.name).arg(p_config.ifc_name));
       break;
 
     }
 
     p_thread->conform(p_config.dev_params, p_config.ifc_params);
-    static_cast<opa::GenericThread*>(p_thread)->initSignalsMap();
+    static_cast<opa::GenericThread*>(p_thread)->initSignalsCollections();
 
   }
 
   catch(SvException e) {
-
     throw e;
 
   }
@@ -188,7 +186,7 @@ void opa::UDPThread::conform(const QString& jsonDevParams, const QString& jsonIf
 
 void opa::UDPThread::open() throw(SvException)
 {
-  if(!socket.bind(QHostAddress::Any, ifc_params.recv_port, QAbstractSocket::DontShareAddress))
+  if(!socket.bind(ifc_params.recv_port, QAbstractSocket::DontShareAddress))
     throw SvException(socket.errorString());
 
   // с заданным интервалом сбрасываем буфер, чтобы отсекать мусор и битые пакеты
@@ -442,33 +440,40 @@ void opa::SerialThread::stop()
 /** **** GENERIC FUNCTIONS **** **/
 opa::GenericThread::~GenericThread()
 {
-  foreach (SvAbstractSignalCollection* ds, signal_collections.values())
-    delete ds;
 
 }
 
-void opa::GenericThread::initSignalsMap() throw(SvException)
+void opa::GenericThread::initSignalsCollections() throw(SvException)
 {
   try {
 
-    signal_collections.insert(static_cast<quint8>(TYPE_0x33), &type0x33_signals);
-    signal_collections.insert(static_cast<quint8>(TYPE_0x02), &type0x02_signals);
-    signal_collections.insert(static_cast<quint8>(TYPE_0x03), &type0x03_signals);
-    signal_collections.insert(static_cast<quint8>(TYPE_0x04), &type0x04_signals);
-    signal_collections.insert(static_cast<quint8>(TYPE_0x19), &type0x19_signals);
+    signal_collections.insert(QString(TYPE_0x33).toLower(), &type0x33_signals);
+    signal_collections.insert(QString(TYPE_0x02).toLower(), &type0x02_signals);
+    signal_collections.insert(QString(TYPE_0x03).toLower(), &type0x03_signals);
+    signal_collections.insert(QString(TYPE_0x04).toLower(), &type0x04_signals);
+    signal_collections.insert(QString(TYPE_0x19).toLower(), &type0x19_signals);
 
-    bool ok;
     foreach (SvSignal* signal, p_device->Signals()->values()) {
 
-      if(signal->config()->tag.toUpper() == "STATUS")
+      QString tag = signal->config()->tag.toLower();
+
+      if(tag == "status")
         line_status_signals.addSignal(signal);
 
       else {
 
-        quint8 t = signal->config()->tag.toUInt(&ok, 0);
+        if(signal_collections.contains(tag))
+          signal_collections.value(tag)->addSignal(signal);
 
-        if(ok && signal_collections.contains(t))
-          signal_collections.value(t)->addSignal(signal);
+        else {
+
+          if(p_logger)
+            *p_logger << sv::log::llError << sv::log::mtError
+                     << QString("Сигнал %1: Неопознанный тэг \"%2\"").arg(signal->config()->name).arg(signal->config()->tag)
+                     << sv::log::endl;
+
+        }
+
 
       }
     }
@@ -561,15 +566,22 @@ void opa::GenericThread::process_data()
                   write(confirmation());
 
                   // раскидываем данные по сигналам, в зависимости от типа данных
-                  if(signal_collections.contains(p_data.data_type))
-                    signal_collections.value(p_data.data_type)->updateSignals(&p_data);
+//                  if(signal_collections.contains(p_data.data_type))
+//                    signal_collections.value(p_data.data_type)->updateSignals(&p_data);
 
 //                  switch (p_data.data_type) {
 
-//                    case 0x19: opa::func_0x19(p_device, &p_data); break;
-//                    case 0x02: opa::func_0x02(p_device, &p_data); break;
-//                    case 0x03: opa::func_0x03(p_device, &p_data); break;
-//                    case 0x04: opa::func_0x04(p_device, &p_data); break;
+                  if     (p_data.data_type == 0x33) type0x33_signals.updateSignals(&p_data);
+                  else if(p_data.data_type == 0x02) type0x02_signals.updateSignals(&p_data);
+                  else if(p_data.data_type == 0x03) type0x03_signals.updateSignals(&p_data);
+                  else if(p_data.data_type == 0x04) type0x04_signals.updateSignals(&p_data);
+                  else if(p_data.data_type == 0x19) type0x19_signals.updateSignals(&p_data);
+
+
+
+
+
+
 
 //                  }
                 }
