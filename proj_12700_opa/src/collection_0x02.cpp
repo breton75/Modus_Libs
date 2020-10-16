@@ -14,9 +14,9 @@ void opa::Type0x02::addSignal(SvSignal* signal) throw (SvException)
 
     quint32 uniq_index = (static_cast<quint32>(p.sensor) << 8) + static_cast<quint32>(p.faktor);
 
-    if(m_signals.contains(uniq_index))
-      throw SvException(QString("Не уникальные значения параметров: '%1'")
-                        .arg(signal->config()->params));
+//    if(m_signals.contains(uniq_index))
+//      throw SvException(QString("Не уникальные значения параметров: '%1'")
+//                        .arg(signal->config()->params));
 
     m_signals.insert(uniq_index, signal);
 
@@ -45,8 +45,10 @@ void opa::Type0x02::updateSignals(const ad::DATA* data)
 
       quint32 uniq_index = (static_cast<quint32>(sensor) << 8) + static_cast<quint32>(faktor);
 
-      if(m_signals.contains(uniq_index))
-        m_signals.value(uniq_index)->setValue(1);
+      if(m_signals.contains(uniq_index)) {
+        for (SvSignal* signal: m_signals.values(uniq_index))
+          signal->setValue(1);
+      }
 
     }
 
@@ -54,9 +56,10 @@ void opa::Type0x02::updateSignals(const ad::DATA* data)
 
       foreach (quint32 index, m_signals.keys()) {
 
-        if((index >> 8) == sensor)
-          m_signals.value(index)->setValue(0);
-
+        if((index >> 8) == sensor){
+          for (SvSignal* signal: m_signals.values(index))
+            signal->setValue(0);
+        }
       }
     }
 

@@ -8,7 +8,7 @@
 
 #include "../../../Modus/global/sv_abstract_signal_collection.h"
 
-typedef QMap<quint32, SvSignal*> SignalsMap;
+//typedef QMap<quint32, SvSignal*> SignalsMap;
 
 namespace opa {
 
@@ -114,7 +114,7 @@ namespace opa {
     void updateSignals(const ad::DATA* data = nullptr);
 
   private:
-    SignalsMap m_signals;
+    QMap<quint32, SvSignal*> m_signals;
 
   };
 }
