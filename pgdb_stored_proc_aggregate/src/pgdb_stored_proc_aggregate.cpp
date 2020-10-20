@@ -263,7 +263,7 @@ void pgspa::pgStoredProcAggThread::run()
 
     for(SvSignal* signal: *p_signals) {
 
-      if(!p_started)
+      if(!p_started) // чтоб не перебирать все сигналы, если пришел stop
         break;
 
 #ifdef TEST_VALUES

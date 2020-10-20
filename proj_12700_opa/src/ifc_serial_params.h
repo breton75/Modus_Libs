@@ -20,6 +20,8 @@
 
 #include "../../../svlib/sv_exception.h"
 
+#include "opa_defs.h"
+
 // имена параметров для RS
 #define P_SERIAL_BAUDRATE "baudrate"
 #define P_SERIAL_PORTNAME "portname"
@@ -28,8 +30,8 @@
 #define P_SERIAL_STOPBITS "stopbits"
 #define P_SERIAL_FLOWCTRL "flowcontrol"
 
-#define IFC_WRONG_PARAM_VALUE   "Неверное значение параметра %1: %2"
-#define IFC_IMPERMISSIBLE_VALUE "Недопустимое значение параметра %1: %2.\nДопустимы: %3"
+//#define IFC_WRONG_PARAM_VALUE   "Неверное значение параметра %1: %2"
+//#define IFC_IMPERMISSIBLE_VALUE "Недопустимое значение параметра %1: %2.\nДопустимы: %3"
 
 const QList<int> Baudrates = {75, 115, 134, 150, 300, 600, 1200, 1800, 2400, 4800, 7200, 9600, 14400, 19200, 38400, 57600, 115200, 128000};
 
@@ -52,6 +54,11 @@ const QMap<QSerialPort::FlowControl, QString> FlowControls = {{QSerialPort::NoFl
                                                               {QSerialPort::HardwareControl, "Аппаратное"},
                                                               {QSerialPort::SoftwareControl, "Программное"}};
 
+#define DEFAULT_BAUDRATE    19200
+#define DEFAULT_DATABITS    8
+#define DEFAULT_PARITY      0
+#define DEFAULT_STOPBITS    2
+#define DEFAULT_FLOWCONTROL 0
 
 /** структура для хранения параметров последовательного порта **/
 struct SerialParams {
@@ -84,83 +91,94 @@ struct SerialParams {
   static SerialParams fromJsonObject(const QJsonObject &object) throw (SvException)
   {
     SerialParams p;
-    int val;
+    QString P;
 
-    if(object.contains(P_SERIAL_PORTNAME)) {
+    P = P_SERIAL_PORTNAME;
+    if(object.contains(P)) {
 
-      p.portname = object.value(P_SERIAL_PORTNAME).toString("ttyS0");
+      p.portname = object.value(P).toString();
 
       if(p.portname.isEmpty())
-        throw SvException(QString(IFC_WRONG_PARAM_VALUE).arg(P_SERIAL_PORTNAME).arg(object.value(P_SERIAL_PORTNAME).toVariant().toString()));
+        throw SvException(QString(E_IMPERMISSIBLE_VALUE)
+                           .arg(P).arg(object.value(P).toVariant().toString())
+                           .arg("Имя порта не может быть пустым"));
     }
+    else
+      throw SvException(QString(E_IMPERMISSIBLE_VALUE)
+                         .arg(P).arg(object.value(P).toVariant().toString())
+                         .arg("Должно быть задано имя порта"));
 
     /* baudrate */
-    if(object.contains(P_SERIAL_BAUDRATE)) {
+    P = P_SERIAL_BAUDRATE;
+    if(object.contains(P)) {
 
-      val = object.value(P_SERIAL_BAUDRATE).toInt(-1);
-      if(val <= 0)
-        throw SvException(QString(IFC_WRONG_PARAM_VALUE).arg(P_SERIAL_BAUDRATE).arg(object.value(P_SERIAL_BAUDRATE).toVariant().toString()));
+      if(object.value(P).toInt(-1) <= 0)
+        throw SvException(QString(E_IMPERMISSIBLE_VALUE)
+                           .arg(P).arg(object.value(P).toVariant().toString())
+                           .arg("Параметр baudrate должен быть задан целым положительным числом"));
 
-      p.baudrate = val;
+      p.baudrate = object.value(P).toInt(DEFAULT_BAUDRATE);
 
     }
+    else
+      p.baudrate = DEFAULT_BAUDRATE;
 
     /* databits */
-    if(object.contains(P_SERIAL_DATABITS)) {
+    P = P_SERIAL_DATABITS;
+    if(object.contains(P)) {
 
-      val = object.value(P_SERIAL_DATABITS).toInt(-1);
+      if(!DataBits.keys().contains(static_cast<QSerialPort::DataBits>(object.value(P).toInt(-1))))
+        throw SvException(QString(E_IMPERMISSIBLE_VALUE)
+                           .arg(P).arg(object.value(P).toVariant().toString())
+                           .arg("Параметр должен быть задан целым положительным числом в диапазоне [5, 6, 7, 8]"));
 
-      if(!DataBits.keys().contains(static_cast<QSerialPort::DataBits>(val)))
-        throw SvException(QString(IFC_IMPERMISSIBLE_VALUE)
-                          .arg(P_SERIAL_DATABITS)
-                          .arg(object.value(P_SERIAL_DATABITS).toVariant().toString())
-                          .arg("5, 6, 7, 8"));
-
-      p.databits = QSerialPort::DataBits(static_cast<QSerialPort::DataBits>(val));
+      p.databits = static_cast<QSerialPort::DataBits>(object.value(P).toInt(DEFAULT_DATABITS);
     }
+    else
+      p.databits = QSerialPort::DataBits(static_cast<QSerialPort::DataBits>(DEFAULT_DATABITS));
 
     /* parity */
-    if(object.contains(P_SERIAL_PARITY)) {
+    P = P_SERIAL_PARITY;
+    if(object.contains(P)) {
 
-      val = object.value(P_SERIAL_PARITY).toInt(-1);
+      if(!Parities.keys().contains(static_cast<QSerialPort::Parity>(object.value(P).toInt(-1))))
+        throw SvException(QString(E_IMPERMISSIBLE_VALUE)
+                           .arg(P).arg(object.value(P).toVariant().toString())
+                           .arg("Параметр должен быть задан целым положительным числом. Допустимые значения: 0 - NoParity, 2 - Even, 3 - Odd, 4 - Space, 5 - Mark"));
 
-      if(!Parities.keys().contains(static_cast<QSerialPort::Parity>(val)))
-        throw SvException(QString(IFC_IMPERMISSIBLE_VALUE)
-                          .arg(P_SERIAL_PARITY)
-                          .arg(object.value(P_SERIAL_PARITY).toVariant().toString())
-                          .arg("0 - NoParity, 2 - Even, 3 - Odd, 4 - Space, 5 - Mark"));
+      p.parity = static_cast<QSerialPort::Parity>(object.value(P).toInt(DEFAULT_PARITY));
 
-      p.parity = QSerialPort::Parity(val);
+    }
+    else
+      p.parity = static_cast<QSerialPort::Parity>(DEFAULT_PARITY);
+
+    /* stopbits */
+    P = P_SERIAL_STOPBITS;
+    if(object.contains(P)) {
+
+      if(!StopBits.keys().contains(static_cast<QSerialPort::StopBits>(object.value(P).toInt(-1))))
+        throw SvException(QString(E_IMPERMISSIBLE_VALUE)
+                           .arg(P).arg(object.value(P).toVariant().toString())
+                           .arg("Параметр должен быть задан целым положительным числом. Допустимые значения: 1 - One, 2 - Two, 3 - OneAndHalf"));
+
+      p.stopbits = static_cast<QSerialPort::StopBits>(object.value(P).toInt(DEFAULT_STOPBITS));
 
     }
 
-    if(object.contains(P_SERIAL_STOPBITS)) {
+    /* flowcontrol*/
+    P = P_SERIAL_FLOWCTRL;
+    if(object.contains(P)) {
 
-      val = object.value(P_SERIAL_STOPBITS).toInt(-1);
+      if(!FlowControls.keys().contains(static_cast<QSerialPort::FlowControl>(object.value(P).toInt(-1))))
+        throw SvException(QString(E_IMPERMISSIBLE_VALUE)
+                           .arg(P).arg(object.value(P).toVariant().toString())
+                           .arg("Параметр должен быть задан целым положительным числом. Допустимые значения: 0 - NoFlowControl, 1 - HardwareControl, 2 - SoftwareControl"));
 
-      if(!StopBits.keys().contains(static_cast<QSerialPort::StopBits>(val)))
-        throw SvException(QString(IFC_IMPERMISSIBLE_VALUE)
-                          .arg(P_SERIAL_STOPBITS)
-                          .arg(object.value(P_SERIAL_STOPBITS).toVariant().toString())
-                          .arg("1 - One, 2 - Two, 3 - OneAndHalf"));
-
-      p.stopbits = QSerialPort::StopBits(val);
-
-    }
-
-    if(object.contains(P_SERIAL_FLOWCTRL)) {
-
-      val = object.value(P_SERIAL_FLOWCTRL).toInt(-1);
-
-      if(!FlowControls.keys().contains(static_cast<QSerialPort::FlowControl>(val)))
-        throw SvException(QString(IFC_IMPERMISSIBLE_VALUE)
-                          .arg(P_SERIAL_FLOWCTRL)
-                          .arg(object.value(P_SERIAL_FLOWCTRL).toVariant().toString())
-                          .arg("0 - NoFlowControl, 1 - HardwareControl, 2 - SoftwareControl"));
-
-      p.flowcontrol = QSerialPort::FlowControl(val);
+      p.flowcontrol = static_cast<QSerialPort::FlowControl>(object.value(P).toInt(DEFAULT_FLOWCONTROL));
 
     }
+    else
+      p.flowcontrol = static_cast<QSerialPort::FlowControl>(DEFAULT_FLOWCONTROL);
 
     return p;
 
