@@ -56,7 +56,7 @@ namespace opa {
   class UDPThread;
   class SerialThread;
 
-  typedef QMap<QString, SvAbstractSignalCollection*> SignalCollections;
+  typedef QMap<int, SvAbstractSignalCollection*> SignalCollections;
 
   bool parse_signal(SvSignal* signal);
 
@@ -130,6 +130,8 @@ public:
 protected:
   opa::DeviceParams dev_params;
 
+  opa::DATA m_data;
+
   opa::Header m_header;
   size_t m_hsz = sizeof(opa::Header);
 
@@ -147,7 +149,7 @@ protected:
   void process_data();
 
 private:
-  quint16 parse_data(ad::BUFF* buff, ad::DATA* data, opa::Header* header);
+  quint16 parse_data(ad::BUFF* buff, opa::DATA* data, opa::Header* header);
 
 //  void func_reset(ad::SvAbstractDevice* device);
 //  void func_0x77(ad::SvAbstractDevice* device);

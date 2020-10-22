@@ -28,7 +28,6 @@ HEADERS += sv_opa.h \
     proj_12700_opa_global.h \
     ../../../Modus/global/sv_abstract_device.h \
     ../../../Modus/global/sv_signal.h \
-    ../../../Modus/global/sv_abstract_signal_collection.h \
     opa_defs.h \
     device_params.h \
     ifc_udp_params.h \

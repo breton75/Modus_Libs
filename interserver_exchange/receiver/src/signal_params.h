@@ -4,9 +4,9 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-#include "../../../svlib/sv_exception.h"
+#include "../../../../svlib/sv_exception.h"
 
-#include "../../../Modus/global/sv_signal.h"
+#include "../../../../Modus/global/sv_signal.h"
 
 #define P_GROUP "group"
 #define P_WORD  "word"

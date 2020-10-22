@@ -3,11 +3,14 @@
 
 #include <QMap>
 
-#define TYPE_0x33 "0x33"
-#define TYPE_0x02 "0x02"
-#define TYPE_0x03 "0x03"
-#define TYPE_0x04 "0x04"
-#define TYPE_0x19 "0x19"
+#include "../../../Modus/global/sv_signal.h"
+#include "../../../Modus/global/sv_abstract_device.h"
+
+#define TYPE_0x33 0x33
+#define TYPE_0x02 0x02
+#define TYPE_0x03 0x03
+#define TYPE_0x04 0x04
+#define TYPE_0x19 0x19
 
 #define P_OPA_SENSOR  "sensor"
 #define P_OPA_FAKTOR  "faktor"
@@ -19,6 +22,38 @@
 
 #define E_IMPERMISSIBLE_VALUE "Недопустимое значение параметра %1: %2.\n%3"
 #define E_NO_PARAM  "Для сигнала не задан обязательный параметр \"%1\""
+
+namespace opa {
+
+  struct DATA
+  {
+    DATA() {}
+
+    qint8   data[MAX_PACKET_SIZE];
+    quint8  data_type;
+    quint8  data_length;
+    quint16 crc;
+
+  };
+
+  class SvAbstractSignalCollection: public QObject
+  {
+    Q_OBJECT
+
+  public:
+    SvAbstractSignalCollection()
+    {  }
+
+    virtual ~SvAbstractSignalCollection()
+    {  }
+
+    virtual void addSignal(SvSignal* signal) throw(SvException) = 0;
+
+    virtual void updateSignals(const opa::DATA* data = nullptr) = 0;
+
+  };
+}
+
 
 /** ******  ТИП ДАННЫХ 0x02  ********* **/
 //#define FACTOR_RESET            0x00

@@ -5,8 +5,6 @@
 #include <QList>
 
 #include "opa_defs.h"
-#include "../../../Modus/global/sv_abstract_signal_collection.h"
-
 
 namespace opa {
 
@@ -119,7 +117,7 @@ namespace opa {
 
     void addSignal(SvSignal* signal) throw (SvException);
 
-    void updateSignals(const ad::DATA* data = nullptr);
+    void updateSignals(const opa::DATA* data = nullptr);
 
   private:
     QList<Signal0x04> m_signals;

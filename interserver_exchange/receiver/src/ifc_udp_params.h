@@ -18,7 +18,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-#include "../../../svlib/sv_exception.h"
+#include "../../../../svlib/sv_exception.h"
 
 // имена параметров для UDP
 #define P_UDP_IFC       "ifc"

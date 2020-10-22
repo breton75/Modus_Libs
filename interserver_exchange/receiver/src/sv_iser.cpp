@@ -185,9 +185,9 @@ void iser::UDPThread::run()
   while(p_is_active) {
 
     process_signals();
-
+  qDebug() << 0;
     while(socket.waitForReadyRead(1000) && p_is_active) {
-
+  qDebug() << 1;
       while(socket.hasPendingDatagrams() && p_is_active)
       {
         if(socket.pendingDatagramSize() <= 0)
@@ -200,7 +200,7 @@ void iser::UDPThread::run()
           break;
 
         /* ... the rest of the datagram will be lost ... */
-        p_buff.offset += socket.readDatagram((char*)(&p_buff.buf[p_buff.offset]), MAX_PACKET_SIZE - p_buff.offset);
+        p_buff.offset += socket.readDatagram(&p_buff.buf[p_buff.offset], MAX_PACKET_SIZE - p_buff.offset);
 
         process_data();
 
@@ -251,19 +251,20 @@ iser::GenericThread::~GenericThread()
 
 void iser::GenericThread::process_data()
 {
+    qDebug() << 2;
   if(p_buff.offset >= m_hsz) {
 
     memcpy(&m_header, &p_buff.buf[0], m_hsz);
-
+qDebug() << m_header.sign << m_def_sign << m_header.receiver << m_header.sender;
     if((m_header.sign != m_def_sign) ||
-       ((dev_params.address != ISER_DEFAULT_ADDRESS) && (m_header.receiver_id != dev_params.address)) ||
-       ((dev_params.sender_address != ISER_DEFAULT_SENDER_ADDRESS)  && (m_header.sender_id != dev_params.sender_address)))
+       ((dev_params.address != ISER_DEFAULT_ADDRESS) && (m_header.receiver != dev_params.address)) ||
+       ((dev_params.sender_address != ISER_DEFAULT_SENDER_ADDRESS)  && (m_header.sender != dev_params.sender_address)))
     {
       reset_buffer();
       return;
     }
 
-    if(p_buff.offset >= m_hsz + m_header.byte_count + 2) {
+    if(p_buff.offset >= m_hsz + m_header.data_length + 2) {
 
         if(p_logger) // && p_device->info()->debug_mode)
           *p_logger << me
@@ -277,10 +278,15 @@ void iser::GenericThread::process_data()
         // считаем, что линия передачи в порядке и задаем новую контрольную точку времени
         p_device->setNewLostEpoch();
 
-        // парсим и проверяем crc
-        quint16 calc_crc = parse_data(&p_buff, &p_data, &m_header);
+        // вытаскиваем данные
+        QDataStream stream(QByteArray(&p_buff.buf[m_hsz], m_header.data_length));
 
-        if(calc_crc != p_data.crc) {
+        // проверяем crc
+        quint16 got_crc;
+        memcpy(&got_crc, &p_buff.buf[m_hsz + m_header.data_length], 2); // crc полученная
+        quint16 chk_crc = CRC::MODBUS_CRC16((const quint8*)(&p_buff.buf[0]), m_hsz + m_header.data_length); // вычисляем crc из данных
+qDebug() << 1;
+        if(false) { //chk_crc != got_crc) {
 
           // если crc не совпадает, то выходим без обработки и ответа
           if(p_logger)
@@ -288,24 +294,21 @@ void iser::GenericThread::process_data()
                         << sv::log::mtError
                         << sv::log::llError
                         << sv::log::TimeZZZ
-                        << QString("Ошибка crc! Ожидалось %1, получено %2").arg(calc_crc, 0, 16).arg(p_data.crc, 0, 16)
+                        << QString("Устройство %1. Ошибка crc! Ожидалось %2, получено %3")
+                           .arg(p_device->config()->name)
+                           .arg(chk_crc, 0, 16)
+                           .arg(got_crc, 0, 16)
                         << sv::log::endl;
 
         }
         else {
 
-          quint64 len = 0;
-          while(len < p_data.data_length) {
-
-            QByteArray ba((const char*)(&p_data.data[0]), p_data.data_length);
-            QDataStream stream_in(&ba, QIODevice::ReadOnly);
-
-            QVariant v;
-            stream_in >> v;
+            QVariantMap v;
+            stream >> v;
 
             qDebug() << v;
-
-          }
+            foreach (QString signal_name, v.keys())
+              p_device->setSignalValue(signal_name, v.value(signal_name));
 
         }
 
@@ -315,28 +318,6 @@ void iser::GenericThread::process_data()
   }
 }
 
-quint16 iser::GenericThread::parse_data(ad::BUFF* buff, ad::DATA* data, iser::Header* header)
-{
-  size_t hSize = sizeof(iser::Header);
-
-  // тип данных
-  memcpy(&data->data_type, &buff->buf[0] + hSize, 1);
-
-  // длина данных
-  memcpy(&data->data_length, &buff->buf[0] + hSize + 1, 1);
-
-  // данные
-  memcpy(&data->data[0], &buff->buf[0] + hSize + 2, data->data_length);
-
-  // crc полученная
-  memcpy(&data->crc, &buff->buf[0] + hSize + header->byte_count, 2);
-
-  // вычисляем crc из данных
-  quint16 crc = CRC::MODBUS_CRC16(&buff->buf[0], hSize + header->byte_count);
-
-  return crc;
-
-}
 
 QByteArray iser::GenericThread::confirmation()
 {

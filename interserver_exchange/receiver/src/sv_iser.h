@@ -7,18 +7,19 @@
 
 #include "interserver_exchange_receiver_global.h"
 
-#include "../../../Modus/global/sv_abstract_device.h"
-#include "../../../Modus/global/sv_signal.h"
+#include "../../../../Modus/global/sv_abstract_device.h"
+#include "../../../../Modus/global/sv_signal.h"
 
-#include "../../../svlib/sv_abstract_logger.h"
-#include "../../../svlib/sv_exception.h"
-#include "../../../svlib/sv_crc.h"
+#include "../../../../svlib/sv_abstract_logger.h"
+#include "../../../../svlib/sv_exception.h"
+#include "../../../../svlib/sv_crc.h"
+
+#include "../../global/ise_defs.h"
 
 #include "device_params.h"
 #include "ifc_udp_params.h"
 //#include "ifc_test_params.h"
 #include "signal_params.h"
-#include "iser_defs.h"
 
 
 extern "C" {
@@ -37,10 +38,9 @@ namespace iser {
   struct Header
   {
     char    sign[3];
-    quint64 sender_id;
-    quint64 receiver_id;
-    quint16 signal_count;
-    quint16 byte_count;
+    quint16 sender;
+    quint16 receiver;
+    quint16 data_length;
   };
   #pragma pack(pop)
 
@@ -112,7 +112,9 @@ protected:
   void process_data();
 
 private:
-  quint16 parse_data(ad::BUFF* buff, ad::DATA* data, iser::Header* header);
+//  ise::DATA m_data;
+
+//  quint16 parse_data(ad::BUFF* buff, ad::DATA* data, iser::Header* header);
 
   QByteArray confirmation();
 

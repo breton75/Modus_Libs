@@ -10,19 +10,19 @@ QT       -= gui
 
 CONFIG += c++11 plugin
 
-TARGET = /home/user/Modus/lib/interserver_exchange_reseiver
+TARGET = /home/user/Modus/lib/interserver_exchange_receiver
 TEMPLATE = lib
 
 DEFINES += INTERSERVER_EXCHANGE_RECEIVER_LIBRARY
 
 SOURCES += sv_iser.cpp \
-    ../../../Modus/global/sv_signal.cpp
+    ../../../../Modus/global/sv_signal.cpp
 
 HEADERS += sv_iser.h \
     interserver_exchange_receiver_global.h \
-    ../../../Modus/global/sv_abstract_device.h \
-    ../../../Modus/global/sv_signal.h \
-    iser_defs.h \
+    ../../../../Modus/global/sv_abstract_device.h \
+    ../../../../Modus/global/sv_signal.h \
+    ../../global/ise_defs.h \
     device_params.h \
     ifc_udp_params.h
 

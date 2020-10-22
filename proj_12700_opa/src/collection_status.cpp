@@ -17,7 +17,7 @@ void opa::LineStatus::addSignal(SvSignal* signal) throw (SvException)
   }
 }
 
-void opa::LineStatus::updateSignals(const ad::DATA* data)
+void opa::LineStatus::updateSignals(const opa::DATA* data)
 {
   Q_UNUSED(data);
 

@@ -27,7 +27,7 @@ void opa::Type0x02::addSignal(SvSignal* signal) throw (SvException)
   }
 }
 
-void opa::Type0x02::updateSignals(const ad::DATA* data)
+void opa::Type0x02::updateSignals(const opa::DATA* data)
 {
   if(!data)
     return;

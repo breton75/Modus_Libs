@@ -447,11 +447,11 @@ void opa::GenericThread::initSignalsCollections() throw(SvException)
 {
   try {
 
-    signal_collections.insert(QString(TYPE_0x33).toLower(), &type0x33_signals);
-    signal_collections.insert(QString(TYPE_0x02).toLower(), &type0x02_signals);
-    signal_collections.insert(QString(TYPE_0x03).toLower(), &type0x03_signals);
-    signal_collections.insert(QString(TYPE_0x04).toLower(), &type0x04_signals);
-    signal_collections.insert(QString(TYPE_0x19).toLower(), &type0x19_signals);
+    signal_collections.insert(TYPE_0x33 /*QString(TYPE_0x33).toLower()*/, &type0x33_signals);
+    signal_collections.insert(TYPE_0x02 /*QString(TYPE_0x02).toLower()*/, &type0x02_signals);
+    signal_collections.insert(TYPE_0x03 /*QString(TYPE_0x03).toLower()*/, &type0x03_signals);
+    signal_collections.insert(TYPE_0x04 /*QString(TYPE_0x04).toLower()*/, &type0x04_signals);
+    signal_collections.insert(TYPE_0x19 /*QString(TYPE_0x19).toLower()*/, &type0x19_signals);
 
     foreach (SvSignal* signal, p_device->Signals()->values()) {
 
@@ -462,8 +462,11 @@ void opa::GenericThread::initSignalsCollections() throw(SvException)
 
       else {
 
-        if(signal_collections.contains(tag))
-          signal_collections.value(tag)->addSignal(signal);
+        bool ok;
+        int itag = tag.toInt(&ok, 0);
+
+        if(ok && signal_collections.contains(itag))
+          signal_collections.value(itag)->addSignal(signal);
 
         else {
 
@@ -473,8 +476,6 @@ void opa::GenericThread::initSignalsCollections() throw(SvException)
                      << sv::log::endl;
 
         }
-
-
       }
     }
   }
@@ -523,74 +524,73 @@ void opa::GenericThread::process_data()
         // ставим состояние данной линии
         line_status_signals.updateSignals();
 
-        switch (current_register - dev_params.start_register)
-        {
-            case 0x00:
-            case 0x03:
-            case 0x05:
+        // парсим и проверяем crc
+        memcpy(&m_data.data_type, &p_buff.buf[0] + m_hsz, 1);                     // тип данных
+        memcpy(&m_data.data_length, &p_buff.buf[0] + m_hsz + 1, 1);               // длина данных
+        memcpy(&m_data.data[0], &p_buff.buf[0] + m_hsz + 2, m_data.data_length);  // данные
+        memcpy(&m_data.crc, &p_buff.buf[0] + m_hsz + m_header.byte_count, 2);     // crc полученная
 
-              // здесь просто отправляем ответ-квитирование
-              write(confirmation());
+        quint16 calc_crc = CRC::MODBUS_CRC16(&p_buff.buf[0], m_hsz + m_header.byte_count); // вычисляем crc из данных
 
-              if(p_data.data_type == 0x77) {
-                foreach (SvSignal* signal, p_device->Signals()->values())
-                  signal->setValue(0);
-              }
+        if(calc_crc != m_data.crc) {
 
-              break;
+          // если crc не совпадает, то выходим без обработки и ответа
+          if(p_logger)
+              *p_logger << me
+                        << sv::log::mtError
+                        << sv::log::llError
+                        << sv::log::TimeZZZ
+                        << QString("Ошибка crc! Ожидалось %1, получено %2").arg(calc_crc, 0, 16).arg(m_data.crc, 0, 16)
+                        << sv::log::endl;
 
-            case 0x06:
-            case 0x10:
-            case 0x50:
-            case 0x90:
-            {
-              // парсим и проверяем crc
-              quint16 calc_crc = parse_data(&p_buff, &p_data, &m_header);
+        }
+        else {
 
+           switch (current_register - dev_params.start_register)
+           {
+               case 0x00:
+               case 0x03:
+               case 0x05:
 
-              if(calc_crc != p_data.crc)
-              {
-                // если crc не совпадает, то выходим без обработки и ответа
-                if(p_logger)
-                    *p_logger << me
-                              << sv::log::mtError
-                              << sv::log::llError
-                              << sv::log::TimeZZZ
-                              << QString("Ошибка crc! Ожидалось %1, получено %2").arg(calc_crc, 0, 16).arg(p_data.crc, 0, 16)
-                              << sv::log::endl;
+                 // здесь просто отправляем ответ-квитирование
+                 write(confirmation());
 
-              }
-              else
-              {
-                  // формируем и отправляем ответ-квитирование
-                  write(confirmation());
+                 if(m_data.data_type == 0x77) {
+                   foreach (SvSignal* signal, p_device->Signals()->values())
+                     signal->setValue(0);
+                 }
 
-                  // раскидываем данные по сигналам, в зависимости от типа данных
-//                  if(signal_collections.contains(p_data.data_type))
-//                    signal_collections.value(p_data.data_type)->updateSignals(&p_data);
+                 break;
 
-//                  switch (p_data.data_type) {
+               case 0x06:
+               case 0x10:
+               case 0x50:
+               case 0x90:
+               {
+                 // парсим и проверяем crc
+   //              quint16 calc_crc = parse_data(&p_buff, &m_data, &m_header);
 
-                  if     (p_data.data_type == 0x33) type0x33_signals.updateSignals(&p_data);
-                  else if(p_data.data_type == 0x02) type0x02_signals.updateSignals(&p_data);
-                  else if(p_data.data_type == 0x03) type0x03_signals.updateSignals(&p_data);
-                  else if(p_data.data_type == 0x04) type0x04_signals.updateSignals(&p_data);
-                  else if(p_data.data_type == 0x19) type0x19_signals.updateSignals(&p_data);
+                     // формируем и отправляем ответ-квитирование
+                     write(confirmation());
 
+                    if(signal_collections.contains(m_data.data_type))
+                      signal_collections.value(m_data.data_type)->updateSignals(&m_data);
 
+//                     if     (m_data.data_type == 0x33) type0x33_signals.updateSignals(&m_data);
+//                     else if(m_data.data_type == 0x02) type0x02_signals.updateSignals(&m_data);
+//                     else if(m_data.data_type == 0x03) type0x03_signals.updateSignals(&m_data);
+//                     else if(m_data.data_type == 0x04) type0x04_signals.updateSignals(&m_data);
+//                     else if(m_data.data_type == 0x19) type0x19_signals.updateSignals(&m_data);
 
+   //                  }
+   //                }
 
+                 break;
+               }
 
-
-
-//                  }
-                }
-
-              break;
-            }
-
-            default:
-                break;
+               default:
+                   break;
+           }
         }
 
         reset_buffer();
@@ -600,7 +600,7 @@ void opa::GenericThread::process_data()
 
 }
 
-quint16 opa::GenericThread::parse_data(ad::BUFF* buff, ad::DATA* data, opa::Header* header)
+quint16 opa::GenericThread::parse_data(ad::BUFF* buff, opa::DATA* data, opa::Header* header)
 {
   size_t hSize = sizeof(opa::Header);
 

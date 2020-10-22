@@ -7,8 +7,8 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-#include "iser_defs.h"
-#include "../../../svlib/sv_exception.h"
+#include "../../global/ise_defs.h"
+#include "../../../../svlib/sv_exception.h"
 
 
 // имена параметров устройств
@@ -143,7 +143,7 @@ namespace iser {
 
 //      j.insert(P_OPA_START_REGISTER, QJsonValue(start_r).toString());
 //      j.insert(P_OPA_LAST_REGISTER, QJsonValue(last_r).toString());
-      j.insert(P_ISER_RESET_TIMEOUT, QJsonValue(reset_interval).toInt(ISER_RESET_INTERVAL));
+      j.insert(P_ISER_RESET_TIMEOUT, QJsonValue(reset_interval).toInt(ISER_DEFAULT_RESET_INTERVAL));
 
       return j;
 

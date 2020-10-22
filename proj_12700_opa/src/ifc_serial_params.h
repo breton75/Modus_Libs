@@ -132,7 +132,7 @@ struct SerialParams {
                            .arg(P).arg(object.value(P).toVariant().toString())
                            .arg("Параметр должен быть задан целым положительным числом в диапазоне [5, 6, 7, 8]"));
 
-      p.databits = static_cast<QSerialPort::DataBits>(object.value(P).toInt(DEFAULT_DATABITS);
+      p.databits = static_cast<QSerialPort::DataBits>(object.value(P).toInt(DEFAULT_DATABITS));
     }
     else
       p.databits = QSerialPort::DataBits(static_cast<QSerialPort::DataBits>(DEFAULT_DATABITS));

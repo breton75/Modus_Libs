@@ -6,10 +6,6 @@
 
 #include "opa_defs.h"
 
-#include "../../../Modus/global/sv_abstract_signal_collection.h"
-
-//typedef QMap<quint32, SvSignal*> SignalsMap;
-
 namespace opa {
 
   struct SignalParams_0x03
@@ -111,7 +107,7 @@ namespace opa {
 
     void addSignal(SvSignal* signal) throw (SvException);
 
-    void updateSignals(const ad::DATA* data = nullptr);
+    void updateSignals(const opa::DATA* data = nullptr);
 
   private:
     QMap<quint32, SvSignal*> m_signals;
