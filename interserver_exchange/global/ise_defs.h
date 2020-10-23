@@ -9,18 +9,37 @@
 
 #define MAX_PACKET_SIZE 0xFFFF
 
-//namespace ise {
+// имена параметров устройств
+#define P_ISE_ISEID           "iseid"
+#define P_ISE_SENDER_ISEID    "sender_iseid"
+#define P_ISE_RECEIVER_ISEID  "receiver_iseid"
+#define P_ISE_SEND_INTERVAL   "send_interval"
+#define P_ISE_RESET_TIMEOUT   "reset_timeout"
+#define P_ISE_HOST            "host"
+#define P_ISE_PORT            "port"
 
-//  struct DATA
-//  {
-//    DATA() { }
+#define ISE_DEFAULT_RESET_INTERVAL  10
+#define ISE_DEFAULT_SEND_INTERVAL   1000
+#define ISE_DEFAULT_ISEID           0
+#define ISE_DEFAULT_SENDER_ISEID    0
+#define ISE_DEFAULT_RECEIVER_ISEID  0
+#define ISE_DEFAULT_PORT            25555
 
-//    QByteArray data;
-//    QVariantMap v;
-//    quint16 crc;
+namespace ise {
 
-//  };
-//}
+  const QByteArray DEF_SIGN = QByteArray("ISE");
+
+  #pragma pack(push,1)
+  struct Header
+  {
+    char    sign[3];
+    quint16 sender;
+    quint16 receiver;
+    quint16 data_length;
+  };
+  #pragma pack(pop)
+
+}
 
 #endif // ISE_DEFS_H
 

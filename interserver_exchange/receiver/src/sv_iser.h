@@ -1,9 +1,9 @@
-﻿#ifndef CONNING_KONGSBER_DEVICE_H
-#define CONNING_KONGSBER_DEVICE_H
+﻿#ifndef ISER_DEVICE_H
+#define ISER_DEVICE_H
 
 #include <QRegularExpression>
 #include <QNetworkInterface>
-//#include <QVariantMap>
+#include <QStringBuilder>
 
 #include "interserver_exchange_receiver_global.h"
 
@@ -18,8 +18,6 @@
 
 #include "device_params.h"
 #include "ifc_udp_params.h"
-//#include "ifc_test_params.h"
-#include "signal_params.h"
 
 
 extern "C" {
@@ -33,16 +31,6 @@ extern "C" {
 }
 
 namespace iser {
-
-  #pragma pack(push,1)
-  struct Header
-  {
-    char    sign[3];
-    quint16 sender;
-    quint16 receiver;
-    quint16 data_length;
-  };
-  #pragma pack(pop)
 
   class SvISER;
   class GenericThread;
@@ -102,10 +90,10 @@ public:
 protected:
   iser::DeviceParams dev_params;
 
-  iser::Header m_header;
-  size_t m_hsz = sizeof(iser::Header);
+  ise::Header m_header;
+  size_t m_hsz = sizeof(ise::Header);
 
-  char m_def_sign[3] = {'I','S','E'};
+
 
   sv::log::sender me;
 
@@ -148,4 +136,4 @@ public slots:
 };
 
 
-#endif // CONNING_KONGSBER_DEVICE_H
+#endif // ISER_DEVICE_H

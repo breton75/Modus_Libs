@@ -12,25 +12,25 @@
 
 
 // имена параметров устройств
-#define P_ISER_ADDRESS        "address"
-#define P_ISER_SENDER_ADDRESS "sender_address"
-#define P_ISER_RESET_TIMEOUT  "reset_timeout"
+//#define P_ISER_ADDRESS        "address"
+//#define P_ISER_SENDER_ADDRESS "sender_address"
+//#define P_ISER_RESET_TIMEOUT  "reset_timeout"
 
 //#define OPA_DEV_IMPERMISSIBLE_VALUE "Недопустимое значение параметра %1: %2.\n%3"
 //#define OPA_DEV_NO_PARAM  "Для устройства не задан обязательный параметр \"%1\""
 
-#define ISER_DEFAULT_RESET_INTERVAL 10
-#define ISER_DEFAULT_ADDRESS        0
-#define ISER_DEFAULT_SENDER_ADDRESS 0
+//#define ISER_DEFAULT_RESET_INTERVAL 10
+//#define ISER_DEFAULT_ADDRESS        0
+//#define ISER_DEFAULT_SENDER_ADDRESS 0
 
 
 namespace iser {
 
   struct DeviceParams {
 
-    quint16   address         = ISER_DEFAULT_ADDRESS;
-    quint16   sender_address  = ISER_DEFAULT_SENDER_ADDRESS;
-    quint16   reset_interval  = ISER_DEFAULT_RESET_INTERVAL;
+    quint16   iseid          = ISE_DEFAULT_ISEID;
+    quint16   sender_iseid   = ISE_DEFAULT_SENDER_ISEID;
+    quint16   reset_interval = ISE_DEFAULT_RESET_INTERVAL;
 
     static DeviceParams fromJson(const QString& json_string) throw (SvException)
     {
@@ -55,44 +55,47 @@ namespace iser {
       DeviceParams p;
       QString P;
 
-      P = P_ISER_ADDRESS;
+      /* iseid */
+      P = P_ISE_ISEID;
       if(object.contains(P)) {
 
         QByteArray h = object.value(P).toString().toUtf8();
 
         bool ok = false;
-        p.address = h.toUShort(&ok, 0);
+        p.iseid = h.toUShort(&ok, 0);
 
         if(!ok)
           throw SvException(QString(E_IMPERMISSIBLE_VALUE)
                             .arg(P)
                             .arg(object.value(P).toVariant().toString())
-                            .arg("Адрес должен быть двухбайтовым целым числом в шестнадцатиречном, восьмеричном или десятичном формате: [0xFFFF | 0177777 | 65535]"));
+                            .arg("Идентификатор должен быть двухбайтовым целым числом в шестнадцатиречном, восьмеричном или десятичном формате: [0xFFFF | 0177777 | 65535]"));
 
       }
       else
-        p.address = ISER_DEFAULT_ADDRESS;
+        p.iseid = ISE_DEFAULT_ISEID;
 
-      P = P_ISER_SENDER_ADDRESS;
+      /* sender_iseid */
+      P = P_ISE_SENDER_ISEID;
       if(object.contains(P)) {
 
         QByteArray h = object.value(P).toString().toUtf8();
 
         bool ok = false;
-        p.sender_address = h.toUShort(&ok, 0);
+        p.sender_iseid = h.toUShort(&ok, 0);
 
         if(!ok)
           throw SvException(QString(E_IMPERMISSIBLE_VALUE)
                             .arg(P)
                             .arg(object.value(P).toVariant().toString())
-                            .arg("Адрес отправителя данных должен быть двухбайтовым целым числом в шестнадцатиречном, восьмеричном или десятичном формате: [0xFFFF | 0177777 | 65535]"));
+                            .arg("Иденитфикатор отправителя данных должен быть двухбайтовым целым числом в шестнадцатиречном, восьмеричном или десятичном формате: [0xFFFF | 0177777 | 65535]"));
 
       }
       else
-        p.sender_address = ISER_DEFAULT_SENDER_ADDRESS;
+        p.sender_iseid = ISE_DEFAULT_SENDER_ISEID;
 
 
-      P = P_ISER_RESET_TIMEOUT;
+      /* reset_interval */
+      P = P_ISE_RESET_TIMEOUT;
       if(object.contains(P)) {
 
         if(object.value(P).toInt(-1) < 1)
@@ -105,7 +108,7 @@ namespace iser {
 
       }
       else
-        p.reset_interval = ISER_DEFAULT_RESET_INTERVAL;
+        p.reset_interval = ISE_DEFAULT_RESET_INTERVAL;
 
 
       return p;
@@ -123,27 +126,17 @@ namespace iser {
     QJsonObject toJsonObject() const
     {
       QJsonObject j;
-//      QString r;
+      QString r;
 
-//      r = QString::number(start_register, 16);
+      r = QString::number(iseid, 16);
+      QString iseid_r = QString("0x%1").arg(r.length() % 2 ? "0" + r : r);
 
-//      if(r.length() < 4)
-//        r.push_front(QString(4 - r.length(), QChar('0')));
+      r = QString::number(sender_iseid, 16);
+      QString sender_iseid_r = QString("0x%1").arg(r.length() % 2 ? "0" + r : r);
 
-//      QString start_r = QString("0x%1").arg(r.length() % 2 ? "0" + r : r);
-
-
-//      r = QString::number(last_register, 16);
-
-//      if(r.length() < 4)
-//        r.push_front(QString(4 - r.length(), QChar('0')));
-
-//      QString last_r = QString("0x%1").arg(r.length() % 2 ? "0" + r : r);
-
-
-//      j.insert(P_OPA_START_REGISTER, QJsonValue(start_r).toString());
-//      j.insert(P_OPA_LAST_REGISTER, QJsonValue(last_r).toString());
-      j.insert(P_ISER_RESET_TIMEOUT, QJsonValue(reset_interval).toInt(ISER_DEFAULT_RESET_INTERVAL));
+      j.insert(P_ISE_ISEID,         QJsonValue(iseid_r).toString("0x00"));
+      j.insert(P_ISE_SENDER_ISEID,  QJsonValue(sender_iseid_r).toString("0x00"));
+      j.insert(P_ISE_RESET_TIMEOUT, QJsonValue(reset_interval).toInt(ISE_DEFAULT_RESET_INTERVAL));
 
       return j;
 

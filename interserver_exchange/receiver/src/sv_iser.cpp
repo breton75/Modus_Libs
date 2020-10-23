@@ -185,9 +185,9 @@ void iser::UDPThread::run()
   while(p_is_active) {
 
     process_signals();
-  qDebug() << 0;
+
     while(socket.waitForReadyRead(1000) && p_is_active) {
-  qDebug() << 1;
+
       while(socket.hasPendingDatagrams() && p_is_active)
       {
         if(socket.pendingDatagramSize() <= 0)
@@ -251,14 +251,13 @@ iser::GenericThread::~GenericThread()
 
 void iser::GenericThread::process_data()
 {
-    qDebug() << 2;
   if(p_buff.offset >= m_hsz) {
 
     memcpy(&m_header, &p_buff.buf[0], m_hsz);
-qDebug() << m_header.sign << m_def_sign << m_header.receiver << m_header.sender;
-    if((m_header.sign != m_def_sign) ||
-       ((dev_params.address != ISER_DEFAULT_ADDRESS) && (m_header.receiver != dev_params.address)) ||
-       ((dev_params.sender_address != ISER_DEFAULT_SENDER_ADDRESS)  && (m_header.sender != dev_params.sender_address)))
+
+    if((QByteArray(m_header.sign, 3) != ise::DEF_SIGN) ||
+       ((dev_params.address != ISE_DEFAULT_ADDRESS) && (m_header.receiver != dev_params.address)) ||
+       ((dev_params.sender_address != ISE_DEFAULT_SENDER_ADDRESS)  && (m_header.sender != dev_params.sender_address)))
     {
       reset_buffer();
       return;
@@ -285,7 +284,7 @@ qDebug() << m_header.sign << m_def_sign << m_header.receiver << m_header.sender;
         quint16 got_crc;
         memcpy(&got_crc, &p_buff.buf[m_hsz + m_header.data_length], 2); // crc полученная
         quint16 chk_crc = CRC::MODBUS_CRC16((const quint8*)(&p_buff.buf[0]), m_hsz + m_header.data_length); // вычисляем crc из данных
-qDebug() << 1;
+
         if(false) { //chk_crc != got_crc) {
 
           // если crc не совпадает, то выходим без обработки и ответа
@@ -306,7 +305,6 @@ qDebug() << 1;
             QVariantMap v;
             stream >> v;
 
-            qDebug() << v;
             foreach (QString signal_name, v.keys())
               p_device->setSignalValue(signal_name, v.value(signal_name));
 
