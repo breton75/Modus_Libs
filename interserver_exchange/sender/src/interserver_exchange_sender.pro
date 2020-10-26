@@ -16,14 +16,12 @@ TEMPLATE = lib
 DEFINES += INTERSERVER_EXCHANGE_SENDER_LIBRARY
 
 SOURCES += \
-    ../../../../svlib/sv_pgdb.cpp \
     ../../../../Modus/global/sv_signal.cpp \
     sv_ises.cpp
 
 HEADERS += \
     interserver_exchange_sender_global.h \
     ../../../../Modus/global/sv_abstract_storage.h \
-    ../../../../svlib/sv_pgdb.h \
     ../../../../svlib/sv_exception.h \
     ../../../../Modus/global/sv_signal.h \
     ../../global/ise_defs.h \

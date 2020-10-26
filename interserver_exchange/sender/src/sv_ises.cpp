@@ -75,9 +75,8 @@ void ises::SvISES::logerr(QString e)
 void ises::SvISES::logreconnect()
 {
   if(p_logger)
-    *p_logger << sv::log::TimeZZZ << sv::log::llInfo << QString("Фух! Восстановлена связь с хранилищем %1 [%2:%3:%4]\n")
-                    .arg(p_config.name).arg(m_params.db)
-                    .arg(m_params.host).arg(m_params.port)
+    *p_logger << sv::log::TimeZZZ << sv::log::llInfo << QString("Фух! Восстановлена связь с сервером %1 [%2:%3]\n")
+                    .arg(p_config.name).arg(m_params.host.toString()).arg(m_params.port)
               << sv::log::endl;
 }
 
@@ -201,7 +200,7 @@ void ises::SvISESThread::run()
             .append((const char*)&varlen, sizeof(quint16))
             .append(varmap);
 
-    quint16 crc = CRC::MODBUS_CRC16((const char*)(datagram.data()), sizeof(ise::Header) + varlen);
+    quint16 crc = CRC::MODBUS_CRC16((const quint8*)(datagram.data()), sizeof(ise::Header) + varlen);
 
     datagram.append((const char*)&crc, sizeof(quint16));
 

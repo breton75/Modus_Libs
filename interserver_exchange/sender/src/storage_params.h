@@ -79,7 +79,7 @@ namespace ises {
                              .arg(P).arg(object.value(P).toVariant().toString())
                              .arg("Номер порта должен быть задан целым положительным числом в диапазоне [1..65535]"));
 
-        p.port = object.value(P).toInt(DEFAULT_RECV_PORT);
+        p.port = object.value(P).toInt(ISE_DEFAULT_PORT);
 
       }
       else
@@ -158,7 +158,7 @@ namespace ises {
       QJsonObject j;
       QString r;
 
-      r = QString::number(address, 16);
+      r = QString::number(iseid, 16);
       QString iseid_r = QString("0x%1").arg(r.length() % 2 ? "0" + r : r);
 
       r = QString::number(receiver, 16);
