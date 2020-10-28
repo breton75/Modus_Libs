@@ -256,8 +256,8 @@ void iser::GenericThread::process_data()
     memcpy(&m_header, &p_buff.buf[0], m_hsz);
 
     if((QByteArray(m_header.sign, 3) != ise::DEF_SIGN) ||
-       ((dev_params.address != ISE_DEFAULT_ADDRESS) && (m_header.receiver != dev_params.address)) ||
-       ((dev_params.sender_address != ISE_DEFAULT_SENDER_ADDRESS)  && (m_header.sender != dev_params.sender_address)))
+       ((dev_params.iseid!= ISE_DEFAULT_ISEID) && (m_header.receiver != dev_params.iseid)) ||
+       ((dev_params.sender_iseid!= ISE_DEFAULT_SENDER_ISEID)  && (m_header.sender != dev_params.sender_iseid)))
     {
       reset_buffer();
       return;

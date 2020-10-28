@@ -104,7 +104,7 @@ namespace iser {
                                  .arg(object.value(P).toVariant().toString())
                                  .arg("Период сброса не может быть меньше 1 мсек."));
 
-        p.reset_interval = object.value(P).toInt(ISER_DEFAULT_RESET_INTERVAL);
+        p.reset_interval = object.value(P).toInt(ISE_DEFAULT_RESET_INTERVAL);
 
       }
       else
