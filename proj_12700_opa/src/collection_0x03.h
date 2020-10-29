@@ -10,7 +10,7 @@ namespace opa {
 
   struct SignalParams_0x03
   {
-    quint16 space = 0;
+    quint16 room  = 0;
     quint8  level = 0;
 
     static SignalParams_0x03 fromJson(const QString& json_string) throw (SvException)
@@ -36,13 +36,13 @@ namespace opa {
       SignalParams_0x03 p;
       QString P;
 
-      P = P_OPA_SPACE;
+      P = P_OPA_ROOM;
       if(object.contains(P)) {
 
         QByteArray h = object.value(P).toString().toUtf8();
 
         bool ok = false;
-        p.space = h.toUShort(&ok, 0);
+        p.room = h.toUShort(&ok, 0);
 
         if(!ok)
           throw SvException(QString(E_IMPERMISSIBLE_VALUE)
@@ -91,7 +91,7 @@ namespace opa {
     {
       QJsonObject j;
 
-      j.insert(P_OPA_SPACE, QJsonValue(space).toString());
+      j.insert(P_OPA_ROOM,  QJsonValue(room).toString());
       j.insert(P_OPA_LEVEL, QJsonValue(level).toString());
 
       return j;

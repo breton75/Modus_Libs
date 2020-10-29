@@ -14,7 +14,7 @@
 
 #define P_OPA_SENSOR  "sensor"
 #define P_OPA_FAKTOR  "faktor"
-#define P_OPA_SPACE   "space"
+#define P_OPA_ROOM    "room"
 #define P_OPA_LEVEL   "level"
 #define P_OPA_BYTE    "byte"
 #define P_OPA_BIT     "bit"

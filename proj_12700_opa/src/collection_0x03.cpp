@@ -12,7 +12,7 @@ void opa::Type0x03::addSignal(SvSignal* signal) throw (SvException)
   {
     opa::SignalParams_0x03 p = opa::SignalParams_0x03::fromJson(signal->config()->params);
 
-    quint32 uniq_index = (static_cast<quint32>(p.space) << 8) + static_cast<quint32>(p.level);
+    quint32 uniq_index = (static_cast<quint32>(p.room) << 8) + static_cast<quint32>(p.level);
 
     if(m_signals.contains(uniq_index))
       throw SvException(QString("Не уникальные значения параметров: '%1'")

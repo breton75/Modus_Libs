@@ -530,7 +530,7 @@ void opa::GenericThread::process_data()
         memcpy(&m_data.data[0], &p_buff.buf[0] + m_hsz + 2, m_data.data_length);  // данные
         memcpy(&m_data.crc, &p_buff.buf[0] + m_hsz + m_header.byte_count, 2);     // crc полученная
 
-        quint16 calc_crc = CRC::MODBUS_CRC16(&p_buff.buf[0], m_hsz + m_header.byte_count); // вычисляем crc из данных
+        quint16 calc_crc = CRC::MODBUS_CRC16((const quint8*)&p_buff.buf[0], m_hsz + m_header.byte_count); // вычисляем crc из данных
 
         if(calc_crc != m_data.crc) {
 
@@ -617,7 +617,7 @@ quint16 opa::GenericThread::parse_data(ad::BUFF* buff, opa::DATA* data, opa::Hea
   memcpy(&data->crc, &buff->buf[0] + hSize + header->byte_count, 2);
 
   // вычисляем crc из данных
-  quint16 crc = CRC::MODBUS_CRC16(&buff->buf[0], hSize + header->byte_count);
+  quint16 crc = CRC::MODBUS_CRC16((const quint8*)&buff->buf[0], hSize + header->byte_count);
 
   return crc;
 
