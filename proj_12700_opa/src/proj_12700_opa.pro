@@ -10,7 +10,7 @@ QT       -= gui
 
 CONFIG += c++11 plugin
 
-TARGET = /home/user/Modus/lib/proj_12700_opa
+TARGET = /home/user/Modus/lib/proj_12700_opa_aggregate
 TEMPLATE = lib
 
 DEFINES += PROJ_12700_OPA_LIBRARY

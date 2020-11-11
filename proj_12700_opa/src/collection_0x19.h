@@ -71,7 +71,7 @@ namespace opa {
                                  "восьмеричном или десятичном формате в диапазоне [0..7] в кавычках: \"0x07\" | \"07\" | \"7\""));
       }
       else
-        throw SvException(QString(E_NO_PARAM).arg(P));
+        p.bit = 0; // throw SvException(QString(E_NO_PARAM).arg(P));
 
 
       return p;

@@ -52,10 +52,10 @@ void opa::Type0x03::updateSignals(const opa::DATA* data)
 
     else {
 
-      foreach (quint32 index, m_signals.keys()) {
+      foreach (quint32 uniq_index, m_signals.keys()) {
 
-        if((index >> 8) == space)
-          m_signals.value(index)->setValue(0);
+        if((uniq_index >> 8) == space)
+          m_signals.value(uniq_index)->setValue(0);
 
       }
     }

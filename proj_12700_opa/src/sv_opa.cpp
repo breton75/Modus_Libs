@@ -525,10 +525,10 @@ void opa::GenericThread::process_data()
         line_status_signals.updateSignals();
 
         // парсим и проверяем crc
-        memcpy(&m_data.data_type, &p_buff.buf[0] + m_hsz, 1);                     // тип данных
-        memcpy(&m_data.data_length, &p_buff.buf[0] + m_hsz + 1, 1);               // длина данных
-        memcpy(&m_data.data[0], &p_buff.buf[0] + m_hsz + 2, m_data.data_length);  // данные
-        memcpy(&m_data.crc, &p_buff.buf[0] + m_hsz + m_header.byte_count, 2);     // crc полученная
+        memcpy(&m_data.data_type,   &p_buff.buf[0] + m_hsz, 1);                       // тип данных
+        memcpy(&m_data.data_length, &p_buff.buf[0] + m_hsz + 1, 1);                   // длина данных
+        memcpy(&m_data.data[0],     &p_buff.buf[0] + m_hsz + 2, m_data.data_length);  // данные
+        memcpy(&m_data.crc,         &p_buff.buf[0] + m_hsz + m_header.byte_count, 2); // crc полученная
 
         quint16 calc_crc = CRC::MODBUS_CRC16((const quint8*)&p_buff.buf[0], m_hsz + m_header.byte_count); // вычисляем crc из данных
 
