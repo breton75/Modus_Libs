@@ -30,14 +30,15 @@ HEADERS += sv_opa.h \
     ../../../Modus/global/sv_signal.h \
     opa_defs.h \
     device_params.h \
-    ifc_udp_params.h \
-    ifc_serial_params.h \
     collection_status.h \
     collection_0x02.h \
     collection_0x03.h \
     collection_0x04.h \
     collection_0x19.h \
-    collection_0x33.h
+    collection_0x33.h \
+    ../../../Modus/global/device_config.h \
+    ../../../Modus/global/ifc_udp_params.h \
+    ../../../Modus/global/ifc_serial_params.h
 
 unix {
     target.path = /usr/lib
