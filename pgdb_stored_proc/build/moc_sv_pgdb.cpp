@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'sv_pgdb.h'
 **
-** Created by: The Qt Meta Object Compiler version 67 (Qt 5.5.1)
+** Created by: The Qt Meta Object Compiler version 67 (Qt 5.9.9)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
@@ -12,12 +12,14 @@
 #if !defined(Q_MOC_OUTPUT_REVISION)
 #error "The header file 'sv_pgdb.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 67
-#error "This file was generated using the moc from 5.5.1. It"
+#error "This file was generated using the moc from 5.9.9. It"
 #error "cannot be used with the include files from this version of Qt."
 #error "(The moc has changed too much.)"
 #endif
 
 QT_BEGIN_MOC_NAMESPACE
+QT_WARNING_PUSH
+QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_SvPGDB_t {
     QByteArrayData data[15];
     char stringdata0[132];
@@ -96,21 +98,21 @@ void SvPGDB::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void
         Q_UNUSED(_t)
         switch (_id) {
         case 0: { QSqlError _r = _t->execSQL((*reinterpret_cast< QString(*)>(_a[1])));
-            if (_a[0]) *reinterpret_cast< QSqlError*>(_a[0]) = _r; }  break;
+            if (_a[0]) *reinterpret_cast< QSqlError*>(_a[0]) = std::move(_r); }  break;
         case 1: { QSqlError _r = _t->execSQL((*reinterpret_cast< QString(*)>(_a[1])),(*reinterpret_cast< QByteArray*(*)>(_a[2])),(*reinterpret_cast< QByteArray*(*)>(_a[3])),(*reinterpret_cast< QByteArray*(*)>(_a[4])),(*reinterpret_cast< QSqlQuery*(*)>(_a[5])));
-            if (_a[0]) *reinterpret_cast< QSqlError*>(_a[0]) = _r; }  break;
+            if (_a[0]) *reinterpret_cast< QSqlError*>(_a[0]) = std::move(_r); }  break;
         case 2: { QSqlError _r = _t->execSQL((*reinterpret_cast< QString(*)>(_a[1])),(*reinterpret_cast< QByteArray*(*)>(_a[2])),(*reinterpret_cast< QByteArray*(*)>(_a[3])),(*reinterpret_cast< QByteArray*(*)>(_a[4])));
-            if (_a[0]) *reinterpret_cast< QSqlError*>(_a[0]) = _r; }  break;
+            if (_a[0]) *reinterpret_cast< QSqlError*>(_a[0]) = std::move(_r); }  break;
         case 3: { QSqlError _r = _t->execSQL((*reinterpret_cast< QString(*)>(_a[1])),(*reinterpret_cast< QByteArray*(*)>(_a[2])),(*reinterpret_cast< QByteArray*(*)>(_a[3])));
-            if (_a[0]) *reinterpret_cast< QSqlError*>(_a[0]) = _r; }  break;
+            if (_a[0]) *reinterpret_cast< QSqlError*>(_a[0]) = std::move(_r); }  break;
         case 4: { QSqlError _r = _t->execSQL((*reinterpret_cast< QString(*)>(_a[1])),(*reinterpret_cast< QByteArray*(*)>(_a[2])));
-            if (_a[0]) *reinterpret_cast< QSqlError*>(_a[0]) = _r; }  break;
+            if (_a[0]) *reinterpret_cast< QSqlError*>(_a[0]) = std::move(_r); }  break;
         case 5: { QSqlError _r = _t->execSQL((*reinterpret_cast< QString(*)>(_a[1])),(*reinterpret_cast< QSqlQuery*(*)>(_a[2])));
-            if (_a[0]) *reinterpret_cast< QSqlError*>(_a[0]) = _r; }  break;
+            if (_a[0]) *reinterpret_cast< QSqlError*>(_a[0]) = std::move(_r); }  break;
         case 6: { QSqlError _r = _t->execSQL((*reinterpret_cast< QString(*)>(_a[1])),(*reinterpret_cast< QSqlQueryModel*(*)>(_a[2])));
-            if (_a[0]) *reinterpret_cast< QSqlError*>(_a[0]) = _r; }  break;
+            if (_a[0]) *reinterpret_cast< QSqlError*>(_a[0]) = std::move(_r); }  break;
         case 7: { bool _r = _t->checkTableExists((*reinterpret_cast< QString(*)>(_a[1])));
-            if (_a[0]) *reinterpret_cast< bool*>(_a[0]) = _r; }  break;
+            if (_a[0]) *reinterpret_cast< bool*>(_a[0]) = std::move(_r); }  break;
         default: ;
         }
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
@@ -129,7 +131,7 @@ void SvPGDB::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void
 
 const QMetaObject SvPGDB::staticMetaObject = {
     { &QObject::staticMetaObject, qt_meta_stringdata_SvPGDB.data,
-      qt_meta_data_SvPGDB,  qt_static_metacall, Q_NULLPTR, Q_NULLPTR}
+      qt_meta_data_SvPGDB,  qt_static_metacall, nullptr, nullptr}
 };
 
 
@@ -140,9 +142,9 @@ const QMetaObject *SvPGDB::metaObject() const
 
 void *SvPGDB::qt_metacast(const char *_clname)
 {
-    if (!_clname) return Q_NULLPTR;
+    if (!_clname) return nullptr;
     if (!strcmp(_clname, qt_meta_stringdata_SvPGDB.stringdata0))
-        return static_cast<void*>(const_cast< SvPGDB*>(this));
+        return static_cast<void*>(this);
     return QObject::qt_metacast(_clname);
 }
 
@@ -162,4 +164,5 @@ int SvPGDB::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     }
     return _id;
 }
+QT_WARNING_POP
 QT_END_MOC_NAMESPACE
