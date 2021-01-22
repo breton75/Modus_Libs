@@ -67,7 +67,7 @@ protected:
   void disposeSignal (modus::SvSignal* signal);
 
   bool parse_input_data();
-  bool form_output_data();
+  bool form_signal_data();
 
 private:
   opa::DeviceParams m_dev_params;

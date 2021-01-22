@@ -69,6 +69,7 @@ bool opa::SvOPA::parse_input_data()
 
     if((m_header.client_addr != 1) || (m_header.func_code != 0x10)) {
 
+      p_input_buffer->reset();
       return parsed;
     }
 
@@ -79,11 +80,11 @@ bool opa::SvOPA::parse_input_data()
         if((current_register < m_dev_params.start_register) ||
            (current_register > m_dev_params.last_register))
         {
-           return parsed;
+          p_input_buffer->reset();
+          return parsed;
         }
 
-qDebug() << 333;
-        emit message(QString(QByteArray((const char*)&p_input_buffer->buf[0], p_input_buffer->offset).toHex()));
+        emit message(QString(">> %1").arg(QString(QByteArray((const char*)&p_input_buffer->buf[0], p_input_buffer->offset).toHex())));
 
         // если хоть какие то пакеты сыпятся (для данного получателя), то
         // считаем, что линия передачи в порядке и задаем новую контрольную точку времени
@@ -103,8 +104,14 @@ qDebug() << 333;
         if(calc_crc != m_data.crc) {
 
           // если crc не совпадает, то выходим без обработки и ответа
-          emit message(QString("Ошибка crc! Ожидалось %1, получено %2").arg(calc_crc, 0, 16).arg(m_data.crc, 0, 16),
+          emit message(QString("Ошибка crc! Ожидалось %1%2, получено %3%4")
+                       .arg(quint8(calc_crc), 2, 16, QChar('0'))
+                       .arg(quint8(calc_crc >> 8), 2, 16, QChar('0'))
+                       .arg(quint8(m_data.crc), 2, 16, QChar('0'))
+                       .arg(quint8(m_data.crc >> 8), 2, 16, QChar('0')),
                        sv::log::llError, sv::log::mtError);
+
+          p_input_buffer->reset();
 
           return parsed;
 
@@ -159,7 +166,7 @@ qDebug() << 333;
 
 }
 
-bool opa::SvOPA::form_output_data()
+bool opa::SvOPA::form_signal_data()
 {
   return true;
 }
@@ -174,10 +181,9 @@ void opa::SvOPA::confirmation()
   confirm.append(quint8(crc & 0xFF));
   confirm.append(quint8(crc >> 8));
 
-  memcpy(p_output_buffer, confirm.data(), confirm.length());
+  QMutexLocker(&p_output_buffer->mutex);
+  memcpy(&p_output_buffer->buf[0], confirm.data(), confirm.length());
   p_output_buffer->offset = confirm.length();
-
-//  emit outputBufferReady();
 
 }
 
