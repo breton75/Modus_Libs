@@ -83,7 +83,7 @@ void websrv::SvWebServer::qt_static_metacall(QObject *_o, QMetaObject::Call _c, 
 }
 
 const QMetaObject websrv::SvWebServer::staticMetaObject = {
-    { &wd::SvAbstractServer::staticMetaObject, qt_meta_stringdata_websrv__SvWebServer.data,
+    { &modus::SvAbstractInteract::staticMetaObject, qt_meta_stringdata_websrv__SvWebServer.data,
       qt_meta_data_websrv__SvWebServer,  qt_static_metacall, Q_NULLPTR, Q_NULLPTR}
 };
 
@@ -98,12 +98,12 @@ void *websrv::SvWebServer::qt_metacast(const char *_clname)
     if (!_clname) return Q_NULLPTR;
     if (!strcmp(_clname, qt_meta_stringdata_websrv__SvWebServer.stringdata0))
         return static_cast<void*>(const_cast< SvWebServer*>(this));
-    return wd::SvAbstractServer::qt_metacast(_clname);
+    return modus::SvAbstractInteract::qt_metacast(_clname);
 }
 
 int websrv::SvWebServer::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
-    _id = wd::SvAbstractServer::qt_metacall(_c, _id, _a);
+    _id = modus::SvAbstractInteract::qt_metacall(_c, _id, _a);
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {

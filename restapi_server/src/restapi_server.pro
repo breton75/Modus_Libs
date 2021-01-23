@@ -9,7 +9,7 @@ QT       -= gui
 
 CONFIG += c++11 plugin
 
-TARGET = /home/developer/Modus/lib/restapi_server
+TARGET = /home/user/Modus/lib/restapi_server
 TEMPLATE = lib
 
 DEFINES += INTERACT_LIBRARY

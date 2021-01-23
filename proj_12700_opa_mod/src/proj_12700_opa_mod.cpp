@@ -32,18 +32,18 @@ void opa::SvOPA::disposeSignal (modus::SvSignal* signal)
 {
   try {
 
-    QString tag = signal->config()->type.toLower();
+    QString type = signal->config()->type.toLower();
 
-    if(tag == "status")
+    if(type == "status")
       line_status_signals.addSignal(signal);
 
     else {
 
       bool ok;
-      int itag = tag.toInt(&ok, 0);
+      int itype = type.toInt(&ok, 0);
 
-      if(ok && signal_collections.contains(itag))
-        signal_collections.value(itag)->addSignal(signal);
+      if(ok && signal_collections.contains(itype))
+        signal_collections.value(itype)->addSignal(signal);
 
       else {
 
@@ -59,7 +59,7 @@ void opa::SvOPA::disposeSignal (modus::SvSignal* signal)
   }
 }
 
-bool opa::SvOPA::parse_input_data()
+bool opa::SvOPA::processInputBuffer()
 {
   bool parsed = false;
 
@@ -166,7 +166,7 @@ bool opa::SvOPA::parse_input_data()
 
 }
 
-bool opa::SvOPA::form_signal_data()
+bool opa::SvOPA::processSignalBuffer()
 {
   return true;
 }

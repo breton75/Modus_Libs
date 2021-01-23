@@ -15,13 +15,13 @@ TEMPLATE = lib
 DEFINES += WEBSERVER_LIBRARY
 
 SOURCES += sv_web_server.cpp \
-    ../../../Modus/global/sv_signal.cpp
+    ../../../Modus/global/signal/sv_signal.cpp
 
 HEADERS += sv_web_server.h\
         webserver_global.h \
     params.h \
-    ../../../Modus/global/sv_abstract_server.h \
-    ../../../Modus/global/sv_signal.h
+    ../../../Modus/global/interact/sv_abstract_interact.h \
+    ../../../Modus/global/signal/sv_signal.h
 
 unix {
     target.path = /usr/lib

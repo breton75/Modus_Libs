@@ -21,14 +21,15 @@
 
 #include "webserver_global.h"
 
-#include "../../../Modus/global/sv_abstract_server.h"
+#include "../../../Modus/global/interact/sv_abstract_interact.h"
+#include "../../../Modus/global/signal/sv_signal.h"
 
 #include "params.h"
 
 
 extern "C" {
 
-    WEBSERVER_SHARED_EXPORT wd::SvAbstractServer* create();
+    WEBSERVER_SHARED_EXPORT modus::SvAbstractInteract* create();
 
 //    VIRTUAL_DEVICESHARED_EXPORT QString defaultDeviceParams();
 //    VIRTUAL_DEVICESHARED_EXPORT QString defaultIfcParams(const QString& ifc);
@@ -58,30 +59,27 @@ namespace websrv {
                                                      };
 
   class SvWebServer;
-//  class SvWebTcpServer;
-//  class SvWebServerThread;
 
 }
 
-class websrv::SvWebServer: public wd::SvAbstractServer
+class websrv::SvWebServer: public modus::SvAbstractInteract
 {
   Q_OBJECT
 
 public:
-  explicit SvWebServer(sv::SvAbstractLogger* logger = nullptr);
+  explicit SvWebServer();
   ~SvWebServer();
 
-  bool configure(const wd::ServerConfig& config);
-
-  bool init();
+  bool init(modus::InteractConfig* config);
 
   void start();
   void stop();
 
-  void addSignal(SvSignal* signal)  throw (SvException) Q_DECL_OVERRIDE;
+  void addSignal(modus::SvSignal* signal) throw (SvException);
+  void bindSignalList(QList<modus::SvSignal*>* signalList)  throw (SvException) Q_DECL_OVERRIDE;
 
-  const QMap<int, SvSignal*>*      signalsById()   const { return &m_signals_by_id;   }
-  const QHash<QString, SvSignal*>* signalsByName() const { return &m_signals_by_name; }
+  const QMap<int, modus::SvSignal*>*      signalsById()   const { return &m_signals_by_id;   }
+  const QHash<QString, modus::SvSignal*>* signalsByName() const { return &m_signals_by_name; }
 
 private:
 //  websrv::SvWebTcpServer m_server;
@@ -90,14 +88,15 @@ private:
 
   websrv::Params m_params;
 
-  sv::SvAbstractLogger* m_logger;
+  sv::SvAbstractLogger* m_logger = nullptr;
 
-  QMap<int, SvSignal*>      m_signals_by_id;//   = QMap<int, SvSignal*>();
-  QHash<QString, SvSignal*> m_signals_by_name;// = QHash<QString, SvSignal*>();
+  QMap<int, modus::SvSignal*>      m_signals_by_id;//   = QMap<int, SvSignal*>();
+  QHash<QString, modus::SvSignal*> m_signals_by_name;// = QHash<QString, SvSignal*>();
 
   QByteArray reply_GET(QList<QByteArray> &parts);
   QByteArray reply_POST(QList<QByteArray> &parts);
 
+  void run() {}
 //public slots:
 //  void threadFinished();
 

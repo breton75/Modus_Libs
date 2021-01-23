@@ -3,11 +3,8 @@
 
 pgsp::pgStoredProcStorage::pgStoredProcStorage()
 {
-  p_signals->clear();
-
   m_reconnect_timer = new QTimer();
   m_reconnect_timer->setInterval(1000);
-
 }
 
 pgsp::pgStoredProcStorage::~pgStoredProcStorage()
@@ -244,6 +241,7 @@ void pgsp::pgStoredProcStorage::run()
 /** ********** EXPORT ************ **/
 modus::SvAbstractStorage* create()
 {
-  return new pgsp::pgStoredProcStorage();
+  modus::SvAbstractStorage* storage = new pgsp::pgStoredProcStorage();
+  return storage;
 }
 

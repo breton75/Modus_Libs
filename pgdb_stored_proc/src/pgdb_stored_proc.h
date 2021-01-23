@@ -48,7 +48,6 @@ public:
 
   bool init(modus::StorageConfig* config) Q_DECL_OVERRIDE;
 
-//  void start() Q_DECL_OVERRIDE;
   void stop()  Q_DECL_OVERRIDE;
 
 private:
@@ -62,7 +61,6 @@ private:
   bool connect();
   void run() override;
 
-
 private slots:
   void reconnect();
   void start_reconnect_timer();
@@ -75,32 +73,6 @@ private slots:
   void logreconnect();
 
 };
-
-
-//class pgsp::pgStoredProcThread: public as::SvAbstractStorageThread
-//{
-//    Q_OBJECT
-
-//public:
-//  pgStoredProcThread(as::SvAbstractStorage* storage);
-//  ~pgStoredProcThread();
-
-//  bool init();
-
-//  void run() Q_DECL_OVERRIDE;
-//  void stop();
-
-//private:
-
-//  pgsp::StorageParams m_params;
-
-//  SvPGDB* PGDB = nullptr;
-
-//signals:
-//  void connected();
-
-//};
-
 
 
 #endif // SV_PGDB_TANKER_STORAGE_H

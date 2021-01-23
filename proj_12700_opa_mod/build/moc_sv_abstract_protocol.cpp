@@ -20,7 +20,7 @@
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_modus__SvAbstractProtocol_t {
     QByteArrayData data[11];
-    char stringdata0[96];
+    char stringdata0[103];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -37,14 +37,14 @@ QT_MOC_LITERAL(4, 53, 3), // "msg"
 QT_MOC_LITERAL(5, 57, 5), // "level"
 QT_MOC_LITERAL(6, 63, 4), // "type"
 QT_MOC_LITERAL(7, 68, 5), // "queue"
-QT_MOC_LITERAL(8, 74, 9), // "SvSignal*"
-QT_MOC_LITERAL(9, 84, 6), // "signal"
-QT_MOC_LITERAL(10, 91, 4) // "stop"
+QT_MOC_LITERAL(8, 74, 16), // "modus::SvSignal*"
+QT_MOC_LITERAL(9, 91, 6), // "signal"
+QT_MOC_LITERAL(10, 98, 4) // "stop"
 
     },
     "modus::SvAbstractProtocol\0affirmDeviceAlive\0"
-    "\0message\0msg\0level\0type\0queue\0SvSignal*\0"
-    "signal\0stop"
+    "\0message\0msg\0level\0type\0queue\0"
+    "modus::SvSignal*\0signal\0stop"
 };
 #undef QT_MOC_LITERAL
 
@@ -94,7 +94,7 @@ void modus::SvAbstractProtocol::qt_static_metacall(QObject *_o, QMetaObject::Cal
         case 1: _t->message((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2])),(*reinterpret_cast< int(*)>(_a[3]))); break;
         case 2: _t->message((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
         case 3: _t->message((*reinterpret_cast< const QString(*)>(_a[1]))); break;
-        case 4: _t->queue((*reinterpret_cast< SvSignal*(*)>(_a[1]))); break;
+        case 4: _t->queue((*reinterpret_cast< modus::SvSignal*(*)>(_a[1]))); break;
         case 5: _t->stop(); break;
         default: ;
         }
@@ -105,7 +105,7 @@ void modus::SvAbstractProtocol::qt_static_metacall(QObject *_o, QMetaObject::Cal
             switch (*reinterpret_cast<int*>(_a[1])) {
             default: *reinterpret_cast<int*>(_a[0]) = -1; break;
             case 0:
-                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< SvSignal* >(); break;
+                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< modus::SvSignal* >(); break;
             }
             break;
         }

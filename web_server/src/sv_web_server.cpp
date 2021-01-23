@@ -5,8 +5,7 @@ using namespace sv::log;
 
 /** ********** SvWebServer ************ **/
 
-websrv::SvWebServer::SvWebServer(sv::SvAbstractLogger* logger):
-  wd::SvAbstractServer(logger),
+websrv::SvWebServer::SvWebServer():
   m_web_server(new QTcpServer(this))
 {
 
@@ -17,13 +16,22 @@ websrv::SvWebServer::~SvWebServer()
 
 }
 
-bool websrv::SvWebServer::configure(const wd::ServerConfig& config)
+bool websrv::SvWebServer::init(modus::InteractConfig *config)
 {
   p_config = config;
 
   try
   {
-    m_params = websrv::Params::fromJsonString(p_config.params);
+    p_config = config;
+    m_params = websrv::Params::fromJsonString(p_config->params);
+
+    if (!m_web_server->listen(QHostAddress::Any, m_params.port))
+    {
+      p_last_error = QString("Ошибка запуска сервера %1: %2").arg(p_config->name).arg(m_web_server->errorString());
+
+      return false;
+
+    };
 
     return true;
 
@@ -36,7 +44,25 @@ bool websrv::SvWebServer::configure(const wd::ServerConfig& config)
   }
 }
 
-void websrv::SvWebServer::addSignal(SvSignal* signal) throw (SvException)
+void websrv::SvWebServer::bindSignalList(QList<modus::SvSignal*>* signalList)  throw (SvException)
+{
+  modus::SvAbstractInteract::bindSignalList(signalList);
+
+  try {
+
+    foreach (modus::SvSignal* signal, *p_signals) {
+
+      addSignal(signal);
+    }
+  }
+  catch(SvException e) {
+
+    throw e;
+  }
+
+}
+
+void websrv::SvWebServer::addSignal(modus::SvSignal* signal) throw (SvException)
 {
   if(m_signals_by_id.contains(signal->config()->id))
     throw SvException(QString("Повторяющееся id сигнала: %1").arg(signal->config()->id));
@@ -46,24 +72,6 @@ void websrv::SvWebServer::addSignal(SvSignal* signal) throw (SvException)
 
   m_signals_by_id.insert(signal->config()->id, signal);
   m_signals_by_name.insert(signal->config()->name, signal);
-
-  wd::SvAbstractServer::addSignal(signal);
-
-}
-
-bool websrv::SvWebServer::init()
-{
-//  m_web_server->setSslConfiguration(QTcpSocketServer::NonSecureMode);
-
-  if (!m_web_server->listen(QHostAddress::Any, m_params.port))
-  {
-    p_last_error = QString("Ошибка запуска сервера %1: %2").arg(p_config.name).arg(m_web_server->errorString());
-
-    return false;
-
-  };
-
-  return true;
 
 }
 
@@ -338,8 +346,8 @@ QByteArray websrv::SvWebServer::reply_POST(QList<QByteArray> &parts)
 
 
 /** ********** EXPORT ************ **/
-wd::SvAbstractServer* create()
+modus::SvAbstractInteract* create()
 {
-//  wd::SvAbstractServer* server = ;
-  return new websrv::SvWebServer();
+  modus::SvAbstractInteract* server = new websrv::SvWebServer();
+  return server;
 }
