@@ -16,7 +16,7 @@ bool opa::SvOPA::configure(const modus::DeviceConfig &cfg)
 
     p_config = cfg;
 
-    m_dev_params = opa::DeviceParams::fromJson(p_config.dev_params);
+    m_dev_params = opa::DeviceParams::fromJson(p_config.protocol);
 
     return true;
 
