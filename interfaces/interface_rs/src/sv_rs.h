@@ -12,10 +12,9 @@ extern "C" {
 
     IFC_RS_EXPORT modus::SvAbstractInterface* create();
 
-//    VIRTUAL_DEVICESHARED_EXPORT QString defaultDeviceParams();
-//    VIRTUAL_DEVICESHARED_EXPORT QString defaultIfcParams(const QString& ifc);
-//    VIRTUAL_DEVICESHARED_EXPORT QList<QString> availableInterfaces();
-
+    IFC_RS_EXPORT const char* getDefaultParams();
+    IFC_RS_EXPORT const char* getName();
+    IFC_RS_EXPORT const char* getDescription();
 }
 
 class SvRS: public modus::SvAbstractInterface

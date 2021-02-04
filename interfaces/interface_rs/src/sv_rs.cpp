@@ -88,3 +88,18 @@ modus::SvAbstractInterface* create()
   modus::SvAbstractInterface* device = new SvRS();
   return device;
 }
+
+const char* getDefaultParams()
+{
+  return "{ \"portname\": \"ttyS6\", \"baudrate\": 19200, \"databits\": 8, \"parity\": 0, \"stopbits\": 2, \"flowcontrol\": 0 }";
+}
+
+const char* getName()
+{
+  return "Драйвер для работы с COM портами";
+}
+
+const char* getDescription()
+{
+  return "Драйвер для работы с COM портами";
+}

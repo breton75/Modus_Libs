@@ -19,8 +19,8 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-#include "../../../svlib/sv_exception.h"
-#include "../../global_defs.h"
+#include "../../../../Modus/global/misc/sv_exception.h"
+#include "../../../../Modus/global/global_defs.h"
 
 // имена параметров для RS
 #define P_SERIAL_BAUDRATE "baudrate"
@@ -70,7 +70,7 @@ struct SerialParams {
 
   bool isValid = true;
 
-  static SerialParams fromJsonString(const QString& json_string) throw (SvException)
+  static SerialParams fromJsonString(const QString& json_string) //throw (SvException)
   {
     QJsonParseError err;
     QJsonDocument jd = QJsonDocument::fromJson(json_string.toUtf8(), &err);
@@ -81,12 +81,12 @@ struct SerialParams {
     try {
       return fromJsonObject(jd.object());
     }
-    catch(SvException e) {
+    catch(SvException& e) {
       throw e;
     }
   }
 
-  static SerialParams fromJsonObject(const QJsonObject &object) throw (SvException)
+  static SerialParams fromJsonObject(const QJsonObject &object) //throw (SvException)
   {
     SerialParams p;
     QString P;

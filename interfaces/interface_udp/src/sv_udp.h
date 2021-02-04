@@ -1,5 +1,5 @@
-#ifndef SVUDP_H
-#define SVUDP_H
+#ifndef SV_UDP_H
+#define SV_UDP_H
 
 #include <QUdpSocket>
 
@@ -13,10 +13,9 @@ extern "C" {
 
     IFC_UDP_EXPORT modus::SvAbstractInterface* create();
 
-//    VIRTUAL_DEVICESHARED_EXPORT QString defaultDeviceParams();
-//    VIRTUAL_DEVICESHARED_EXPORT QString defaultIfcParams(const QString& ifc);
-//    VIRTUAL_DEVICESHARED_EXPORT QList<QString> availableInterfaces();
-
+    IFC_UDP_EXPORT const char* getDefaultParams();
+    IFC_UDP_EXPORT const char* getName();
+    IFC_UDP_EXPORT const char* getDescription();
 }
 
 class SvUdp: public modus::SvAbstractInterface
@@ -37,4 +36,4 @@ private:
 
 };
 
-#endif // SVUDP_H
+#endif // SV_UDP_H

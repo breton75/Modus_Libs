@@ -90,3 +90,18 @@ modus::SvAbstractInterface* create()
   modus::SvAbstractInterface* device = new SvUdp();
   return device;
 }
+
+const char* getDefaultParams()
+{
+  return "{ \"host\": \"172.16.4.11\", \"recv_port\": 6001, \"send_port\": 5001 }";
+}
+
+const char* getName()
+{
+  return "Драйвер для работы с UDP";
+}
+
+const char* getDescription()
+{
+  return "Драйвер для работы с UDP";
+}
