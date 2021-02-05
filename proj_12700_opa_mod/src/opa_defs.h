@@ -4,7 +4,7 @@
 #include <QMap>
 
 #include "../../../Modus/global/signal/sv_signal.h"
-#include "../../../Modus/global/device/sv_abstract_protocol.h"
+#include "../../../Modus/global/device/protocol/sv_abstract_protocol.h"
 #include "../../../Modus/global/global_defs.h"
 #include "../../../Modus/global/device/device_defs.h"
 

@@ -10,13 +10,14 @@ opa::SvOPA::SvOPA():
   signal_collections.insert(TYPE_0x19, &type0x19_signals);
 }
 
-bool opa::SvOPA::configure(const modus::DeviceConfig &cfg)
+bool opa::SvOPA::configure(modus::DeviceConfig *config, modus::IOBuffer *iobuffer)
 {
   try {
 
-    p_config = cfg;
+    p_config = config;
+    p_io_buffer = iobuffer;
 
-    m_dev_params = opa::DeviceParams::fromJson(p_config.protocol);
+    m_params = opa::DeviceParams::fromJson(p_config->protocol.params);
 
     return true;
 
@@ -28,7 +29,7 @@ bool opa::SvOPA::configure(const modus::DeviceConfig &cfg)
   }
 }
 
-void opa::SvOPA::disposeSignal (modus::SvSignal* signal)
+void opa::SvOPA::disposeInputSignal (modus::SvSignal* signal)
 {
   try {
 
@@ -59,116 +60,132 @@ void opa::SvOPA::disposeSignal (modus::SvSignal* signal)
   }
 }
 
-bool opa::SvOPA::processInputBuffer()
+void opa::SvOPA::disposeOutputSignal (modus::SvSignal* signal)
 {
-  bool parsed = false;
-
-  if(p_input_buffer->offset >= m_hsz) {
-
-    memcpy(&m_header, &p_input_buffer->buf[0], m_hsz);
-
-    if((m_header.client_addr != 1) || (m_header.func_code != 0x10)) {
-
-      p_input_buffer->reset();
-      return parsed;
-    }
-
-    if(p_input_buffer->offset >= m_hsz + m_header.byte_count + 2) {
-
-        quint16 current_register = (static_cast<quint16>(m_header.ADDRESS << 8)) + m_header.OFFSET;
-
-        if((current_register < m_dev_params.start_register) ||
-           (current_register > m_dev_params.last_register))
-        {
-          p_input_buffer->reset();
-          return parsed;
-        }
-
-        emit message(QString(">> %1").arg(QString(QByteArray((const char*)&p_input_buffer->buf[0], p_input_buffer->offset).toHex())));
-
-        // если хоть какие то пакеты сыпятся (для данного получателя), то
-        // считаем, что линия передачи в порядке и задаем новую контрольную точку времени
-//        p_device->setNewLostEpoch();
-
-        // ставим состояние данной линии
-        line_status_signals.updateSignals();
-
-        // парсим и проверяем crc
-        memcpy(&m_data.data_type,   &p_input_buffer->buf[0] + m_hsz, 1);                       // тип данных
-        memcpy(&m_data.data_length, &p_input_buffer->buf[0] + m_hsz + 1, 1);                   // длина данных
-        memcpy(&m_data.data[0],     &p_input_buffer->buf[0] + m_hsz + 2, m_data.data_length);  // данные
-        memcpy(&m_data.crc,         &p_input_buffer->buf[0] + m_hsz + m_header.byte_count, 2); // crc полученная
-
-        quint16 calc_crc = CRC::MODBUS_CRC16((const quint8*)&p_input_buffer->buf[0], m_hsz + m_header.byte_count); // вычисляем crc из данных
-
-        if(calc_crc != m_data.crc) {
-
-          // если crc не совпадает, то выходим без обработки и ответа
-          emit message(QString("Ошибка crc! Ожидалось %1%2, получено %3%4")
-                       .arg(quint8(calc_crc), 2, 16, QChar('0'))
-                       .arg(quint8(calc_crc >> 8), 2, 16, QChar('0'))
-                       .arg(quint8(m_data.crc), 2, 16, QChar('0'))
-                       .arg(quint8(m_data.crc >> 8), 2, 16, QChar('0')),
-                       sv::log::llError, sv::log::mtError);
-
-          p_input_buffer->reset();
-
-          return parsed;
-
-        }
-        else {
-
-           switch (current_register - m_dev_params.start_register)
-           {
-               case 0x00:
-               case 0x03:
-               case 0x05:
-
-                 // здесь просто отправляем ответ-квитирование
-                 confirmation();
-
-                 if(m_data.data_type == 0x77) {
-                   foreach (modus::SvSignal* signal, p_input_signals.values())
-                     signal->setValue(0);
-                 }
-
-                 parsed = true;
-
-                 break;
-
-               case 0x06:
-               case 0x10:
-               case 0x50:
-               case 0x90:
-               {
-                 // парсим и проверяем crc
-   //              quint16 calc_crc = parse_data(&p_buff, &m_data, &m_header);
-
-                  // формируем и отправляем ответ-квитирование
-                  confirmation();
-
-                  if(signal_collections.contains(m_data.data_type))
-                    signal_collections.value(m_data.data_type)->updateSignals(&m_data);
-
-                  parsed = true;
-
-                  break;
-               }
-
-               default:
-                   break;
-           }
-        }
-    }
-  }
-
-  return parsed;
 
 }
 
-bool opa::SvOPA::processSignalBuffer()
+void opa::SvOPA::validateSignals(QDateTime &lastParsedTime)
 {
-  return true;
+
+}
+
+void opa::SvOPA::run()
+{
+  p_is_active = bool(p_config) && bool(p_io_buffer);
+
+  while(p_is_active) {
+
+    p_io_buffer->confirm->mutex.lock();
+    p_io_buffer->input->mutex.lock();     // если нужен ответ квитирование
+
+    opa::PARSERESULT result = parse();
+
+    if(result.do_reset == DO_RESET)
+      p_io_buffer->input->reset();
+
+    p_io_buffer->input->mutex.unlock();     // если нужен ответ квитирование
+    p_io_buffer->confirm->mutex.unlock();
+
+    if(result.parse_time.isValid())
+      validateSignals(result.parse_time);
+
+  }
+}
+
+opa::PARSERESULT opa::SvOPA::parse()
+{
+  // проверяем, что длина данных в буфере не меньше длины звголовка
+  if(p_io_buffer->input->offset < m_hsz)
+    return opa::PARSERESULT(DO_NOT_RESET);
+
+  // разбираем заголовок. если адрес или код функции не тот, значит это чужой пакет
+  memcpy(&m_header, &p_io_buffer->input->data[0], m_hsz);
+  if((m_header.client_addr != 1) || (m_header.func_code != 0x10))
+    return opa::PARSERESULT(DO_RESET);
+
+  // проверяем, что длина данных в буфере не меньше длины всего отправленного пакета
+  if(p_io_buffer->input->offset < m_hsz + m_header.byte_count + 2)
+    return opa::PARSERESULT(DO_NOT_RESET);
+
+  // проверяем начальный и конечный адреса регистров. если не входит в заданный диапазон - чужой пакет
+  quint16 current_register = (static_cast<quint16>(m_header.ADDRESS << 8)) + m_header.OFFSET;
+
+  if((current_register < m_params.start_register) ||
+     (current_register > m_params.last_register))
+    return opa::PARSERESULT(DO_RESET);
+
+  /**
+  *  в этой точке в буфере должны находиться правильные данные
+  *  производим непосредственно разбор данных и назначаем значения сигналам
+  **/
+  emit message(QString(">> %1").arg(QString(QByteArray((const char*)&p_io_buffer->input->data[0], p_io_buffer->input->offset).toHex())));
+
+  // если хоть какие то пакеты сыпятся (для данного получателя), то
+  // считаем, что линия передачи в порядке и задаем новую контрольную точку времени
+//  p_device->setNewLostEpoch();
+
+  // ставим состояние данной линии
+  line_status_signals.updateSignals();
+
+  // парсим и проверяем crc
+  memcpy(&m_data.data_type,   &p_io_buffer->input->data[0] + m_hsz, 1);                       // тип данных
+  memcpy(&m_data.data_length, &p_io_buffer->input->data[0] + m_hsz + 1, 1);                   // длина данных
+  memcpy(&m_data.data[0],     &p_io_buffer->input->data[0] + m_hsz + 2, m_data.data_length);  // данные
+  memcpy(&m_data.crc,         &p_io_buffer->input->data[0] + m_hsz + m_header.byte_count, 2); // crc полученная
+
+  quint16 calc_crc = CRC::MODBUS_CRC16((const quint8*)&p_io_buffer->input->data[0], m_hsz + m_header.byte_count); // вычисляем crc из данных
+
+  if(calc_crc != m_data.crc) {
+
+    // если crc не совпадает, то выходим без обработки и ответа
+    emit message(QString("Ошибка crc! Ожидалось %1%2, получено %3%4")
+                 .arg(quint8(calc_crc), 2, 16, QChar('0'))
+                 .arg(quint8(calc_crc >> 8), 2, 16, QChar('0'))
+                 .arg(quint8(m_data.crc), 2, 16, QChar('0'))
+                 .arg(quint8(m_data.crc >> 8), 2, 16, QChar('0')),
+                 sv::log::llError, sv::log::mtError);
+
+    return opa::PARSERESULT(DO_RESET);
+  }
+
+  // если все корректно, то разбираем данные в зависимости от типа
+  switch (current_register - m_params.start_register)
+  {
+      case 0x00:
+      case 0x03:
+      case 0x05:
+
+        // здесь просто отправляем ответ-квитирование
+        confirmation();
+
+        if(m_data.data_type == 0x77) {
+
+          for (modus::SvSignal* signal: p_input_signals)
+            signal->setValue(0);
+        }
+
+        break;
+
+      case 0x06:
+      case 0x10:
+      case 0x50:
+      case 0x90:
+      {
+         // формируем и отправляем ответ-квитирование
+         confirmation();
+
+         if(signal_collections.contains(m_data.data_type))
+           signal_collections.value(m_data.data_type)->updateSignals(&m_data);
+
+         break;
+      }
+
+      default:
+          break;
+  }
+
+  return opa::PARSERESULT(DO_RESET, QDateTime::currentDateTime());
 }
 
 void opa::SvOPA::confirmation()
@@ -181,9 +198,8 @@ void opa::SvOPA::confirmation()
   confirm.append(quint8(crc & 0xFF));
   confirm.append(quint8(crc >> 8));
 
-  QMutexLocker(&p_output_buffer->mutex);
-  memcpy(&p_output_buffer->buf[0], confirm.data(), confirm.length());
-  p_output_buffer->offset = confirm.length();
+  memcpy(&p_io_buffer->confirm->data[0], confirm.data(), confirm.length());
+  p_io_buffer->confirm->offset = confirm.length();
 
 }
 

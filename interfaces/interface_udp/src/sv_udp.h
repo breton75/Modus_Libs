@@ -23,7 +23,7 @@ class SvUdp: public modus::SvAbstractInterface
 public:
   SvUdp();
 
-  virtual bool configure(const modus::DeviceConfig& config) override;
+  virtual bool configure(modus::DeviceConfig* config, modus::IOBuffer*iobuffer) override;
 
 protected:
   virtual void run() override;

@@ -56,14 +56,15 @@ SOURCES       = ../../proj_12700_opa_mod/src/collection_0x02.cpp \
 		../../proj_12700_opa_mod/src/collection_0x19.cpp \
 		../../proj_12700_opa_mod/src/collection_0x33.cpp \
 		../../proj_12700_opa_mod/src/collection_status.cpp \
-		../../proj_12700_opa_mod/src/proj_12700_opa_mod.cpp moc_sv_abstract_protocol.cpp \
-		moc_collection_0x02.cpp \
+		../../proj_12700_opa_mod/src/proj_12700_opa_mod.cpp \
+		../../../Modus/global/signal/sv_signal.cpp moc_collection_0x02.cpp \
 		moc_collection_0x03.cpp \
 		moc_collection_0x04.cpp \
 		moc_collection_0x19.cpp \
 		moc_collection_0x33.cpp \
 		moc_collection_status.cpp \
-		moc_opa_defs.cpp
+		moc_opa_defs.cpp \
+		moc_sv_signal.cpp
 OBJECTS       = collection_0x02.o \
 		collection_0x03.o \
 		collection_0x04.o \
@@ -71,14 +72,15 @@ OBJECTS       = collection_0x02.o \
 		collection_0x33.o \
 		collection_status.o \
 		proj_12700_opa_mod.o \
-		moc_sv_abstract_protocol.o \
+		sv_signal.o \
 		moc_collection_0x02.o \
 		moc_collection_0x03.o \
 		moc_collection_0x04.o \
 		moc_collection_0x19.o \
 		moc_collection_0x33.o \
 		moc_collection_status.o \
-		moc_opa_defs.o
+		moc_opa_defs.o \
+		moc_sv_signal.o
 DIST          = ../../../../Qt5.9.9/5.9.9/gcc_64/mkspecs/features/spec_pre.prf \
 		../../../../Qt5.9.9/5.9.9/gcc_64/mkspecs/common/unix.conf \
 		../../../../Qt5.9.9/5.9.9/gcc_64/mkspecs/common/linux.conf \
@@ -245,15 +247,17 @@ DIST          = ../../../../Qt5.9.9/5.9.9/gcc_64/mkspecs/features/spec_pre.prf \
 		../../proj_12700_opa_mod/src/opa_params.h \
 		../../proj_12700_opa_mod/src/proj_12700_opa_mod_global.h \
 		../../proj_12700_opa_mod/src/proj_12700_opa_mod.h \
-		../../proj_12700_opa_mod/src/signal_params.h ../../proj_12700_opa_mod/src/collection_0x02.cpp \
+		../../proj_12700_opa_mod/src/signal_params.h \
+		../../../Modus/global/signal/sv_signal.h ../../proj_12700_opa_mod/src/collection_0x02.cpp \
 		../../proj_12700_opa_mod/src/collection_0x03.cpp \
 		../../proj_12700_opa_mod/src/collection_0x04.cpp \
 		../../proj_12700_opa_mod/src/collection_0x19.cpp \
 		../../proj_12700_opa_mod/src/collection_0x33.cpp \
 		../../proj_12700_opa_mod/src/collection_status.cpp \
-		../../proj_12700_opa_mod/src/proj_12700_opa_mod.cpp
+		../../proj_12700_opa_mod/src/proj_12700_opa_mod.cpp \
+		../../../Modus/global/signal/sv_signal.cpp
 QMAKE_TARGET  = proj_12700_opa_agg_mod
-DESTDIR       = ../../../../Modus/lib/
+DESTDIR       = /home/user/Modus/lib/
 TARGET        = libproj_12700_opa_agg_mod.so
 TARGETD       = libproj_12700_opa_agg_mod.so
 
@@ -261,11 +265,11 @@ TARGETD       = libproj_12700_opa_agg_mod.so
 first: all
 ####### Build rules
 
-../../../../Modus/lib/$(TARGET):  $(OBJECTS) $(SUBLIBS) $(OBJCOMP)  
-	@test -d ../../../../Modus/lib/ || mkdir -p ../../../../Modus/lib/
+/home/user/Modus/lib/$(TARGET):  $(OBJECTS) $(SUBLIBS) $(OBJCOMP)  
+	@test -d /home/user/Modus/lib/ || mkdir -p /home/user/Modus/lib/
 	-$(DEL_FILE) $(TARGET)
 	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS) $(LIBS) $(OBJCOMP)
-	-$(MOVE) $(TARGET) ../../../../Modus/lib/$(TARGET)
+	-$(MOVE) $(TARGET) /home/user/Modus/lib/$(TARGET)
 
 
 
@@ -588,7 +592,7 @@ qmake: FORCE
 qmake_all: FORCE
 
 
-all: Makefile ../../../../Modus/lib/$(TARGET)
+all: Makefile /home/user/Modus/lib/$(TARGET)
 
 dist: distdir FORCE
 	(cd `dirname $(DISTDIR)` && $(TAR) $(DISTNAME).tar $(DISTNAME) && $(COMPRESS) $(DISTNAME).tar) && $(MOVE) `dirname $(DISTDIR)`/$(DISTNAME).tar.gz . && $(DEL_FILE) -r $(DISTDIR)
@@ -597,8 +601,8 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents ../../../../Qt5.9.9/5.9.9/gcc_64/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents ../../../Modus/global/device/sv_abstract_protocol.h ../../../Modus/global/global_defs.h ../../proj_12700_opa_mod/src/collection_0x02.h ../../proj_12700_opa_mod/src/collection_0x03.h ../../proj_12700_opa_mod/src/collection_0x04.h ../../proj_12700_opa_mod/src/collection_0x19.h ../../proj_12700_opa_mod/src/collection_0x33.h ../../proj_12700_opa_mod/src/collection_status.h ../../proj_12700_opa_mod/src/opa_defs.h ../../proj_12700_opa_mod/src/opa_params.h ../../proj_12700_opa_mod/src/proj_12700_opa_mod_global.h ../../proj_12700_opa_mod/src/proj_12700_opa_mod.h ../../proj_12700_opa_mod/src/signal_params.h $(DISTDIR)/
-	$(COPY_FILE) --parents ../../proj_12700_opa_mod/src/collection_0x02.cpp ../../proj_12700_opa_mod/src/collection_0x03.cpp ../../proj_12700_opa_mod/src/collection_0x04.cpp ../../proj_12700_opa_mod/src/collection_0x19.cpp ../../proj_12700_opa_mod/src/collection_0x33.cpp ../../proj_12700_opa_mod/src/collection_status.cpp ../../proj_12700_opa_mod/src/proj_12700_opa_mod.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents ../../../Modus/global/device/sv_abstract_protocol.h ../../../Modus/global/global_defs.h ../../proj_12700_opa_mod/src/collection_0x02.h ../../proj_12700_opa_mod/src/collection_0x03.h ../../proj_12700_opa_mod/src/collection_0x04.h ../../proj_12700_opa_mod/src/collection_0x19.h ../../proj_12700_opa_mod/src/collection_0x33.h ../../proj_12700_opa_mod/src/collection_status.h ../../proj_12700_opa_mod/src/opa_defs.h ../../proj_12700_opa_mod/src/opa_params.h ../../proj_12700_opa_mod/src/proj_12700_opa_mod_global.h ../../proj_12700_opa_mod/src/proj_12700_opa_mod.h ../../proj_12700_opa_mod/src/signal_params.h ../../../Modus/global/signal/sv_signal.h $(DISTDIR)/
+	$(COPY_FILE) --parents ../../proj_12700_opa_mod/src/collection_0x02.cpp ../../proj_12700_opa_mod/src/collection_0x03.cpp ../../proj_12700_opa_mod/src/collection_0x04.cpp ../../proj_12700_opa_mod/src/collection_0x19.cpp ../../proj_12700_opa_mod/src/collection_0x33.cpp ../../proj_12700_opa_mod/src/collection_status.cpp ../../proj_12700_opa_mod/src/proj_12700_opa_mod.cpp ../../../Modus/global/signal/sv_signal.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -607,7 +611,7 @@ clean: compiler_clean
 
 
 distclean: clean 
-	-$(DEL_FILE) ../../../../Modus/lib/$(TARGET) 
+	-$(DEL_FILE) /home/user/Modus/lib/$(TARGET) 
 	-$(DEL_FILE) .qmake.stash
 	-$(DEL_FILE) Makefile
 
@@ -630,220 +634,9 @@ compiler_moc_predefs_clean:
 moc_predefs.h: ../../../../Qt5.9.9/5.9.9/gcc_64/mkspecs/features/data/dummy.cpp
 	g++ -pipe -g -std=gnu++11 -Wall -W -dM -E -o moc_predefs.h ../../../../Qt5.9.9/5.9.9/gcc_64/mkspecs/features/data/dummy.cpp
 
-compiler_moc_header_make_all: moc_sv_abstract_protocol.cpp moc_collection_0x02.cpp moc_collection_0x03.cpp moc_collection_0x04.cpp moc_collection_0x19.cpp moc_collection_0x33.cpp moc_collection_status.cpp moc_opa_defs.cpp
+compiler_moc_header_make_all: moc_collection_0x02.cpp moc_collection_0x03.cpp moc_collection_0x04.cpp moc_collection_0x19.cpp moc_collection_0x33.cpp moc_collection_status.cpp moc_opa_defs.cpp moc_sv_signal.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) moc_sv_abstract_protocol.cpp moc_collection_0x02.cpp moc_collection_0x03.cpp moc_collection_0x04.cpp moc_collection_0x19.cpp moc_collection_0x33.cpp moc_collection_status.cpp moc_opa_defs.cpp
-moc_sv_abstract_protocol.cpp: ../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QObject \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qobject.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qobjectdefs.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qnamespace.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qglobal.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qconfig-bootstrapped.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qconfig.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qtcore-config.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qsystemdetection.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qprocessordetection.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qcompilerdetection.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qtypeinfo.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qsysinfo.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qlogging.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qflags.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qatomic.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qbasicatomic.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qatomic_bootstrap.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qgenericatomic.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qatomic_cxx11.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qatomic_msvc.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qglobalstatic.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qmutex.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qnumeric.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qversiontagging.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qobjectdefs_impl.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qstring.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qchar.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qbytearray.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qrefcount.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qarraydata.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qstringbuilder.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qlist.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qalgorithms.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qiterator.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qhashfunctions.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qpair.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qbytearraylist.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qstringlist.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qregexp.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qstringmatcher.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qcoreevent.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qscopedpointer.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qmetatype.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qvarlengtharray.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qcontainerfwd.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qobject_impl.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QRunnable \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qrunnable.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QDebug \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qdebug.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qhash.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qmap.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qtextstream.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qiodevice.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qlocale.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qvariant.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qshareddata.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qvector.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qpoint.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qset.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qcontiguouscache.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qsharedpointer.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qsharedpointer_impl.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QThread \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qthread.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QMutex \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QTimer \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qtimer.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qbasictimer.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QHash \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QQueue \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qqueue.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QFuture \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuture.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfutureinterface.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qexception.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qresultstore.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QJsonDocument \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qjsondocument.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qjsonvalue.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QJsonObject \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qjsonobject.h \
-		../../../Modus/global/device/device_defs.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QtCore \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QtCoreDepends \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qabstractanimation.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qabstracteventdispatcher.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qeventloop.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qabstractitemmodel.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qabstractnativeeventfilter.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qabstractproxymodel.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qabstractstate.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qabstracttransition.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qanimationgroup.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qarraydataops.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qarraydatapointer.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qbitarray.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qbuffer.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qbytearraymatcher.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qcache.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qcollator.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qcommandlineoption.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qcommandlineparser.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qcoreapplication.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qcryptographichash.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qdatastream.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qdatetime.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qdeadlinetimer.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qelapsedtimer.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qdir.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfileinfo.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfile.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfiledevice.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qdiriterator.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qeasingcurve.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qendian.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qeventtransition.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfactoryinterface.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfileselector.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QStringList \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfilesystemwatcher.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfinalstate.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuturesynchronizer.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuturewatcher.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qhistorystate.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qidentityproxymodel.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qisenum.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qitemselectionmodel.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qjsonarray.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qlibrary.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qlibraryinfo.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qversionnumber.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qline.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qlinkedlist.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qlockfile.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qloggingcategory.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qmargins.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qmath.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qmessageauthenticationcode.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qmetaobject.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qmimedata.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qmimedatabase.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qmimetype.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qobjectcleanuphandler.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qoperatingsystemversion.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qparallelanimationgroup.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qpauseanimation.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qplugin.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qpointer.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qpluginloader.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qprocess.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qpropertyanimation.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qvariantanimation.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qreadwritelock.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qrect.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qsize.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qregularexpression.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qresource.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qsavefile.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qscopedvaluerollback.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qsemaphore.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qsequentialanimationgroup.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qsettings.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qsharedmemory.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qsignalmapper.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qsignaltransition.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qsocketnotifier.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qsortfilterproxymodel.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qstack.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qstandardpaths.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qstate.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qstatemachine.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qstorageinfo.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qstringlistmodel.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qsystemsemaphore.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qtemporarydir.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QScopedPointer \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qtemporaryfile.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qtextboundaryfinder.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qtextcodec.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qthreadpool.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qthreadstorage.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qtimeline.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qtimezone.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qtranslator.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qtypetraits.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qurl.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qurlquery.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/quuid.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qwaitcondition.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qwineventnotifier.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qxmlstream.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qtcoreversion.h \
-		../../../svlib/sv_exception.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QString \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QException \
-		../../../Modus/global/global_defs.h \
-		../../../svlib/sv_abstract_logger.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QDate \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QTime \
-		../../../Modus/global/signal/sv_signal.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QDateTime \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QList \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QJsonArray \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QFile \
-		../../../Modus/global/device/sv_abstract_protocol.h \
-		moc_predefs.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/bin/moc
-	/home/developer/Qt5.9.9/5.9.9/gcc_64/bin/moc $(DEFINES) --include ./moc_predefs.h -I/home/developer/Qt5.9.9/5.9.9/gcc_64/mkspecs/linux-g++ -I/home/developer/c++/Modus_Libs/proj_12700_opa_mod/src -I/home/developer/Qt5.9.9/5.9.9/gcc_64/include -I/home/developer/Qt5.9.9/5.9.9/gcc_64/include/QtCore -I. -I/usr/include/c++/9 -I/usr/include/x86_64-linux-gnu/c++/9 -I/usr/include/c++/9/backward -I/usr/lib/gcc/x86_64-linux-gnu/9/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include ../../../Modus/global/device/sv_abstract_protocol.h -o moc_sv_abstract_protocol.cpp
-
+	-$(DEL_FILE) moc_collection_0x02.cpp moc_collection_0x03.cpp moc_collection_0x04.cpp moc_collection_0x19.cpp moc_collection_0x33.cpp moc_collection_status.cpp moc_opa_defs.cpp moc_sv_signal.cpp
 moc_collection_0x02.cpp: ../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QObject \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qobject.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qobjectdefs.h \
@@ -930,12 +723,10 @@ moc_collection_0x02.cpp: ../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QObject
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QStringList \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QDate \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QTime \
-		../../../svlib/sv_exception.h \
+		../../../Modus/global/misc/sv_exception.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QException \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qexception.h \
-		../../../Modus/global/device/sv_abstract_protocol.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QRunnable \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qrunnable.h \
+		../../../Modus/global/device/protocol/sv_abstract_protocol.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QThread \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qthread.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QTimer \
@@ -944,10 +735,6 @@ moc_collection_0x02.cpp: ../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QObject
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QHash \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QQueue \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qqueue.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QFuture \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuture.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfutureinterface.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qresultstore.h \
 		../../../Modus/global/device/device_defs.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QtCore \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QtCoreDepends \
@@ -984,6 +771,10 @@ moc_collection_0x02.cpp: ../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QObject
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfileselector.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfilesystemwatcher.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfinalstate.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuture.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfutureinterface.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qrunnable.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qresultstore.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuturesynchronizer.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuturewatcher.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qhistorystate.h \
@@ -1144,12 +935,10 @@ moc_collection_0x03.cpp: ../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QObject
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QStringList \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QDate \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QTime \
-		../../../svlib/sv_exception.h \
+		../../../Modus/global/misc/sv_exception.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QException \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qexception.h \
-		../../../Modus/global/device/sv_abstract_protocol.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QRunnable \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qrunnable.h \
+		../../../Modus/global/device/protocol/sv_abstract_protocol.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QThread \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qthread.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QTimer \
@@ -1158,10 +947,6 @@ moc_collection_0x03.cpp: ../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QObject
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QHash \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QQueue \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qqueue.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QFuture \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuture.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfutureinterface.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qresultstore.h \
 		../../../Modus/global/device/device_defs.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QtCore \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QtCoreDepends \
@@ -1198,6 +983,10 @@ moc_collection_0x03.cpp: ../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QObject
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfileselector.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfilesystemwatcher.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfinalstate.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuture.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfutureinterface.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qrunnable.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qresultstore.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuturesynchronizer.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuturewatcher.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qhistorystate.h \
@@ -1358,12 +1147,10 @@ moc_collection_0x04.cpp: ../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QObject
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QStringList \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QDate \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QTime \
-		../../../svlib/sv_exception.h \
+		../../../Modus/global/misc/sv_exception.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QException \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qexception.h \
-		../../../Modus/global/device/sv_abstract_protocol.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QRunnable \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qrunnable.h \
+		../../../Modus/global/device/protocol/sv_abstract_protocol.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QThread \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qthread.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QTimer \
@@ -1372,10 +1159,6 @@ moc_collection_0x04.cpp: ../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QObject
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QHash \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QQueue \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qqueue.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QFuture \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuture.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfutureinterface.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qresultstore.h \
 		../../../Modus/global/device/device_defs.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QtCore \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QtCoreDepends \
@@ -1412,6 +1195,10 @@ moc_collection_0x04.cpp: ../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QObject
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfileselector.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfilesystemwatcher.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfinalstate.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuture.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfutureinterface.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qrunnable.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qresultstore.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuturesynchronizer.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuturewatcher.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qhistorystate.h \
@@ -1572,12 +1359,10 @@ moc_collection_0x19.cpp: ../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QObject
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QStringList \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QDate \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QTime \
-		../../../svlib/sv_exception.h \
+		../../../Modus/global/misc/sv_exception.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QException \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qexception.h \
-		../../../Modus/global/device/sv_abstract_protocol.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QRunnable \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qrunnable.h \
+		../../../Modus/global/device/protocol/sv_abstract_protocol.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QThread \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qthread.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QTimer \
@@ -1586,10 +1371,6 @@ moc_collection_0x19.cpp: ../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QObject
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QHash \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QQueue \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qqueue.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QFuture \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuture.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfutureinterface.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qresultstore.h \
 		../../../Modus/global/device/device_defs.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QtCore \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QtCoreDepends \
@@ -1626,6 +1407,10 @@ moc_collection_0x19.cpp: ../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QObject
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfileselector.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfilesystemwatcher.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfinalstate.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuture.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfutureinterface.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qrunnable.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qresultstore.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuturesynchronizer.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuturewatcher.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qhistorystate.h \
@@ -1786,12 +1571,10 @@ moc_collection_0x33.cpp: ../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QObject
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QStringList \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QDate \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QTime \
-		../../../svlib/sv_exception.h \
+		../../../Modus/global/misc/sv_exception.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QException \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qexception.h \
-		../../../Modus/global/device/sv_abstract_protocol.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QRunnable \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qrunnable.h \
+		../../../Modus/global/device/protocol/sv_abstract_protocol.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QThread \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qthread.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QTimer \
@@ -1800,10 +1583,6 @@ moc_collection_0x33.cpp: ../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QObject
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QHash \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QQueue \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qqueue.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QFuture \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuture.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfutureinterface.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qresultstore.h \
 		../../../Modus/global/device/device_defs.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QtCore \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QtCoreDepends \
@@ -1840,6 +1619,10 @@ moc_collection_0x33.cpp: ../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QObject
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfileselector.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfilesystemwatcher.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfinalstate.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuture.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfutureinterface.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qrunnable.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qresultstore.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuturesynchronizer.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuturewatcher.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qhistorystate.h \
@@ -2000,12 +1783,10 @@ moc_collection_status.cpp: ../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QObje
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QStringList \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QDate \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QTime \
-		../../../svlib/sv_exception.h \
+		../../../Modus/global/misc/sv_exception.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QException \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qexception.h \
-		../../../Modus/global/device/sv_abstract_protocol.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QRunnable \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qrunnable.h \
+		../../../Modus/global/device/protocol/sv_abstract_protocol.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QThread \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qthread.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QTimer \
@@ -2014,10 +1795,6 @@ moc_collection_status.cpp: ../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QObje
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QHash \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QQueue \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qqueue.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QFuture \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuture.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfutureinterface.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qresultstore.h \
 		../../../Modus/global/device/device_defs.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QtCore \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QtCoreDepends \
@@ -2054,6 +1831,10 @@ moc_collection_status.cpp: ../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QObje
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfileselector.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfilesystemwatcher.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfinalstate.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuture.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfutureinterface.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qrunnable.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qresultstore.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuturesynchronizer.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuturewatcher.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qhistorystate.h \
@@ -2213,12 +1994,10 @@ moc_opa_defs.cpp: ../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QMap \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QStringList \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QDate \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QTime \
-		../../../svlib/sv_exception.h \
+		../../../Modus/global/misc/sv_exception.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QException \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qexception.h \
-		../../../Modus/global/device/sv_abstract_protocol.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QRunnable \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qrunnable.h \
+		../../../Modus/global/device/protocol/sv_abstract_protocol.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QThread \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qthread.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QTimer \
@@ -2227,10 +2006,6 @@ moc_opa_defs.cpp: ../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QMap \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QHash \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QQueue \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qqueue.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QFuture \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuture.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfutureinterface.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qresultstore.h \
 		../../../Modus/global/device/device_defs.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QtCore \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QtCoreDepends \
@@ -2267,6 +2042,10 @@ moc_opa_defs.cpp: ../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QMap \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfileselector.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfilesystemwatcher.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfinalstate.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuture.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfutureinterface.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qrunnable.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qresultstore.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuturesynchronizer.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuturewatcher.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qhistorystate.h \
@@ -2341,6 +2120,96 @@ moc_opa_defs.cpp: ../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QMap \
 		moc_predefs.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/bin/moc
 	/home/developer/Qt5.9.9/5.9.9/gcc_64/bin/moc $(DEFINES) --include ./moc_predefs.h -I/home/developer/Qt5.9.9/5.9.9/gcc_64/mkspecs/linux-g++ -I/home/developer/c++/Modus_Libs/proj_12700_opa_mod/src -I/home/developer/Qt5.9.9/5.9.9/gcc_64/include -I/home/developer/Qt5.9.9/5.9.9/gcc_64/include/QtCore -I. -I/usr/include/c++/9 -I/usr/include/x86_64-linux-gnu/c++/9 -I/usr/include/c++/9/backward -I/usr/lib/gcc/x86_64-linux-gnu/9/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include ../../proj_12700_opa_mod/src/opa_defs.h -o moc_opa_defs.cpp
+
+moc_sv_signal.cpp: ../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QObject \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qobject.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qobjectdefs.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qnamespace.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qglobal.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qconfig-bootstrapped.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qconfig.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qtcore-config.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qsystemdetection.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qprocessordetection.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qcompilerdetection.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qtypeinfo.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qsysinfo.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qlogging.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qflags.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qatomic.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qbasicatomic.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qatomic_bootstrap.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qgenericatomic.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qatomic_cxx11.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qatomic_msvc.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qglobalstatic.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qmutex.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qnumeric.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qversiontagging.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qobjectdefs_impl.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qstring.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qchar.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qbytearray.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qrefcount.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qarraydata.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qstringbuilder.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qlist.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qalgorithms.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qiterator.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qhashfunctions.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qpair.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qbytearraylist.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qstringlist.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qregexp.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qstringmatcher.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qcoreevent.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qscopedpointer.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qmetatype.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qvarlengtharray.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qcontainerfwd.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qobject_impl.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QDateTime \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qdatetime.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qshareddata.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qhash.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QList \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QDebug \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qdebug.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qmap.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qtextstream.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qiodevice.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qlocale.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qvariant.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qvector.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qpoint.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qset.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qcontiguouscache.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qsharedpointer.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qsharedpointer_impl.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QJsonDocument \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qjsondocument.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qjsonvalue.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QJsonObject \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qjsonobject.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QJsonArray \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qjsonarray.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QFile \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfile.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfiledevice.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QMutex \
+		../../../Modus/global/global_defs.h \
+		../../../svlib/sv_abstract_logger.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QString \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QStringList \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QDate \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QTime \
+		../../../Modus/global/misc/sv_exception.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QException \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qexception.h \
+		../../../Modus/global/signal/sv_signal.h \
+		moc_predefs.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/bin/moc
+	/home/developer/Qt5.9.9/5.9.9/gcc_64/bin/moc $(DEFINES) --include ./moc_predefs.h -I/home/developer/Qt5.9.9/5.9.9/gcc_64/mkspecs/linux-g++ -I/home/developer/c++/Modus_Libs/proj_12700_opa_mod/src -I/home/developer/Qt5.9.9/5.9.9/gcc_64/include -I/home/developer/Qt5.9.9/5.9.9/gcc_64/include/QtCore -I. -I/usr/include/c++/9 -I/usr/include/x86_64-linux-gnu/c++/9 -I/usr/include/c++/9/backward -I/usr/lib/gcc/x86_64-linux-gnu/9/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include ../../../Modus/global/signal/sv_signal.h -o moc_sv_signal.cpp
 
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
@@ -2441,12 +2310,10 @@ collection_0x02.o: ../../proj_12700_opa_mod/src/collection_0x02.cpp ../../proj_1
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QStringList \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QDate \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QTime \
-		../../../svlib/sv_exception.h \
+		../../../Modus/global/misc/sv_exception.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QException \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qexception.h \
-		../../../Modus/global/device/sv_abstract_protocol.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QRunnable \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qrunnable.h \
+		../../../Modus/global/device/protocol/sv_abstract_protocol.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QThread \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qthread.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QTimer \
@@ -2455,10 +2322,6 @@ collection_0x02.o: ../../proj_12700_opa_mod/src/collection_0x02.cpp ../../proj_1
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QHash \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QQueue \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qqueue.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QFuture \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuture.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfutureinterface.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qresultstore.h \
 		../../../Modus/global/device/device_defs.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QtCore \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QtCoreDepends \
@@ -2495,6 +2358,10 @@ collection_0x02.o: ../../proj_12700_opa_mod/src/collection_0x02.cpp ../../proj_1
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfileselector.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfilesystemwatcher.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfinalstate.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuture.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfutureinterface.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qrunnable.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qresultstore.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuturesynchronizer.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuturewatcher.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qhistorystate.h \
@@ -2653,12 +2520,10 @@ collection_0x03.o: ../../proj_12700_opa_mod/src/collection_0x03.cpp ../../proj_1
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QStringList \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QDate \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QTime \
-		../../../svlib/sv_exception.h \
+		../../../Modus/global/misc/sv_exception.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QException \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qexception.h \
-		../../../Modus/global/device/sv_abstract_protocol.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QRunnable \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qrunnable.h \
+		../../../Modus/global/device/protocol/sv_abstract_protocol.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QThread \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qthread.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QTimer \
@@ -2667,10 +2532,6 @@ collection_0x03.o: ../../proj_12700_opa_mod/src/collection_0x03.cpp ../../proj_1
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QHash \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QQueue \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qqueue.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QFuture \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuture.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfutureinterface.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qresultstore.h \
 		../../../Modus/global/device/device_defs.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QtCore \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QtCoreDepends \
@@ -2707,6 +2568,10 @@ collection_0x03.o: ../../proj_12700_opa_mod/src/collection_0x03.cpp ../../proj_1
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfileselector.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfilesystemwatcher.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfinalstate.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuture.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfutureinterface.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qrunnable.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qresultstore.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuturesynchronizer.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuturewatcher.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qhistorystate.h \
@@ -2865,12 +2730,10 @@ collection_0x04.o: ../../proj_12700_opa_mod/src/collection_0x04.cpp ../../proj_1
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QStringList \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QDate \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QTime \
-		../../../svlib/sv_exception.h \
+		../../../Modus/global/misc/sv_exception.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QException \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qexception.h \
-		../../../Modus/global/device/sv_abstract_protocol.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QRunnable \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qrunnable.h \
+		../../../Modus/global/device/protocol/sv_abstract_protocol.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QThread \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qthread.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QTimer \
@@ -2879,10 +2742,6 @@ collection_0x04.o: ../../proj_12700_opa_mod/src/collection_0x04.cpp ../../proj_1
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QHash \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QQueue \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qqueue.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QFuture \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuture.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfutureinterface.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qresultstore.h \
 		../../../Modus/global/device/device_defs.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QtCore \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QtCoreDepends \
@@ -2919,6 +2778,10 @@ collection_0x04.o: ../../proj_12700_opa_mod/src/collection_0x04.cpp ../../proj_1
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfileselector.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfilesystemwatcher.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfinalstate.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuture.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfutureinterface.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qrunnable.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qresultstore.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuturesynchronizer.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuturewatcher.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qhistorystate.h \
@@ -3077,12 +2940,10 @@ collection_0x19.o: ../../proj_12700_opa_mod/src/collection_0x19.cpp ../../proj_1
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QStringList \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QDate \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QTime \
-		../../../svlib/sv_exception.h \
+		../../../Modus/global/misc/sv_exception.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QException \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qexception.h \
-		../../../Modus/global/device/sv_abstract_protocol.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QRunnable \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qrunnable.h \
+		../../../Modus/global/device/protocol/sv_abstract_protocol.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QThread \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qthread.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QTimer \
@@ -3091,10 +2952,6 @@ collection_0x19.o: ../../proj_12700_opa_mod/src/collection_0x19.cpp ../../proj_1
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QHash \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QQueue \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qqueue.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QFuture \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuture.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfutureinterface.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qresultstore.h \
 		../../../Modus/global/device/device_defs.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QtCore \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QtCoreDepends \
@@ -3131,6 +2988,10 @@ collection_0x19.o: ../../proj_12700_opa_mod/src/collection_0x19.cpp ../../proj_1
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfileselector.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfilesystemwatcher.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfinalstate.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuture.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfutureinterface.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qrunnable.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qresultstore.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuturesynchronizer.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuturewatcher.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qhistorystate.h \
@@ -3289,12 +3150,10 @@ collection_0x33.o: ../../proj_12700_opa_mod/src/collection_0x33.cpp ../../proj_1
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QStringList \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QDate \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QTime \
-		../../../svlib/sv_exception.h \
+		../../../Modus/global/misc/sv_exception.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QException \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qexception.h \
-		../../../Modus/global/device/sv_abstract_protocol.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QRunnable \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qrunnable.h \
+		../../../Modus/global/device/protocol/sv_abstract_protocol.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QThread \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qthread.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QTimer \
@@ -3303,10 +3162,6 @@ collection_0x33.o: ../../proj_12700_opa_mod/src/collection_0x33.cpp ../../proj_1
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QHash \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QQueue \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qqueue.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QFuture \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuture.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfutureinterface.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qresultstore.h \
 		../../../Modus/global/device/device_defs.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QtCore \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QtCoreDepends \
@@ -3343,6 +3198,10 @@ collection_0x33.o: ../../proj_12700_opa_mod/src/collection_0x33.cpp ../../proj_1
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfileselector.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfilesystemwatcher.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfinalstate.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuture.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfutureinterface.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qrunnable.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qresultstore.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuturesynchronizer.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuturewatcher.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qhistorystate.h \
@@ -3501,12 +3360,10 @@ collection_status.o: ../../proj_12700_opa_mod/src/collection_status.cpp ../../pr
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QStringList \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QDate \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QTime \
-		../../../svlib/sv_exception.h \
+		../../../Modus/global/misc/sv_exception.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QException \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qexception.h \
-		../../../Modus/global/device/sv_abstract_protocol.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QRunnable \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qrunnable.h \
+		../../../Modus/global/device/protocol/sv_abstract_protocol.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QThread \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qthread.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QTimer \
@@ -3515,10 +3372,6 @@ collection_status.o: ../../proj_12700_opa_mod/src/collection_status.cpp ../../pr
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QHash \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QQueue \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qqueue.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QFuture \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuture.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfutureinterface.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qresultstore.h \
 		../../../Modus/global/device/device_defs.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QtCore \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QtCoreDepends \
@@ -3555,6 +3408,10 @@ collection_status.o: ../../proj_12700_opa_mod/src/collection_status.cpp ../../pr
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfileselector.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfilesystemwatcher.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfinalstate.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuture.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfutureinterface.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qrunnable.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qresultstore.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuturesynchronizer.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuturewatcher.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qhistorystate.h \
@@ -3652,7 +3509,7 @@ proj_12700_opa_mod.o: ../../proj_12700_opa_mod/src/proj_12700_opa_mod.cpp ../../
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qversiontagging.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QMutexLocker \
 		../../proj_12700_opa_mod/src/proj_12700_opa_mod_global.h \
-		../../../Modus/global/device/sv_abstract_protocol.h \
+		../../../Modus/global/device/protocol/sv_abstract_protocol.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QObject \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qobject.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qobjectdefs.h \
@@ -3679,8 +3536,6 @@ proj_12700_opa_mod.o: ../../proj_12700_opa_mod/src/proj_12700_opa_mod.cpp ../../
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qvarlengtharray.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qcontainerfwd.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qobject_impl.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QRunnable \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qrunnable.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QDebug \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qdebug.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qhash.h \
@@ -3704,11 +3559,6 @@ proj_12700_opa_mod.o: ../../proj_12700_opa_mod/src/proj_12700_opa_mod.cpp ../../
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QHash \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QQueue \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qqueue.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QFuture \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuture.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfutureinterface.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qexception.h \
-		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qresultstore.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QJsonDocument \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qjsondocument.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qjsonvalue.h \
@@ -3749,11 +3599,16 @@ proj_12700_opa_mod.o: ../../proj_12700_opa_mod/src/proj_12700_opa_mod.cpp ../../
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qeasingcurve.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qendian.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qeventtransition.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qexception.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfactoryinterface.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfileselector.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QStringList \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfilesystemwatcher.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfinalstate.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuture.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfutureinterface.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qrunnable.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qresultstore.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuturesynchronizer.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfuturewatcher.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qhistorystate.h \
@@ -3825,7 +3680,7 @@ proj_12700_opa_mod.o: ../../proj_12700_opa_mod/src/proj_12700_opa_mod.cpp ../../
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qwineventnotifier.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qxmlstream.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qtcoreversion.h \
-		../../../svlib/sv_exception.h \
+		../../../Modus/global/misc/sv_exception.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QString \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QException \
 		../../../Modus/global/global_defs.h \
@@ -3838,6 +3693,7 @@ proj_12700_opa_mod.o: ../../proj_12700_opa_mod/src/proj_12700_opa_mod.cpp ../../
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QJsonArray \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QFile \
 		../../proj_12700_opa_mod/src/opa_params.h \
+		../../../svlib/sv_exception.h \
 		../../proj_12700_opa_mod/src/signal_params.h \
 		../../proj_12700_opa_mod/src/opa_defs.h \
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QMap \
@@ -3852,8 +3708,93 @@ proj_12700_opa_mod.o: ../../proj_12700_opa_mod/src/proj_12700_opa_mod.cpp ../../
 		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QtGlobal
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o proj_12700_opa_mod.o ../../proj_12700_opa_mod/src/proj_12700_opa_mod.cpp
 
-moc_sv_abstract_protocol.o: moc_sv_abstract_protocol.cpp 
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_sv_abstract_protocol.o moc_sv_abstract_protocol.cpp
+sv_signal.o: ../../../Modus/global/signal/sv_signal.cpp ../../../Modus/global/signal/sv_signal.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QObject \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qobject.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qobjectdefs.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qnamespace.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qglobal.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qconfig-bootstrapped.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qconfig.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qtcore-config.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qsystemdetection.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qprocessordetection.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qcompilerdetection.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qtypeinfo.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qsysinfo.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qlogging.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qflags.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qatomic.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qbasicatomic.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qatomic_bootstrap.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qgenericatomic.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qatomic_cxx11.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qatomic_msvc.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qglobalstatic.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qmutex.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qnumeric.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qversiontagging.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qobjectdefs_impl.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qstring.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qchar.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qbytearray.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qrefcount.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qarraydata.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qstringbuilder.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qlist.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qalgorithms.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qiterator.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qhashfunctions.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qpair.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qbytearraylist.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qstringlist.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qregexp.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qstringmatcher.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qcoreevent.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qscopedpointer.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qmetatype.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qvarlengtharray.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qcontainerfwd.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qobject_impl.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QDateTime \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qdatetime.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qshareddata.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qhash.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QList \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QDebug \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qdebug.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qmap.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qtextstream.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qiodevice.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qlocale.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qvariant.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qvector.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qpoint.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qset.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qcontiguouscache.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qsharedpointer.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qsharedpointer_impl.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QJsonDocument \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qjsondocument.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qjsonvalue.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QJsonObject \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qjsonobject.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QJsonArray \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qjsonarray.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QFile \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfile.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qfiledevice.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QMutex \
+		../../../Modus/global/global_defs.h \
+		../../../svlib/sv_abstract_logger.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QString \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QStringList \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QDate \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QTime \
+		../../../Modus/global/misc/sv_exception.h \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/QException \
+		../../../../Qt5.9.9/5.9.9/gcc_64/include/QtCore/qexception.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o sv_signal.o ../../../Modus/global/signal/sv_signal.cpp
 
 moc_collection_0x02.o: moc_collection_0x02.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_collection_0x02.o moc_collection_0x02.cpp
@@ -3876,11 +3817,14 @@ moc_collection_status.o: moc_collection_status.cpp
 moc_opa_defs.o: moc_opa_defs.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_opa_defs.o moc_opa_defs.cpp
 
+moc_sv_signal.o: moc_sv_signal.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_sv_signal.o moc_sv_signal.cpp
+
 ####### Install
 
 install_target: first FORCE
 	@test -d $(INSTALL_ROOT)/usr/lib || mkdir -p $(INSTALL_ROOT)/usr/lib
-	-$(QINSTALL_PROGRAM) ../../../../Modus/lib/$(TARGET) $(INSTALL_ROOT)/usr/lib/$(TARGET)
+	-$(QINSTALL_PROGRAM) /home/user/Modus/lib/$(TARGET) $(INSTALL_ROOT)/usr/lib/$(TARGET)
 
 uninstall_target: FORCE
 	-$(DEL_FILE) $(INSTALL_ROOT)/usr/lib/$(TARGET)

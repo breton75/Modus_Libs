@@ -65,7 +65,7 @@ namespace opa {
 
       }
       else
-        throw SvException(QString(DEV_NO_PARAM).arg(P));
+        throw SvException(QString(MISSING_PARAM).arg(P));
 
       P = P_OPA_LAST_REGISTER;
       if(object.contains(P)) {
@@ -83,7 +83,7 @@ namespace opa {
 
       }
       else
-        throw SvException(QString(DEV_NO_PARAM).arg(P));
+        throw SvException(QString(MISSING_PARAM).arg(P));
 
 
       P = P_OPA_RESET_TIMEOUT;

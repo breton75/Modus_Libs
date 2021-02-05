@@ -34,6 +34,10 @@ extern "C" {
 
 }
 
+#define GOOD_PARSED   0
+#define DO_RESET      1
+#define DO_NOT_RESET  2
+
 namespace opa {
 
   #pragma pack(push,1)
@@ -48,6 +52,17 @@ namespace opa {
   };
   #pragma pack(pop)
 
+  struct PARSERESULT {
+
+    PARSERESULT();
+    PARSERESULT(bool reset, QDateTime dt = QDateTime())
+    { do_reset = reset; parse_time = dt; }
+
+    bool do_reset;
+    QDateTime parse_time;
+
+  };
+
   class SvOPA;
 
   typedef QMap<int, SvAbstractSignalCollection*> SignalCollections;
@@ -61,16 +76,21 @@ class opa::SvOPA: public modus::SvAbstractProtocol
 public:
   SvOPA();
 
-  bool configure(const modus::DeviceConfig& cfg);
+  bool configure(modus::DeviceConfig* config, modus::IOBuffer *iobuffer) override;
 
 protected:
-  void disposeSignal (modus::SvSignal* signal);
+  void run() override;
 
-  bool processInputBuffer();
-  bool processSignalBuffer();
+  void disposeInputSignal (modus::SvSignal* signal) override;
+  void disposeOutputSignal (modus::SvSignal* signal) override;
+
+  void validateSignals(QDateTime& lastParsedTime) override;
 
 private:
-  opa::DeviceParams m_dev_params;
+  QList<modus::SvSignal*>   p_input_signals;
+  QList<modus::SvSignal*>   p_output_signals;
+
+  opa::DeviceParams m_params;
 
   opa::DATA m_data;
 
@@ -86,6 +106,7 @@ private:
 
   opa::SignalCollections signal_collections;
 
+  PARSERESULT parse();
   void confirmation();
 
 
