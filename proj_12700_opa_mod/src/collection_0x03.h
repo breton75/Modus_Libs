@@ -13,7 +13,7 @@ namespace opa {
     quint16 room  = 0;
     quint8  level = 0;
 
-    static SignalParams_0x03 fromJson(const QString& json_string) throw (SvException)
+    static SignalParams_0x03 fromJson(const QString& json_string) //throw (SvException)
     {
       QJsonParseError err;
       QJsonDocument jd = QJsonDocument::fromJson(json_string.toUtf8(), &err);
@@ -26,12 +26,12 @@ namespace opa {
         return fromJsonObject(jd.object());
 
       }
-      catch(SvException e) {
+      catch(SvException& e) {
         throw e;
       }
     }
 
-    static SignalParams_0x03 fromJsonObject(const QJsonObject &object) throw (SvException)
+    static SignalParams_0x03 fromJsonObject(const QJsonObject &object) //throw (SvException)
     {
       SignalParams_0x03 p;
       QString P;
@@ -105,7 +105,7 @@ namespace opa {
   public:
     explicit Type0x03();
 
-    void addSignal(modus::SvSignal* signal) throw (SvException);
+    void addSignal(modus::SvSignal* signal); // throw (SvException);
 
     void updateSignals(const opa::DATA* data = nullptr);
 

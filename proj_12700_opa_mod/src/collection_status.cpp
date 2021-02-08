@@ -6,13 +6,13 @@ opa::LineStatus::LineStatus():
 
 }
 
-void opa::LineStatus::addSignal(modus::SvSignal* signal) throw (SvException)
+void opa::LineStatus::addSignal(modus::SvSignal* signal) //throw (SvException)
 {
   try {
 
     m_signals.append(signal);
 
-  } catch(SvException e) {
+  } catch(SvException& e) {
     throw e;
   }
 }

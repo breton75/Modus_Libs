@@ -46,7 +46,7 @@ namespace opa {
     virtual ~SvAbstractSignalCollection()
     {  }
 
-    virtual void addSignal(modus::SvSignal* signal) throw(SvException) = 0;
+    virtual void addSignal(modus::SvSignal* signal) = 0;
 
     virtual void updateSignals(const opa::DATA* data = nullptr) = 0;
 

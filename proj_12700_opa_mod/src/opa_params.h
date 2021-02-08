@@ -26,7 +26,7 @@ namespace opa {
     quint16   last_register = 0;
     quint16   reset_interval = OPA_RESET_INTERVAL;
 
-    static DeviceParams fromJson(const QString& json_string) throw (SvException)
+    static DeviceParams fromJson(const QString& json_string) //throw (SvException)
     {
       QJsonParseError err;
       QJsonDocument jd = QJsonDocument::fromJson(json_string.toUtf8(), &err);
@@ -39,12 +39,12 @@ namespace opa {
         return fromJsonObject(jd.object());
 
       }
-      catch(SvException e) {
+      catch(SvException& e) {
         throw e;
       }
     }
 
-    static DeviceParams fromJsonObject(const QJsonObject &object) throw (SvException)
+    static DeviceParams fromJsonObject(const QJsonObject &object) //throw (SvException)
     {
       DeviceParams p;
       QString P;

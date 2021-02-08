@@ -6,7 +6,7 @@ opa::Type0x04::Type0x04():
 
 }
 
-void opa::Type0x04::addSignal(modus::SvSignal* signal) throw (SvException)
+void opa::Type0x04::addSignal(modus::SvSignal* signal) //throw (SvException)
 {
   try
   {
@@ -15,7 +15,7 @@ void opa::Type0x04::addSignal(modus::SvSignal* signal) throw (SvException)
     m_signals.append(Signal0x04(signal, p));
 
   }
-  catch(SvException e)
+  catch(SvException& e)
   {
     throw SvException(QString("Сигнал %1: %2").arg(signal->config()->name).arg(e.error));
   }

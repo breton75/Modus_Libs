@@ -84,7 +84,7 @@ protected:
   void disposeInputSignal (modus::SvSignal* signal) override;
   void disposeOutputSignal (modus::SvSignal* signal) override;
 
-  void validateSignals(QDateTime& lastParsedTime) override;
+//  void validateSignals(QDateTime& lastParsedTime) override;
 
 private:
   QList<modus::SvSignal*>   p_input_signals;

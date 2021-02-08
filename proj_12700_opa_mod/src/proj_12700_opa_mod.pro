@@ -4,7 +4,7 @@ DEFINES += PROJ_12700_OPA_MOD_LIBRARY
 
 CONFIG += c++11 plugin
 
-TARGET = /home/user/Modus/lib/proj_12700_opa_agg_mod
+TARGET = /home/developer/Modus/lib/protocols/proj_12700_opa_agg_mod
 TEMPLATE = lib
 
 # The following define makes your compiler emit warnings if you use
@@ -29,7 +29,7 @@ SOURCES += \
     ../../../Modus/global/signal/sv_signal.cpp
 
 HEADERS += \
-    ../../../Modus/global/device/sv_abstract_protocol.h \
+    ../../../Modus/global/device/protocol/sv_abstract_protocol.h \
     ../../../Modus/global/global_defs.h \
     collection_0x02.h \
     collection_0x03.h \

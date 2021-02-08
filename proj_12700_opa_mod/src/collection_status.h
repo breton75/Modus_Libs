@@ -14,7 +14,7 @@ namespace opa {
   public:
     explicit LineStatus();
 
-    void addSignal(modus::SvSignal* signal) throw (SvException);
+    void addSignal(modus::SvSignal* signal); //throw (SvException);
 
     void updateSignals(const opa::DATA* data = nullptr);
 

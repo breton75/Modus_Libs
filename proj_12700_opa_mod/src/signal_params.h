@@ -20,7 +20,7 @@ namespace  ckng {
     int word;
     QString tag;
 
-    static SignalParams fromSignal(modus::SvSignal* signal) throw (SvException)
+    static SignalParams fromSignal(modus::SvSignal* signal) //throw (SvException)
     {
       try
       {
@@ -33,7 +33,7 @@ namespace  ckng {
       }
     }
 
-    static SignalParams fromJsonString(const QString& json_string) throw (SvException)
+    static SignalParams fromJsonString(const QString& json_string) //throw (SvException)
     {
       QJsonParseError err;
       QJsonDocument jd = QJsonDocument::fromJson(json_string.toUtf8(), &err);
@@ -44,12 +44,12 @@ namespace  ckng {
       try {
         return fromJsonObject(jd.object());
       }
-      catch(SvException e) {
+      catch(SvException& e) {
         throw e;
       }
     }
 
-    static SignalParams fromJsonObject(const QJsonObject &object) throw (SvException)
+    static SignalParams fromJsonObject(const QJsonObject &object) //throw (SvException)
     {
       SignalParams p;
 

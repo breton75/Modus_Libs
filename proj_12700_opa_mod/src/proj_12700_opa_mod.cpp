@@ -55,19 +55,14 @@ void opa::SvOPA::disposeInputSignal (modus::SvSignal* signal)
     }
   }
 
-  catch(SvException e) {
+  catch(SvException& e) {
     throw e;
   }
 }
 
 void opa::SvOPA::disposeOutputSignal (modus::SvSignal* signal)
 {
-
-}
-
-void opa::SvOPA::validateSignals(QDateTime &lastParsedTime)
-{
-
+  Q_UNUSED(signal);
 }
 
 void opa::SvOPA::run()

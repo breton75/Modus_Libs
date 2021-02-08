@@ -6,7 +6,7 @@
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
-#include "../../../Modus/global/device/sv_abstract_protocol.h"
+#include "../../../Modus/global/device/protocol/sv_abstract_protocol.h"
 #include <QtCore/qbytearray.h>
 #include <QtCore/qmetatype.h>
 #if !defined(Q_MOC_OUTPUT_REVISION)
@@ -21,8 +21,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_modus__SvAbstractProtocol_t {
-    QByteArrayData data[19];
-    char stringdata0[230];
+    QByteArrayData data[11];
+    char stringdata0[103];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -34,31 +34,19 @@ static const qt_meta_stringdata_modus__SvAbstractProtocol_t qt_meta_stringdata_m
 QT_MOC_LITERAL(0, 0, 25), // "modus::SvAbstractProtocol"
 QT_MOC_LITERAL(1, 26, 17), // "affirmDeviceAlive"
 QT_MOC_LITERAL(2, 44, 0), // ""
-QT_MOC_LITERAL(3, 45, 17), // "inputBufferParsed"
-QT_MOC_LITERAL(4, 63, 9), // "alive_age"
-QT_MOC_LITERAL(5, 73, 17), // "outputBufferReady"
-QT_MOC_LITERAL(6, 91, 7), // "message"
-QT_MOC_LITERAL(7, 99, 3), // "msg"
-QT_MOC_LITERAL(8, 103, 14), // "sv::log::Level"
-QT_MOC_LITERAL(9, 118, 5), // "level"
-QT_MOC_LITERAL(10, 124, 21), // "sv::log::MessageTypes"
-QT_MOC_LITERAL(11, 146, 4), // "type"
-QT_MOC_LITERAL(12, 151, 16), // "processInputData"
-QT_MOC_LITERAL(13, 168, 17), // "processOutputData"
-QT_MOC_LITERAL(14, 186, 15), // "validateSignals"
-QT_MOC_LITERAL(15, 202, 5), // "queue"
-QT_MOC_LITERAL(16, 208, 9), // "SvSignal*"
-QT_MOC_LITERAL(17, 218, 6), // "signal"
-QT_MOC_LITERAL(18, 225, 4) // "stop"
+QT_MOC_LITERAL(3, 45, 7), // "message"
+QT_MOC_LITERAL(4, 53, 3), // "msg"
+QT_MOC_LITERAL(5, 57, 5), // "level"
+QT_MOC_LITERAL(6, 63, 4), // "type"
+QT_MOC_LITERAL(7, 68, 5), // "queue"
+QT_MOC_LITERAL(8, 74, 16), // "modus::SvSignal*"
+QT_MOC_LITERAL(9, 91, 6), // "signal"
+QT_MOC_LITERAL(10, 98, 4) // "stop"
 
     },
     "modus::SvAbstractProtocol\0affirmDeviceAlive\0"
-    "\0inputBufferParsed\0alive_age\0"
-    "outputBufferReady\0message\0msg\0"
-    "sv::log::Level\0level\0sv::log::MessageTypes\0"
-    "type\0processInputData\0processOutputData\0"
-    "validateSignals\0queue\0SvSignal*\0signal\0"
-    "stop"
+    "\0message\0msg\0level\0type\0queue\0"
+    "modus::SvSignal*\0signal\0stop"
 };
 #undef QT_MOC_LITERAL
 
@@ -68,41 +56,31 @@ static const uint qt_meta_data_modus__SvAbstractProtocol[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-      11,   14, // methods
+       6,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
        0,       // flags
-       6,       // signalCount
+       4,       // signalCount
 
  // signals: name, argc, parameters, tag, flags
-       1,    0,   69,    2, 0x06 /* Public */,
-       3,    1,   70,    2, 0x06 /* Public */,
-       5,    0,   73,    2, 0x06 /* Public */,
-       6,    3,   74,    2, 0x06 /* Public */,
-       6,    2,   81,    2, 0x26 /* Public | MethodCloned */,
-       6,    1,   86,    2, 0x26 /* Public | MethodCloned */,
+       1,    0,   44,    2, 0x06 /* Public */,
+       3,    3,   45,    2, 0x06 /* Public */,
+       3,    2,   52,    2, 0x26 /* Public | MethodCloned */,
+       3,    1,   57,    2, 0x26 /* Public | MethodCloned */,
 
  // slots: name, argc, parameters, tag, flags
-      12,    0,   89,    2, 0x0a /* Public */,
-      13,    0,   90,    2, 0x0a /* Public */,
-      14,    0,   91,    2, 0x0a /* Public */,
-      15,    1,   92,    2, 0x0a /* Public */,
-      18,    0,   95,    2, 0x0a /* Public */,
+       7,    1,   60,    2, 0x0a /* Public */,
+      10,    0,   63,    2, 0x0a /* Public */,
 
  // signals: parameters
     QMetaType::Void,
-    QMetaType::Void, QMetaType::ULongLong,    4,
-    QMetaType::Void,
-    QMetaType::Void, QMetaType::QString, 0x80000000 | 8, 0x80000000 | 10,    7,    9,   11,
-    QMetaType::Void, QMetaType::QString, 0x80000000 | 8,    7,    9,
-    QMetaType::Void, QMetaType::QString,    7,
+    QMetaType::Void, QMetaType::QString, QMetaType::Int, QMetaType::Int,    4,    5,    6,
+    QMetaType::Void, QMetaType::QString, QMetaType::Int,    4,    5,
+    QMetaType::Void, QMetaType::QString,    4,
 
  // slots: parameters
-    QMetaType::Void,
-    QMetaType::Void,
-    QMetaType::Void,
-    QMetaType::Void, 0x80000000 | 16,   17,
+    QMetaType::Void, 0x80000000 | 8,    9,
     QMetaType::Void,
 
        0        // eod
@@ -115,26 +93,21 @@ void modus::SvAbstractProtocol::qt_static_metacall(QObject *_o, QMetaObject::Cal
         Q_UNUSED(_t)
         switch (_id) {
         case 0: _t->affirmDeviceAlive(); break;
-        case 1: _t->inputBufferParsed((*reinterpret_cast< const quint64(*)>(_a[1]))); break;
-        case 2: _t->outputBufferReady(); break;
-        case 3: _t->message((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< sv::log::Level(*)>(_a[2])),(*reinterpret_cast< sv::log::MessageTypes(*)>(_a[3]))); break;
-        case 4: _t->message((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< sv::log::Level(*)>(_a[2]))); break;
-        case 5: _t->message((*reinterpret_cast< const QString(*)>(_a[1]))); break;
-        case 6: _t->processInputData(); break;
-        case 7: _t->processOutputData(); break;
-        case 8: _t->validateSignals(); break;
-        case 9: _t->queue((*reinterpret_cast< SvSignal*(*)>(_a[1]))); break;
-        case 10: _t->stop(); break;
+        case 1: _t->message((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2])),(*reinterpret_cast< int(*)>(_a[3]))); break;
+        case 2: _t->message((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
+        case 3: _t->message((*reinterpret_cast< const QString(*)>(_a[1]))); break;
+        case 4: _t->queue((*reinterpret_cast< modus::SvSignal*(*)>(_a[1]))); break;
+        case 5: _t->stop(); break;
         default: ;
         }
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
         switch (_id) {
         default: *reinterpret_cast<int*>(_a[0]) = -1; break;
-        case 9:
+        case 4:
             switch (*reinterpret_cast<int*>(_a[1])) {
             default: *reinterpret_cast<int*>(_a[0]) = -1; break;
             case 0:
-                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< SvSignal* >(); break;
+                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< modus::SvSignal* >(); break;
             }
             break;
         }
@@ -148,23 +121,9 @@ void modus::SvAbstractProtocol::qt_static_metacall(QObject *_o, QMetaObject::Cal
             }
         }
         {
-            typedef void (SvAbstractProtocol::*_t)(const quint64 );
-            if (*reinterpret_cast<_t *>(_a[1]) == static_cast<_t>(&SvAbstractProtocol::inputBufferParsed)) {
-                *result = 1;
-                return;
-            }
-        }
-        {
-            typedef void (SvAbstractProtocol::*_t)();
-            if (*reinterpret_cast<_t *>(_a[1]) == static_cast<_t>(&SvAbstractProtocol::outputBufferReady)) {
-                *result = 2;
-                return;
-            }
-        }
-        {
-            typedef void (SvAbstractProtocol::*_t)(const QString , sv::log::Level , sv::log::MessageTypes );
+            typedef void (SvAbstractProtocol::*_t)(const QString , int , int );
             if (*reinterpret_cast<_t *>(_a[1]) == static_cast<_t>(&SvAbstractProtocol::message)) {
-                *result = 3;
+                *result = 1;
                 return;
             }
         }
@@ -196,13 +155,13 @@ int modus::SvAbstractProtocol::qt_metacall(QMetaObject::Call _c, int _id, void *
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 11)
+        if (_id < 6)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 11;
+        _id -= 6;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 11)
+        if (_id < 6)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 11;
+        _id -= 6;
     }
     return _id;
 }
@@ -214,23 +173,10 @@ void modus::SvAbstractProtocol::affirmDeviceAlive()
 }
 
 // SIGNAL 1
-void modus::SvAbstractProtocol::inputBufferParsed(const quint64 _t1)
-{
-    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
-    QMetaObject::activate(this, &staticMetaObject, 1, _a);
-}
-
-// SIGNAL 2
-void modus::SvAbstractProtocol::outputBufferReady()
-{
-    QMetaObject::activate(this, &staticMetaObject, 2, nullptr);
-}
-
-// SIGNAL 3
-void modus::SvAbstractProtocol::message(const QString _t1, sv::log::Level _t2, sv::log::MessageTypes _t3)
+void modus::SvAbstractProtocol::message(const QString _t1, int _t2, int _t3)
 {
     void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)), const_cast<void*>(reinterpret_cast<const void*>(&_t3)) };
-    QMetaObject::activate(this, &staticMetaObject, 3, _a);
+    QMetaObject::activate(this, &staticMetaObject, 1, _a);
 }
 QT_WARNING_POP
 QT_END_MOC_NAMESPACE
