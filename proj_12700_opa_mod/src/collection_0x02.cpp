@@ -46,7 +46,7 @@ void opa::Type0x02::updateSignals(const opa::DATA* data)
       quint32 uniq_index = (static_cast<quint32>(sensor) << 8) + static_cast<quint32>(faktor);
 
       if(m_signals.contains(uniq_index)) {
-        for (modus::SvSignal* signal: m_signals.values(uniq_index))
+        foreach (modus::SvSignal* signal, m_signals.values(uniq_index))
           signal->setValue(1);
       }
 

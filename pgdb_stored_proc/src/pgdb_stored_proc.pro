@@ -10,7 +10,7 @@ QT       -= gui
 
 CONFIG += c++11 plugin
 
-TARGET = /home/user/Modus/lib/pgdb_stored_proc
+TARGET = /home/developer/Modus/lib/storages/pgdb_stored_proc
 TEMPLATE = lib
 
 DEFINES += PGDB_STORED_PROC_LIBRARY

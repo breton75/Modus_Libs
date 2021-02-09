@@ -73,6 +73,8 @@ namespace opa {
 
 class opa::SvOPA: public modus::SvAbstractProtocol
 {
+  Q_OBJECT
+
 public:
   SvOPA();
 
@@ -108,7 +110,6 @@ private:
 
   PARSERESULT parse();
   void confirmation();
-
 
 };
 

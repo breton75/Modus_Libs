@@ -1,67 +1,29 @@
 ﻿#include "pgdb_stored_proc_aggregate.h"
 
 
-pgspa::pgStoredProcAggStorage::pgStoredProcAggStorage(sv::SvAbstractLogger* logger):
-  as::SvAbstractStorage(logger)
+pgsp::pgStoredProcStorage::pgStoredProcStorage()
 {
-  p_signals.clear();
-
   m_reconnect_timer = new QTimer();
   m_reconnect_timer->setInterval(1000);
-
 }
 
-pgspa::pgStoredProcAggStorage::~pgStoredProcAggStorage()
+pgsp::pgStoredProcStorage::~pgStoredProcStorage()
 {
-//  stop();
-//  if(_thr)
-//    delete _thr;
-
-//  _thr->stop();
-
-//  while(_thr)
-//    QCoreApplication::processEvents();
-
-//  /** при завершении работы сервера, сбрасываем все сигналы **/
-//  foreach (SvSignal* signal, _signals)
-//    signal->setLostValue();
+  delete PGDB;
+  QSqlDatabase::removeDatabase(QString("PGConn_%1").arg(p_config->id));
 
   deleteLater();
 
 }
 
-bool pgspa::pgStoredProcAggStorage::configure(const as::StorageConfig& config)
+bool pgsp::pgStoredProcStorage::configure(modus::StorageConfig *config)
 {
   p_config = config;
 
   try {
 
     /* парсим - проверяем, что парметры заданы верно */
-    m_params = pgspa::StorageParams::fromJson(p_config.params);
-
-    p_is_configured = true;
-
-    return true;
-
-  }
-
-  catch(SvException& e) {
-
-    p_is_configured = false;
-    p_last_error = e.error;
-
-    return false;
-  }
-}
-
-bool pgspa::pgStoredProcAggStorage::init()
-{
-  try {
-
-    p_thread = new pgspa::pgStoredProcAggThread(this);
-
-    if(!p_thread->init())
-      throw SvException(p_thread->lastError());
+    m_params = pgsp::Params::fromJson(p_config->params);
 
     return true;
 
@@ -71,120 +33,24 @@ bool pgspa::pgStoredProcAggStorage::init()
 
     p_last_error = e.error;
 
-    delete p_thread;
-    p_thread = nullptr;
-
-    // запускаем реконнект
-    if(!m_reconnect_timer->isActive()) // обязательно проверяем!
-      start_reconnect_timer();
-
-    logerr(p_last_error);
-
     return false;
-
   }
 }
 
-void pgspa::pgStoredProcAggStorage::logerr(QString e)
-{
-  *p_logger << sv::log::TimeZZZ << sv::log::llError << e << '\n' << sv::log::endl;
-}
-
-void pgspa::pgStoredProcAggStorage::logreconnect()
-{
-  if(p_logger)
-    *p_logger << sv::log::TimeZZZ << sv::log::llInfo << QString("Фух! Восстановлена связь с хранилищем %1 [%2:%3:%4]\n")
-                    .arg(p_config.name).arg(m_params.db)
-                    .arg(m_params.host).arg(m_params.port)
-              << sv::log::endl;
-}
-
-void pgspa::pgStoredProcAggStorage::reconnect()
-{
-  if(init()) {
-
-    stop_reconnect_timer();
-    start();
-
-    logreconnect();
-
-  }
-}
-
-void pgspa::pgStoredProcAggStorage::start_reconnect_timer()
-{
-  m_reconnect_timer->start();
-  connect(m_reconnect_timer, &QTimer::timeout, this, &pgspa::pgStoredProcAggStorage::reconnect);
-}
-
-void pgspa::pgStoredProcAggStorage::stop_reconnect_timer()
-{
-  m_reconnect_timer->stop();
-  disconnect(m_reconnect_timer, &QTimer::timeout, this, &pgspa::pgStoredProcAggStorage::reconnect);
-}
-
-void pgspa::pgStoredProcAggStorage::stop()
-{
-  if(!p_thread)
-    return;
-
-  /// при ручном завершении, отключаем переподключение
-  disconnect(p_thread, &pgspa::pgStoredProcAggThread::finished, this, &pgspa::pgStoredProcAggStorage::start_reconnect_timer);
-  disconnect((pgspa::pgStoredProcAggThread*)p_thread, &pgspa::pgStoredProcAggThread::connected, this, &pgspa::pgStoredProcAggStorage::logreconnect);
-
-  stop_reconnect_timer();
-  delete m_reconnect_timer;
-
-  p_thread->stop();
-
-}
-
-void pgspa::pgStoredProcAggStorage::start()
-{
-  if(!p_thread)
-    return;
-
-//  connect(_thr, &pgspa::pgStoredProcAggThread::finished, _thr, &pgspa::pgStoredProcAggThread::deleteLater);
-  connect((pgspa::pgStoredProcAggThread*)p_thread, &pgspa::pgStoredProcAggThread::finished, this, &pgspa::pgStoredProcAggStorage::deleteThread);
-//  connect(_thr, &pgspa::pgStoredProcAggThread::finished, [=](){ delete _thr; _thr = nullptr; } );
-  connect((pgspa::pgStoredProcAggThread*)p_thread, &pgspa::pgStoredProcAggThread::finished, this, &pgspa::pgStoredProcAggStorage::start_reconnect_timer);
-  connect((pgspa::pgStoredProcAggThread*)p_thread, &pgspa::pgStoredProcAggThread::error, this, &pgspa::pgStoredProcAggStorage::logerr);
-
-  p_thread->start();
-
-}
-
-//void pgspa::pgStoredProcAggStorage::stopThread()
-//{
-//  _thr->stop();
-//}
-
-void pgspa::pgStoredProcAggStorage::deleteThread()
-{
-  delete p_thread;
-  p_thread = nullptr;
-}
-
-/** *************  Storage Thread  ******************* */
-
-pgspa::pgStoredProcAggThread::pgStoredProcAggThread(as::SvAbstractStorage* storage):
-  as::SvAbstractStorageThread(storage)
-{
-
-}
-
-bool pgspa::pgStoredProcAggThread::init()
+bool pgsp::pgStoredProcStorage::connect()
 {
   try {
 
-    m_params = pgspa::StorageParams::fromJson(p_storage->config()->params);
-
+    if(PGDB) {
+      delete PGDB;
+      QSqlDatabase::removeDatabase(QString("PGConn_%1").arg(p_config->id));
+    }
 
     PGDB = new SvPGDB();
     PGDB->setConnectionParams(m_params.db, m_params.host, m_params.port,
                               m_params.login, m_params.pass, m_params.role);
 
-    QSqlError err = PGDB->connectToDB(QString("PGConn_%1").arg(p_storage->config()->id));
+    QSqlError err = PGDB->connectToDB(QString("PGConn_%1").arg(p_config->id));
 
     if(err.type() != QSqlError::NoError)
       throw SvException(err.text());
@@ -196,47 +62,61 @@ bool pgspa::pgStoredProcAggThread::init()
   catch(SvException& e) {
 
     p_last_error = e.error;
-    emit error(e.error);
+    emit message(e.error, sv::log::llError, sv::log::mtError);
 
     return false;
 
   }
 }
 
-pgspa::pgStoredProcAggThread::~pgStoredProcAggThread()
-{
-//  stop();
-  delete PGDB;
-  QSqlDatabase::removeDatabase(QString("PGConn_%1").arg(p_storage->config()->id));
+//void pgsp::pgStoredProcStorage::reconnect()
+//{
+//  if(connect()) {
 
-  deleteLater();
-}
+//    stop_reconnect_timer();
+//    start();
 
-void pgspa::pgStoredProcAggThread::stop()
-{
-  p_started = false;
-  while(!p_finished) QCoreApplication::instance()->processEvents();
-}
+//    logreconnect();
 
-void pgspa::pgStoredProcAggThread::run()
+//  }
+//}
+
+//void pgsp::pgStoredProcStorage::start_reconnect_timer()
+//{
+////  m_reconnect_timer->start();
+////  connect(m_reconnect_timer, &QTimer::timeout, this, &pgsp::pgStoredProcStorage::reconnect);
+//}
+
+//void pgsp::pgStoredProcStorage::stop_reconnect_timer()
+//{
+////  m_reconnect_timer->stop();
+////  disconnect(m_reconnect_timer, &QTimer::timeout, this, &pgsp::pgStoredProcStorage::reconnect);
+//}
+
+void pgsp::pgStoredProcStorage::processSignals()
 {
   auto Var2Str = [](QVariant value) -> QString {
 
-      switch (value.type()) {
-        case QMetaType::Int:
+      if(value.isValid())
+      {
+        switch (value.type()) {
+          case QVariant::Int:
 
-          return value.isValid() ? QString::number(value.toDouble()) : "-1.0";
-          break;
+            return QString::number(value.toInt());
+            break;
 
-        case QMetaType::Double:
+          case QVariant::Double:
 
-          return value.isValid() ? QString::number(value.toDouble()) : "-3.0";
-          break;
+            return QString::number(value.toDouble());
+            break;
 
-        default:
-          return "-1.0";
+          default:
+            return "NULL";
 
+        }
       }
+
+      return "NULL";
 
   };
 
@@ -244,26 +124,30 @@ void pgspa::pgStoredProcAggThread::run()
 
   elapsed_time.start();
 
-  p_started = true;
-  p_finished = false;
+  p_is_active = true;
 
-  bool need_to_finish = false;
+  bool need_to_finish    = false;
+  bool need_to_reconnect = true;
 
   while(!need_to_finish) {
 
+    if(need_to_reconnect && !connect())
+      continue;
+
+    need_to_reconnect = false;
+
     msleep(1); // чтоб не грузило систему
 
-    if(elapsed_time.elapsed() < m_params.interval )
+    if(quint64(elapsed_time.elapsed()) < p_config->interval )
       continue;
 
     elapsed_time.restart();
 
-    QString signals_values = "";
-    QString signals_reserve_values = "";
+    QMap<QString, QString> signals_values;
 
-    for(SvSignal* signal: *p_signals) {
+    for(modus::SvSignal* signal: p_signals) {
 
-      if(!p_started) // чтоб не перебирать все сигналы, если пришел stop
+      if(!p_is_active) // чтоб не перебирать все сигналы, если пришел stop
         break;
 
 #ifdef TEST_VALUES
@@ -275,53 +159,33 @@ void pgspa::pgStoredProcAggThread::run()
 //        qDebug() << signal->value();
 #endif
 
-//      if((signal->config()->timeout >  0 && signal->isAlive()) ||
-//         (signal->config()->timeout == 0 && signal->isDeviceAlive()))
       {
-        signals_values.append(QString("%1;%2|").arg(signal->id()).arg(Var2Str(signal->value())));
+
+        if(signals_values.contains(signal->config()->type))
+          signals_values[signal->config()->type] += QString("%1;%2|").arg(signal->id()).arg(Var2Str(signal->value()));
+
+        else
+          signals_values.insert(signal->config()->type, QString("%1;%2|").arg(signal->id()).arg(Var2Str(signal->value())));
+
       }
-      /* алгоритм при потере сигнала:
-       * 1) если для сигнала назначен резервный сигнал, то сигналу присваивается значение резервного сигнала
-       * 2) если резервного сигнала нет, то присваиваем сигналу значение timeout_value,
-       * 3) в первый раз зписываем в базу через функцию set_values. таким образом фиксируем в базе время потери связи
-       * 4) впоследующем, если сигнал уже имеет значение timeout_value, то пропускаем его фиксацию в базе, для экономии ресурсов
-       */
-//      else {
-
-//        if(signal->config()->timeout_signal_id > 0)
-//        {
-//          if(signals_reserv.contains(signal->config()->type))
-//            signals_reserv[signal->config()->type] += QString("%1;%2|").arg(signal->id()).arg(signal->config()->timeout_signal_id);
-
-//          else
-//            signals_reserv.insert(signal->config()->type, QString("%1;%2|").arg(signal->id()).arg(signal->config()->timeout_signal_id));
-//        }
-
-
-//        else
-//        {
-//          /* если сигналу уже назначено значение timeout_value, то не добавляем сигнал к скрипту */
-////          if(signal->previousValue() != signal->value())
-//          {
-//            if(signals_values.contains(signal->config()->type))
-//              signals_values[signal->config()->type] += QString("%1;%2|").arg(signal->id()).arg(Var2Str(signal->value())); // signal->config()->timeout_value);
-
-//            else
-//              signals_values.insert(signal->config()->type, QString("%1;%2|").arg(signal->id()).arg(Var2Str(signal->value()))); // signal->config()->timeout_value));
-//          }
-//        }
-//      }
     }
 
-    /** здесь проверяем флаг p_started. если p_started = false, то есть пришел внешний сигнал на завершение потока,
+    /** здесь проверяем флаг p_is_active. если p_is_active = false, то есть пришел внешний сигнал на завершение потока,
      * то проходим по всем сигналам, и присваиваем им timeout_value.
      * присваиваем _need_to_finish = true. после прохода по всем сигналам, будет произведена запись в БД
      * на следующем прходе, главный цикл завершится, т.к. _need_to_finish уже true
      * такая схема применена для гарантированной записи в БД значений timeout_value при завершении работы сервера */
-    if(!p_started)
+    if(!p_is_active)
     {
-      for(SvSignal* signal: *p_signals)
-        signals_values.append(QString("%1;%2|").arg(signal->id()).arg(Var2Str(QVariant())));
+      for(modus::SvSignal* signal: p_signals) {
+
+        if(signals_values.contains(signal->config()->type))
+          signals_values[signal->config()->type] += QString("%1;%2|").arg(signal->id()).arg(Var2Str(QVariant()));
+
+        else
+          signals_values.insert(signal->config()->type, QString("%1;%2|").arg(signal->id()).arg(Var2Str(QVariant())));
+
+      }
 
       need_to_finish = true;
     }
@@ -329,53 +193,42 @@ void pgspa::pgStoredProcAggThread::run()
 
     try {
 
-        if(!signals_values.isEmpty()) {
+      foreach (QString type, signals_values.keys()) {
 
-          signals_values.chop(1);
+        if(!signals_values.value(type).isEmpty()) {
 
-          QSqlError serr = PGDB->execSQL(QString(PG_FUNC_SET_VALUES)
-                                         .arg(m_params.func_set_values)
-                                         .arg(signals_values));
+          signals_values[type].chop(1);
 
-          if(serr.type() != QSqlError::NoError)
-            throw SvException(serr.text());
-
-        }
-
-        if(!signals_reserve_values.isEmpty()) {
-
-          signals_reserve_values.chop(1);
-          QSqlError serr = PGDB->execSQL(QString(PG_FUNC_SET_RESERVE_VALUES).arg(signals_reserve_values));
+          QSqlError serr = PGDB->execSQL(QString(PROC_CALL)
+                                         .arg(m_params.proc_name)
+                                         .arg(signals_values.value(type)));
 
           if(serr.type() != QSqlError::NoError)
             throw SvException(serr.text());
 
         }
       }
-
+    }
 
     catch(SvException& e) {
 
-      emit error(e.error);
+      emit message(e.error, sv::log::llError, sv::log::mtError);
 
-      /// если произошла потеря связи с серверм БД, то завершаем поток
-      need_to_finish = PGDB->connected();
-      p_started = PGDB->connected();      // это не работает. встает на db.exec и стоит пока соединение не появится снова
+      // если произошла потеря связи с серверм БД, то завершаем поток
+      need_to_reconnect = !PGDB->connected();      // это не работает. встает на db.exec и стоит пока соединение не появится снова
 
-      /// если нет, то продолжаем работать
+      // если нет, то продолжаем работать
 
     }
   }
-
-  p_finished = true;
-
 }
 
 
 
 /** ********** EXPORT ************ **/
-as::SvAbstractStorage* create()
+modus::SvAbstractStorage* create()
 {
-  return new pgspa::pgStoredProcAggStorage();
+  modus::SvAbstractStorage* storage = new pgsp::pgStoredProcStorage();
+  return storage;
 }
 

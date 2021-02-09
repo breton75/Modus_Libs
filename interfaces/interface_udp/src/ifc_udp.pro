@@ -22,6 +22,7 @@ SOURCES += \
     sv_udp.cpp
 
 HEADERS += \
+    ../../../../Modus/global/device/interface/sv_abstract_interface.h \
     ifc_udp_global.h \
     sv_udp.h \
     udp_defs.h

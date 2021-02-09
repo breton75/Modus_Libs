@@ -71,8 +71,8 @@ void opa::SvOPA::run()
 
   while(p_is_active) {
 
-    p_io_buffer->confirm->mutex.lock();
-    p_io_buffer->input->mutex.lock();     // если нужен ответ квитирование
+    p_io_buffer->confirm->mutex.lock();     // если нужен ответ квитирование
+    p_io_buffer->input->mutex.lock();
 
     opa::PARSERESULT result = parse();
 
@@ -114,7 +114,8 @@ opa::PARSERESULT opa::SvOPA::parse()
   *  в этой точке в буфере должны находиться правильные данные
   *  производим непосредственно разбор данных и назначаем значения сигналам
   **/
-  emit message(QString(">> %1").arg(QString(QByteArray((const char*)&p_io_buffer->input->data[0], p_io_buffer->input->offset).toHex())));
+//  qDebug() << QString(QByteArray((const char*)&p_io_buffer->input->data[0], p_io_buffer->input->offset).toHex());
+  message(QString(">> %1").arg(QString(QByteArray((const char*)&p_io_buffer->input->data[0], p_io_buffer->input->offset).toHex())));
 
   // если хоть какие то пакеты сыпятся (для данного получателя), то
   // считаем, что линия передачи в порядке и задаем новую контрольную точку времени
@@ -179,6 +180,7 @@ opa::PARSERESULT opa::SvOPA::parse()
       default:
           break;
   }
+
 
   return opa::PARSERESULT(DO_RESET, QDateTime::currentDateTime());
 }

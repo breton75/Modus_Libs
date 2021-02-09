@@ -74,8 +74,6 @@ void SvUdp::run()
 //      p_io_buffer->output.mutex.unlock();
 
     }
-
-
   }
 }
 
@@ -85,10 +83,10 @@ void SvUdp::write(modus::BUFF* buffer)
   bool written = m_socket->writeDatagram(&buffer->data[0], buffer->offset, m_params.host, m_params.send_port) > 0;
   m_socket->flush();
 
-  buffer->reset();
-
   if(written)
     emit message(QString("<< %1").arg(QString(QByteArray((const char*)&buffer->data[0], buffer->offset).toHex())));
+
+  buffer->reset();
 
 }
 

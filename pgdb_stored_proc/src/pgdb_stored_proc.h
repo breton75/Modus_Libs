@@ -11,6 +11,7 @@
 #include <QTimer>
 #include <QHostAddress>
 #include <QTime>
+#include <QElapsedTimer>
 
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -46,9 +47,7 @@ public:
   pgStoredProcStorage();
   ~pgStoredProcStorage();
 
-  bool init(modus::StorageConfig* config) Q_DECL_OVERRIDE;
-
-  void stop()  Q_DECL_OVERRIDE;
+  bool configure(modus::StorageConfig* config) Q_DECL_OVERRIDE;
 
 private:
   pgsp::Params m_params;
@@ -59,7 +58,7 @@ private:
   QTimer* m_reconnect_timer = nullptr;
 
   bool connect();
-  void run() override;
+  void processSignals() override;
 
 private slots:
   void reconnect();

@@ -33,7 +33,7 @@ namespace pgsp {
       QString role            = "postgres";
       QString proc_name       = "set_values";
 
-      static Params fromJson(const QString& json_string) throw (SvException)
+      static Params fromJson(const QString& json_string) //throw (SvException)
       {
         QJsonParseError err;
         QJsonDocument jd = QJsonDocument::fromJson(json_string.toUtf8(), &err);
@@ -46,12 +46,12 @@ namespace pgsp {
           return fromJsonObject(jd.object());
 
         }
-        catch(SvException e) {
+        catch(SvException& e) {
           throw e;
         }
       }
 
-      static Params fromJsonObject(const QJsonObject &object) throw (SvException)
+      static Params fromJsonObject(const QJsonObject &object) //throw (SvException)
       {
         // проверяем наличие основных полей
         QStringList l = QStringList() << P_HOST << P_DB;

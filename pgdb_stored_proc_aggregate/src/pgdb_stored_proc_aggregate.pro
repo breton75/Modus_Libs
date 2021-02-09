@@ -10,7 +10,7 @@ QT       -= gui
 
 CONFIG += c++11 plugin
 
-TARGET = /home/user/Modus/lib/pgdb_stored_proc_aggregate
+TARGET = /home/developer/Modus/lib/storages/pgdb_stored_proc_aggregate
 TEMPLATE = lib
 
 DEFINES += PGDB_STORED_PROC_AGGREGATE_LIBRARY
@@ -18,15 +18,15 @@ DEFINES += PGDB_STORED_PROC_AGGREGATE_LIBRARY
 SOURCES += \
     pgdb_stored_proc_aggregate.cpp \
     ../../../svlib/sv_pgdb.cpp \
-    ../../../Modus/global/sv_signal.cpp
+    ../../../Modus/global/signal/sv_signal.cpp
 
 HEADERS += \
     pgdb_stored_proc_aggregate_global.h \
     pgdb_stored_proc_aggregate.h \
-    ../../../Modus/global/sv_abstract_storage.h \
-    ../../../svlib/sv_pgdb.h \
-    ../../../svlib/sv_exception.h \
-    ../../../Modus/global/sv_signal.h
+    ../../../Modus/global/storage/sv_abstract_storage.h \
+    ../../../Modus/global/misc/sv_pgdb.h \
+    ../../../Modus/global/misc/sv_exception.h \
+    ../../../Modus/global/signal/sv_signal.h
 
 unix {
     target.path = /usr/lib

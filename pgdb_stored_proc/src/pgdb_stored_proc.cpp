@@ -16,7 +16,7 @@ pgsp::pgStoredProcStorage::~pgStoredProcStorage()
 
 }
 
-bool pgsp::pgStoredProcStorage::init(modus::StorageConfig* config)
+bool pgsp::pgStoredProcStorage::configure(modus::StorageConfig *config)
 {
   p_config = config;
 
@@ -93,20 +93,7 @@ bool pgsp::pgStoredProcStorage::connect()
 ////  disconnect(m_reconnect_timer, &QTimer::timeout, this, &pgsp::pgStoredProcStorage::reconnect);
 //}
 
-void pgsp::pgStoredProcStorage::stop()
-{
-  /// при ручном завершении, отключаем переподключение
-//  disconnect(p_thread, &pgsp::pgStoredProcThread::finished, this, &pgsp::pgStoredProcStorage::start_reconnect_timer);
-//  disconnect((pgsp::pgStoredProcThread*)p_thread, &pgsp::pgStoredProcThread::connected, this, &pgsp::pgStoredProcStorage::logreconnect);
-
-//  stop_reconnect_timer();
-//  delete m_reconnect_timer;
-
-//  p_thread->stop();
-
-}
-
-void pgsp::pgStoredProcStorage::run()
+void pgsp::pgStoredProcStorage::processSignals()
 {
   auto Var2Str = [](QVariant value) -> QString {
 
@@ -158,7 +145,7 @@ void pgsp::pgStoredProcStorage::run()
 
     QMap<QString, QString> signals_values;
 
-    for(modus::SvSignal* signal: *p_signals) {
+    for(modus::SvSignal* signal: p_signals) {
 
       if(!p_is_active) // чтоб не перебирать все сигналы, если пришел stop
         break;
@@ -189,7 +176,7 @@ void pgsp::pgStoredProcStorage::run()
      * такая схема применена для гарантированной записи в БД значений timeout_value при завершении работы сервера */
     if(!p_is_active)
     {
-      for(modus::SvSignal* signal: *p_signals) {
+      for(modus::SvSignal* signal: p_signals) {
 
         if(signals_values.contains(signal->config()->type))
           signals_values[signal->config()->type] += QString("%1;%2|").arg(signal->id()).arg(Var2Str(QVariant()));
