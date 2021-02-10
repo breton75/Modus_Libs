@@ -7,7 +7,7 @@
 *****************************************************************************/
 
 #include <memory>
-#include "../../protocols/12700/oht/src/collection_status.h"
+#include "../src/collection_status.h"
 #include <QtCore/qbytearray.h>
 #include <QtCore/qmetatype.h>
 #if !defined(Q_MOC_OUTPUT_REVISION)
@@ -21,25 +21,25 @@
 QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
-struct qt_meta_stringdata_oht__LineStatus_t {
+struct qt_meta_stringdata_opa__LineStatus_t {
     QByteArrayData data[1];
     char stringdata0[16];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
-    qptrdiff(offsetof(qt_meta_stringdata_oht__LineStatus_t, stringdata0) + ofs \
+    qptrdiff(offsetof(qt_meta_stringdata_opa__LineStatus_t, stringdata0) + ofs \
         - idx * sizeof(QByteArrayData)) \
     )
-static const qt_meta_stringdata_oht__LineStatus_t qt_meta_stringdata_oht__LineStatus = {
+static const qt_meta_stringdata_opa__LineStatus_t qt_meta_stringdata_opa__LineStatus = {
     {
-QT_MOC_LITERAL(0, 0, 15) // "oht::LineStatus"
+QT_MOC_LITERAL(0, 0, 15) // "opa::LineStatus"
 
     },
-    "oht::LineStatus"
+    "opa::LineStatus"
 };
 #undef QT_MOC_LITERAL
 
-static const uint qt_meta_data_oht__LineStatus[] = {
+static const uint qt_meta_data_opa__LineStatus[] = {
 
  // content:
        8,       // revision
@@ -55,7 +55,7 @@ static const uint qt_meta_data_oht__LineStatus[] = {
        0        // eod
 };
 
-void oht::LineStatus::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+void opa::LineStatus::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     Q_UNUSED(_o);
     Q_UNUSED(_id);
@@ -63,30 +63,30 @@ void oht::LineStatus::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int 
     Q_UNUSED(_a);
 }
 
-QT_INIT_METAOBJECT const QMetaObject oht::LineStatus::staticMetaObject = { {
+QT_INIT_METAOBJECT const QMetaObject opa::LineStatus::staticMetaObject = { {
     QMetaObject::SuperData::link<SvAbstractSignalCollection::staticMetaObject>(),
-    qt_meta_stringdata_oht__LineStatus.data,
-    qt_meta_data_oht__LineStatus,
+    qt_meta_stringdata_opa__LineStatus.data,
+    qt_meta_data_opa__LineStatus,
     qt_static_metacall,
     nullptr,
     nullptr
 } };
 
 
-const QMetaObject *oht::LineStatus::metaObject() const
+const QMetaObject *opa::LineStatus::metaObject() const
 {
     return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
-void *oht::LineStatus::qt_metacast(const char *_clname)
+void *opa::LineStatus::qt_metacast(const char *_clname)
 {
     if (!_clname) return nullptr;
-    if (!strcmp(_clname, qt_meta_stringdata_oht__LineStatus.stringdata0))
+    if (!strcmp(_clname, qt_meta_stringdata_opa__LineStatus.stringdata0))
         return static_cast<void*>(this);
     return SvAbstractSignalCollection::qt_metacast(_clname);
 }
 
-int oht::LineStatus::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+int opa::LineStatus::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = SvAbstractSignalCollection::qt_metacall(_c, _id, _a);
     return _id;

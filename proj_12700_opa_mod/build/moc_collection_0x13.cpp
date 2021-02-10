@@ -1,5 +1,5 @@
 /****************************************************************************
-** Meta object code from reading C++ file 'collection_status.h'
+** Meta object code from reading C++ file 'collection_0x13.h'
 **
 ** Created by: The Qt Meta Object Compiler version 67 (Qt 5.15.2)
 **
@@ -7,11 +7,11 @@
 *****************************************************************************/
 
 #include <memory>
-#include "../../protocols/12700/oht/src/collection_status.h"
+#include "../../protocols/12700/oht/src/collection_0x13.h"
 #include <QtCore/qbytearray.h>
 #include <QtCore/qmetatype.h>
 #if !defined(Q_MOC_OUTPUT_REVISION)
-#error "The header file 'collection_status.h' doesn't include <QObject>."
+#error "The header file 'collection_0x13.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 67
 #error "This file was generated using the moc from 5.15.2. It"
 #error "cannot be used with the include files from this version of Qt."
@@ -21,25 +21,25 @@
 QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
-struct qt_meta_stringdata_oht__LineStatus_t {
+struct qt_meta_stringdata_oht__Type0x13_t {
     QByteArrayData data[1];
-    char stringdata0[16];
+    char stringdata0[14];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
-    qptrdiff(offsetof(qt_meta_stringdata_oht__LineStatus_t, stringdata0) + ofs \
+    qptrdiff(offsetof(qt_meta_stringdata_oht__Type0x13_t, stringdata0) + ofs \
         - idx * sizeof(QByteArrayData)) \
     )
-static const qt_meta_stringdata_oht__LineStatus_t qt_meta_stringdata_oht__LineStatus = {
+static const qt_meta_stringdata_oht__Type0x13_t qt_meta_stringdata_oht__Type0x13 = {
     {
-QT_MOC_LITERAL(0, 0, 15) // "oht::LineStatus"
+QT_MOC_LITERAL(0, 0, 13) // "oht::Type0x13"
 
     },
-    "oht::LineStatus"
+    "oht::Type0x13"
 };
 #undef QT_MOC_LITERAL
 
-static const uint qt_meta_data_oht__LineStatus[] = {
+static const uint qt_meta_data_oht__Type0x13[] = {
 
  // content:
        8,       // revision
@@ -55,7 +55,7 @@ static const uint qt_meta_data_oht__LineStatus[] = {
        0        // eod
 };
 
-void oht::LineStatus::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+void oht::Type0x13::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     Q_UNUSED(_o);
     Q_UNUSED(_id);
@@ -63,30 +63,30 @@ void oht::LineStatus::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int 
     Q_UNUSED(_a);
 }
 
-QT_INIT_METAOBJECT const QMetaObject oht::LineStatus::staticMetaObject = { {
+QT_INIT_METAOBJECT const QMetaObject oht::Type0x13::staticMetaObject = { {
     QMetaObject::SuperData::link<SvAbstractSignalCollection::staticMetaObject>(),
-    qt_meta_stringdata_oht__LineStatus.data,
-    qt_meta_data_oht__LineStatus,
+    qt_meta_stringdata_oht__Type0x13.data,
+    qt_meta_data_oht__Type0x13,
     qt_static_metacall,
     nullptr,
     nullptr
 } };
 
 
-const QMetaObject *oht::LineStatus::metaObject() const
+const QMetaObject *oht::Type0x13::metaObject() const
 {
     return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
-void *oht::LineStatus::qt_metacast(const char *_clname)
+void *oht::Type0x13::qt_metacast(const char *_clname)
 {
     if (!_clname) return nullptr;
-    if (!strcmp(_clname, qt_meta_stringdata_oht__LineStatus.stringdata0))
+    if (!strcmp(_clname, qt_meta_stringdata_oht__Type0x13.stringdata0))
         return static_cast<void*>(this);
     return SvAbstractSignalCollection::qt_metacast(_clname);
 }
 
-int oht::LineStatus::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+int oht::Type0x13::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = SvAbstractSignalCollection::qt_metacall(_c, _id, _a);
     return _id;

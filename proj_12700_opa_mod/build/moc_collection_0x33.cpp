@@ -7,7 +7,7 @@
 *****************************************************************************/
 
 #include <memory>
-#include "../src/collection_0x33.h"
+#include "../../protocols/12700/oht/src/collection_0x33.h"
 #include <QtCore/qbytearray.h>
 #include <QtCore/qmetatype.h>
 #if !defined(Q_MOC_OUTPUT_REVISION)
@@ -21,25 +21,25 @@
 QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
-struct qt_meta_stringdata_opa__Type0x33_t {
+struct qt_meta_stringdata_oht__Type0x33_t {
     QByteArrayData data[1];
     char stringdata0[14];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
-    qptrdiff(offsetof(qt_meta_stringdata_opa__Type0x33_t, stringdata0) + ofs \
+    qptrdiff(offsetof(qt_meta_stringdata_oht__Type0x33_t, stringdata0) + ofs \
         - idx * sizeof(QByteArrayData)) \
     )
-static const qt_meta_stringdata_opa__Type0x33_t qt_meta_stringdata_opa__Type0x33 = {
+static const qt_meta_stringdata_oht__Type0x33_t qt_meta_stringdata_oht__Type0x33 = {
     {
-QT_MOC_LITERAL(0, 0, 13) // "opa::Type0x33"
+QT_MOC_LITERAL(0, 0, 13) // "oht::Type0x33"
 
     },
-    "opa::Type0x33"
+    "oht::Type0x33"
 };
 #undef QT_MOC_LITERAL
 
-static const uint qt_meta_data_opa__Type0x33[] = {
+static const uint qt_meta_data_oht__Type0x33[] = {
 
  // content:
        8,       // revision
@@ -55,7 +55,7 @@ static const uint qt_meta_data_opa__Type0x33[] = {
        0        // eod
 };
 
-void opa::Type0x33::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+void oht::Type0x33::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     Q_UNUSED(_o);
     Q_UNUSED(_id);
@@ -63,30 +63,30 @@ void opa::Type0x33::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _i
     Q_UNUSED(_a);
 }
 
-QT_INIT_METAOBJECT const QMetaObject opa::Type0x33::staticMetaObject = { {
+QT_INIT_METAOBJECT const QMetaObject oht::Type0x33::staticMetaObject = { {
     QMetaObject::SuperData::link<SvAbstractSignalCollection::staticMetaObject>(),
-    qt_meta_stringdata_opa__Type0x33.data,
-    qt_meta_data_opa__Type0x33,
+    qt_meta_stringdata_oht__Type0x33.data,
+    qt_meta_data_oht__Type0x33,
     qt_static_metacall,
     nullptr,
     nullptr
 } };
 
 
-const QMetaObject *opa::Type0x33::metaObject() const
+const QMetaObject *oht::Type0x33::metaObject() const
 {
     return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
-void *opa::Type0x33::qt_metacast(const char *_clname)
+void *oht::Type0x33::qt_metacast(const char *_clname)
 {
     if (!_clname) return nullptr;
-    if (!strcmp(_clname, qt_meta_stringdata_opa__Type0x33.stringdata0))
+    if (!strcmp(_clname, qt_meta_stringdata_oht__Type0x33.stringdata0))
         return static_cast<void*>(this);
     return SvAbstractSignalCollection::qt_metacast(_clname);
 }
 
-int opa::Type0x33::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+int oht::Type0x33::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = SvAbstractSignalCollection::qt_metacall(_c, _id, _a);
     return _id;
