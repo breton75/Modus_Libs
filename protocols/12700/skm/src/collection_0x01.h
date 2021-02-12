@@ -1,19 +1,19 @@
-﻿#ifndef TYPE0X19_H
-#define TYPE0X19_H
+﻿#ifndef TYPE0X01_H
+#define TYPE0X01_H
 
 #include <QObject>
-#include <QList>
+#include <QMap>
 
 #include "skm_defs.h"
 
 namespace skm {
 
-  struct SignalParams_0x19
+  struct SignalParams_0x01
   {
-    quint8 byte = 0;
-    quint8 bit  = 0;
+    quint8 vin    = 0;
+    quint8 faktor = 0;
 
-    static SignalParams_0x19 fromJson(const QString& json_string) //throw (SvException)
+    static SignalParams_0x01 fromJson(const QString& json_string) //throw (SvException)
     {
       QJsonParseError err;
       QJsonDocument jd = QJsonDocument::fromJson(json_string.toUtf8(), &err);
@@ -31,47 +31,50 @@ namespace skm {
       }
     }
 
-    static SignalParams_0x19 fromJsonObject(const QJsonObject &object) //throw (SvException)
+    static SignalParams_0x01 fromJsonObject(const QJsonObject &object) //throw (SvException)
     {
-      SignalParams_0x19 p;
+      SignalParams_0x01 p;
       QString P;
 
-      P = P_OPA_BYTE;
+      // vin
+      P = P_SKM_VIN;
       if(object.contains(P)) {
 
         QByteArray h = object.value(P).toString().toUtf8();
 
         bool ok = false;
-        p.byte = h.toUShort(&ok, 0);
+        p.vin = h.toUShort(&ok, 0);
 
         if(!ok)
           throw SvException(QString(IMPERMISSIBLE_VALUE)
                             .arg(P)
                             .arg(object.value(P).toVariant().toString())
-                            .arg("Номер байта должен быть задан однобайтовым целым числом в шестнадцатеричном, "
+                            .arg("Номер ВИН камеры должен быть задан однобайтовым целым числом в шестнадцатиречном, "
                                  "восьмеричном или десятичном формате в кавычках: \"0xFF\" | \"0377\" | \"255\""));
 
       }
       else
         throw SvException(QString(MISSING_PARAM).arg(P));
 
-      P = P_OPA_BIT;
+      // faktor
+      P = P_SKM_FAKTOR;
       if(object.contains(P)) {
 
         QByteArray h = object.value(P).toString().toUtf8();
 
         bool ok = false;
-        p.bit = h.toUShort(&ok, 0);
+        p.faktor = h.toUShort(&ok, 0);
 
-        if(!ok || p.bit > 7)
+        if(!ok)
           throw SvException(QString(IMPERMISSIBLE_VALUE)
                             .arg(P)
                             .arg(object.value(P).toVariant().toString())
-                            .arg("Номер бита должен быть задан однобайтовым целым числом в шестнадцатеричном, "
-                                 "восьмеричном или десятичном формате в диапазоне [0..7] в кавычках: \"0x07\" | \"07\" | \"7\""));
+                            .arg("Фактор сработки должен быть задан однобайтовым целым числом в шестнадцатиречном, "
+                                 "восьмеричном или десятичном формате в кавычках: \"0xFF\" | \"0377\" | \"255\""));
+
       }
       else
-        p.bit = 0; // throw SvException(QString(E_NO_PARAM).arg(P));
+        throw SvException(QString(MISSING_PARAM).arg(P));
 
 
       return p;
@@ -90,40 +93,30 @@ namespace skm {
     {
       QJsonObject j;
 
-      j.insert(P_OPA_BYTE, QJsonValue(QString::number(byte)).toString());
-      j.insert(P_OPA_BIT,  QJsonValue(QString::number(bit)).toString());
+      j.insert(P_SKM_VIN,    QJsonValue(vin).toString());
+      j.insert(P_SKM_FAKTOR, QJsonValue(faktor).toString());
 
       return j;
 
     }
   };
 
-  struct Signal0x19 {
-
-    Signal0x19(modus::SvSignal* signal, SignalParams_0x19 params):
-      signal(signal), params(params)
-    {  }
-
-    modus::SvSignal* signal;
-    SignalParams_0x19 params;
-
-  };
-
-  class Type0x19 : public SvAbstractSignalCollection
+  class Type0x01 : public SvAbstractSignalCollection
   {
     Q_OBJECT
   public:
-    explicit Type0x19();
+    explicit Type0x01();
 
-    void addSignal(modus::SvSignal* signal); //throw (SvException);
+    void addSignal(modus::SvSignal* signal); // throw (SvException);
 
     void updateSignals(const skm::DATA* data = nullptr);
 
   private:
-    QList<Signal0x19> m_signals;
+    QMap<quint32, modus::SvSignal*> m_signals;
+
 
   };
 }
 
 
-#endif // TYPE0X19_H
+#endif // TYPE0X01_H

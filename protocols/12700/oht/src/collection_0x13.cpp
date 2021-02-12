@@ -12,13 +12,13 @@ void oht::Type0x13::addSignal(modus::SvSignal* signal) //throw (SvException)
   {
     oht::SignalParams_0x13 p = oht::SignalParams_0x13::fromJson(signal->config()->params);
 
-    quint32 uniq_index = (static_cast<quint32>(p.route) << 8) + static_cast<quint32>(p.number);
+    quint32 uid = getUid(0, p.route, p.byte, p.bit);
 
-    if(m_signals.contains(uniq_index))
+    if(m_signals.contains(uid))
       throw SvException(QString("Не уникальные значения параметров: '%1'")
                         .arg(signal->config()->params));
 
-    m_signals.insert(uniq_index, signal);
+    m_signals.insert(uid, oht::Signal0x13(signal, p));
 
   }
   catch(SvException& e)
@@ -32,46 +32,31 @@ void oht::Type0x13::updateSignals(const oht::DATA* data)
   if(!data)
     return;
 
-  quint8 data_begin = 0;
+  quint8 offset = 0;
   quint8 route;
 
-  while(data_begin < data->data_length) {
+  while(data->data.size() - offset >= ROUTE_DATA_LENGTH) {
 
-    memcpy(&route, &data->data[data_begin], 1);
-//    memcpy(&level, &data->data[data_begin + 2], 1);
+    route = data->data.at(offset);
 
-    QVariant value = QVariant();
-    quint32 uniq_index = (static_cast<quint32>(route) << 8);
+    for(int byte = offset + 1; byte < offset + ROUTE_DATA_LENGTH; byte++) {
 
-    for(int i = 1; i < 5; i++) {
+      for(int bit = 0; bit < 8; bit++) {
 
-      if(!m_signals.contains(uniq_index + i))
-        continue;
+        quint32 uid   = getUid(0, route, byte, bit);
 
-      switch (i) {
+        if(!m_signals.contains(uid))
+          continue;
 
-        case 1:
-          value = static_cast<quint8>(data->data[1] & 0x0F);
-          break;
+        quint8 mask = pow(2, m_signals.value(uid).params.len) - 1;
+        QVariant value = (static_cast<quint8>(data->data.at(byte) >> bit) & mask);
 
-        case 2:
-          value = static_cast<quint8>(data->data[1] >> 4);
-          break;
+        m_signals.value(uid).signal->setValue(value);
 
-        case 3:
-          value = static_cast<quint8>((data->data[2] >> 4) & 0x03);
-          break;
-
-        case 4:
-          value = static_cast<quint8>((data->data[2] >> 7) & 0x01);
-          break;
       }
-
-      m_signals.value(uniq_index + 1)->setValue(value);
-
     }
 
-    data_begin += 4; // 4 байта данных на одно напрвление
+    offset += ROUTE_DATA_LENGTH; // 4 байта данных на одно напрвление
 
   }
 }

@@ -3,15 +3,20 @@
 
 #include <QObject>
 #include <QMap>
+#include <QBitArray>
 
 #include "oht_defs.h"
+
+#define ROUTE_DATA_LENGTH 6
 
 namespace oht {
 
   struct SignalParams_0x13
   {
-    quint16 route  = 0;
-    quint8  number = 0;
+    quint16 route = 0;
+    quint8  byte  = 0;
+    quint8  bit   = 0;
+    quint8  len   = 0;
 
     static SignalParams_0x13 fromJson(const QString& json_string) //throw (SvException)
     {
@@ -36,44 +41,69 @@ namespace oht {
       SignalParams_0x13 p;
       QString P;
 
+      // route (направление пожаротушения)
       P = P_ROUTE;
       if(object.contains(P)) {
 
-        QByteArray h = object.value(P).toString().toUtf8();
-
-        bool ok = false;
-        p.route = h.toUShort(&ok, 0);
-
-        if(!ok)
+        if(object.value(P).toInt(-1) < 0)
           throw SvException(QString(IMPERMISSIBLE_VALUE)
                             .arg(P)
                             .arg(object.value(P).toVariant().toString())
-                            .arg("Номер направления должен быть задан однобайтовым целым числом в шестнадцатиричном, "
-                                 "восьмеричном или десятичном формате в кавычках: \"0xFF\" | \"0377\" | \"255\""));
+                            .arg("Номер направления должен быть задан целым числом"));
+
+        p.route = quint16(object.value(P).toInt());
 
       }
       else
         throw SvException(QString(MISSING_PARAM).arg(P));
 
-      P = P_NUMBER;
+      // byte
+      P = P_BYTE;
       if(object.contains(P)) {
 
-        QByteArray h = object.value(P).toString().toUtf8();
-
-        bool ok = false;
-        p.number = h.toUShort(&ok, 0);
-
-        if(!ok)
+        if(object.value(P).toInt(-1) < 0)
           throw SvException(QString(IMPERMISSIBLE_VALUE)
                             .arg(P)
                             .arg(object.value(P).toVariant().toString())
-                            .arg("Номер сигнала в пакете должен быть задан однобайтовым целым числом в шестнадцатиричном, "
-                                 "восьмеричном или десятичном формате в кавычках: \"0xFF\" | \"0377\" | \"255\""));
+                            .arg("Номер байта в пакете должен быть задан целым числом"));
+
+        p.byte = quint16(object.value(P).toInt());
 
       }
       else
         throw SvException(QString(MISSING_PARAM).arg(P));
 
+      // bit
+      P = P_BYTE;
+      if(object.contains(P)) {
+
+        if(object.value(P).toInt(-1) < 0)
+          throw SvException(QString(IMPERMISSIBLE_VALUE)
+                            .arg(P)
+                            .arg(object.value(P).toVariant().toString())
+                            .arg("Номер бита должен быть задан целым числом"));
+
+        p.bit = quint16(object.value(P).toInt());
+
+      }
+      else
+        throw SvException(QString(MISSING_PARAM).arg(P));
+
+      // len
+      P = P_LEN;
+      if(object.contains(P)) {
+
+        if(object.value(P).toInt(-1) < 0)
+          throw SvException(QString(IMPERMISSIBLE_VALUE)
+                            .arg(P)
+                            .arg(object.value(P).toVariant().toString())
+                            .arg("Количество бит должно быть задано целым числом"));
+
+        p.len = quint16(object.value(P).toInt());
+
+      }
+      else
+        throw SvException(QString(MISSING_PARAM).arg(P));
 
       return p;
 
@@ -97,6 +127,21 @@ namespace oht {
       return j;
 
     }
+
+  };
+
+  struct Signal0x13 {
+
+    Signal0x13()
+    { }
+
+    Signal0x13(modus::SvSignal* signal, SignalParams_0x13 params):
+      signal(signal), params(params)
+    {  }
+
+    modus::SvSignal* signal;
+    SignalParams_0x13 params;
+
   };
 
   class Type0x13 : public SvAbstractSignalCollection
@@ -110,7 +155,8 @@ namespace oht {
     void updateSignals(const oht::DATA* data = nullptr);
 
   private:
-    QMap<quint32, modus::SvSignal*> m_signals;
+//    QMap<quint32, modus::SvSignal*> m_signals;
+    QMap<quint32, oht::Signal0x13> m_signals;
 
   };
 }

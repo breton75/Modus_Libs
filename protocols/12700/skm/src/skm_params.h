@@ -11,20 +11,22 @@
 #include "../../../Modus/global/global_defs.h"
 #include "../../../Modus/global/device/device_defs.h"
 
-#define SKM_RESET_INTERVAL  10
+// имена параметров устройства
+#define P_SKM_SRC               "src"
+#define P_SKM_DST               "dst"
+#define P_SKM_PROTOCOL_VERSION  "protocol_version"
 
-// имена параметров устройств
-#define P_SKM_START_REGISTER  "start_register"
-#define P_SKM_LAST_REGISTER   "last_register"
-#define P_SKM_RESET_TIMEOUT   "reset_timeout"
+#define DEFAULT_SRC               0x01
+#define DEFAULT_DST               0x09
+#define DEFAULT_PROTOCOL_VERSION  0x24
 
 namespace skm {
 
   struct DeviceParams {
 
-    quint16   start_register = 0;
-    quint16   last_register = 0;
-    quint16   reset_interval = SKM_RESET_INTERVAL;
+    quint8 src = 0;
+    quint8 dst = 0;
+    quint8 protocol_version = 0x24;
 
     static DeviceParams fromJson(const QString& json_string) //throw (SvException)
     {
@@ -49,57 +51,62 @@ namespace skm {
       DeviceParams p;
       QString P;
 
-      P = P_SKM_START_REGISTER;
+      // src
+      P = P_SKM_SRC;
       if(object.contains(P)) {
 
         QByteArray h = object.value(P).toString().toUtf8();
 
         bool ok = false;
-        p.start_register = h.toUShort(&ok, 0);
+        p.src = h.toUShort(&ok, 0);
 
         if(!ok)
           throw SvException(QString(IMPERMISSIBLE_VALUE)
                             .arg(P)
                             .arg(object.value(P).toVariant().toString())
-                            .arg("Стартовый регистр должен быть двухбайтовым целым числом в шестнадцатиречном, восьмеричном или десятичном формате: [0xFFFF | 0177777 | 65535]"));
+                            .arg("Адрес отправителя должен быть однобайтовым целым числом в шестнадцатиричном, восьмеричном или десятичном формате: [0xFF | 0377 | 255]"));
 
       }
       else
-        throw SvException(QString(MISSING_PARAM).arg(P));
+        p.src = DEFAULT_SRC;
 
-      P = P_SKM_LAST_REGISTER;
+      // dst
+      P = P_SKM_DST;
       if(object.contains(P)) {
 
         QByteArray h = object.value(P).toString().toUtf8();
 
         bool ok = false;
-        p.last_register = h.toUShort(&ok, 0);
+        p.dst = h.toUShort(&ok, 0);
 
         if(!ok)
           throw SvException(QString(IMPERMISSIBLE_VALUE)
                             .arg(P)
                             .arg(object.value(P).toVariant().toString())
-                            .arg("Конечный регистр должен быть двухбайтовым целым числом в шестнадцатиречном, восьмеричном или десятичном формате: [0xFFFF | 0177777 | 65535]"));
+                            .arg("Адрес получателя должен быть однобайтовым целым числом в шестнадцатиричном, восьмеричном или десятичном формате: [0xFF | 0377 | 255]"));
 
       }
       else
-        throw SvException(QString(MISSING_PARAM).arg(P));
+        p.dst = DEFAULT_DST;
 
-
-      P = P_SKM_RESET_TIMEOUT;
+      // protocol version
+      P = P_SKM_PROTOCOL_VERSION;
       if(object.contains(P)) {
 
+        QByteArray h = object.value(P).toString().toUtf8();
+
+        bool ok = false;
+        p.protocol_version = h.toUShort(&ok, 0);
+
+        if(!ok)
         if(object.value(P).toInt(-1) < 1)
           throw SvException(QString(IMPERMISSIBLE_VALUE)
                                  .arg(P)
                                  .arg(object.value(P).toVariant().toString())
-                                 .arg("Период сброса не может быть меньше 1 мсек."));
-
-        p.reset_interval = object.value(P).toInt(SKM_RESET_INTERVAL);
-
+                                 .arg("Версия протокола должна быть задана однобайтовым целым числом в шестнадцатиричном, восьмеричном или десятичном формате: [0xFF | 0377 | 255]"));
       }
       else
-        p.reset_interval = SKM_RESET_INTERVAL;
+        p.protocol_version = DEFAULT_PROTOCOL_VERSION;
 
 
       return p;
@@ -117,27 +124,10 @@ namespace skm {
     QJsonObject toJsonObject() const
     {
       QJsonObject j;
-      QString r;
 
-      r = QString::number(start_register, 16);
-
-      if(r.length() < 4)
-        r.push_front(QString(4 - r.length(), QChar('0')));
-
-      QString start_r = QString("0x%1").arg(r.length() % 2 ? "0" + r : r);
-
-
-      r = QString::number(last_register, 16);
-
-      if(r.length() < 4)
-        r.push_front(QString(4 - r.length(), QChar('0')));
-
-      QString last_r = QString("0x%1").arg(r.length() % 2 ? "0" + r : r);
-
-
-      j.insert(P_SKM_START_REGISTER, QJsonValue(start_r).toString());
-      j.insert(P_SKM_LAST_REGISTER, QJsonValue(last_r).toString());
-      j.insert(P_SKM_RESET_TIMEOUT, QJsonValue(reset_interval).toInt());
+      j.insert(P_SKM_SRC,               QJsonValue(QString("\"0x%1\"").arg(src, 2, 16, QChar('0'))).toString());
+      j.insert(P_SKM_DST,               QJsonValue(QString("\"0x%1\"").arg(dst, 2, 16, QChar('0'))).toString());
+      j.insert(P_SKM_PROTOCOL_VERSION,  QJsonValue(QString("\"0x%1\"").arg(protocol_version, 2, 16, QChar('0'))).toString());
 
       return j;
 

@@ -11,8 +11,8 @@ namespace skm {
 
   struct SignalParams_0x02
   {
-    quint16 sensor = 0;
-    quint8  faktor = 0;
+    quint8 byte = 0;
+    quint8 bit = 0;
 
     static SignalParams_0x02 fromJson(const QString& json_string) //throw (SvException)
     {
@@ -37,39 +37,39 @@ namespace skm {
       SignalParams_0x02 p;
       QString P;
 
-      P = P_OPA_SENSOR;
+      P = P_SKM_BIT;
       if(object.contains(P)) {
 
         QByteArray h = object.value(P).toString().toUtf8();
 
         bool ok = false;
-        p.sensor = h.toUShort(&ok, 0);
+        p.byte = h.toUShort(&ok, 0);
 
         if(!ok)
           throw SvException(QString(IMPERMISSIBLE_VALUE)
                             .arg(P)
                             .arg(object.value(P).toVariant().toString())
-                            .arg("Номер датчика должен быть задан двухбайтовым целым числом в шестнадцатиречном, "
-                                 "восьмеричном или десятичном формате в кавычках: \"0xFFFF\" | \"0177777\" | \"65535\""));
+                            .arg("Номер байта должен быть задан однобайтовым целым числом в шестнадцатиричном, "
+                                 "восьмеричном или десятичном формате в кавычках: \"0xFF\" | \"0377\" | \"255\""));
 
       }
       else
         throw SvException(QString(MISSING_PARAM).arg(P));
 
-      P = P_OPA_FAKTOR;
+      P = P_SKM_BIT;
       if(object.contains(P)) {
 
         QByteArray h = object.value(P).toString().toUtf8();
 
         bool ok = false;
-        p.faktor = h.toUShort(&ok, 0);
+        p.bit = h.toUShort(&ok, 0);
 
         if(!ok)
           throw SvException(QString(IMPERMISSIBLE_VALUE)
                             .arg(P)
                             .arg(object.value(P).toVariant().toString())
-                            .arg("Фактор сработки должен быть задан однобайтовым целым числом в шестнадцатиречном, "
-                                 "восьмеричном или десятичном формате в кавычках: \"0xFF\" | \"01777\" | \"255\""));
+                            .arg("Номер бита должен быть задан однобайтовым целым числом в шестнадцатиричном, "
+                                 "восьмеричном или десятичном формате в кавычках: \"0xFF\" | \"0377\" | \"255\""));
 
       }
       else
@@ -91,17 +91,9 @@ namespace skm {
     QJsonObject toJsonObject() const
     {
       QJsonObject j;
-      QString r;
 
-      r = QString::number(sensor, 16);
-      QString sensor_r = QString("0x%1").arg(r.length() % 2 ? "0" + r : r);
-
-      r = QString::number(faktor, 16);
-      QString faktor_r = QString("0x%1").arg(r.length() % 2 ? "0" + r : r);
-
-
-      j.insert(P_OPA_SENSOR, QJsonValue(sensor_r).toString());
-      j.insert(P_OPA_FAKTOR, QJsonValue(faktor_r).toString());
+      j.insert(P_SKM_BYTE, QJsonValue(byte).toString());
+      j.insert(P_SKM_BIT,  QJsonValue(bit).toString());
 
       return j;
 

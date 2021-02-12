@@ -14,9 +14,10 @@
 #define TYPE_0x19 0x19
 
 #define P_ROUTE   "route"
-#define P_NUMBER  "number"
+#define P_LEN     "len"
 #define P_BYTE    "byte"
 #define P_BIT     "bit"
+#define P_NUMBER  "number"
 
 
 namespace oht {
@@ -25,10 +26,12 @@ namespace oht {
   {
     DATA() {}
 
-    qint8   data[MAX_BUF_SIZE];
-    quint8  data_type;
-    quint8  data_length;
-    quint16 crc;
+//    qint8   data[MAX_BUF_SIZE];
+//    quint8  data_length;
+
+    QByteArray data = QByteArray();
+    quint8     data_type;
+    quint16    crc;
 
   };
 
@@ -47,6 +50,12 @@ namespace oht {
 
     virtual void updateSignals(const oht::DATA* data = nullptr) = 0;
 
+  protected:
+
+    inline quint32 getUid(quint8 val1, quint8 val2, quint8 val3, quint8 val4)
+    {
+      return (static_cast<quint32>(val1) << 24) + (static_cast<quint32>(val2) << 16) + (static_cast<quint32>(val3) << 8) + static_cast<quint32>(val4);
+    }
   };
 }
 

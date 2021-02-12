@@ -14,11 +14,7 @@
 #include "skm_defs.h"
 
 #include "collection_0x02.h"
-#include "collection_0x03.h"
-#include "collection_0x04.h"
-#include "collection_0x33.h"
-#include "collection_0x19.h"
-#include "collection_status.h"
+#include "collection_0x01.h"
 
 #include "../../../svlib/sv_abstract_logger.h"
 #include "../../../svlib/sv_exception.h"
@@ -43,12 +39,10 @@ namespace skm {
   #pragma pack(push,1)
   struct Header
   {
-    quint8  client_addr;
-    quint8  func_code;
-    quint8  ADDRESS;
-    quint8  OFFSET;
-    quint16 register_count;
-    quint8  byte_count;
+    quint8  begin_0x1F;
+    quint8  DST;
+    quint8  SRC;
+    quint8  version;
   };
   #pragma pack(pop)
 
@@ -99,16 +93,14 @@ private:
   skm::Header m_header;
   size_t m_hsz = sizeof(skm::Header);
 
+  skm::Type0x01   type0x01_signals;
   skm::Type0x02   type0x02_signals;
-  skm::Type0x03   type0x03_signals;
-  skm::Type0x04   type0x04_signals;
-  skm::Type0x19   type0x19_signals;
-  skm::Type0x33   type0x33_signals;
-  skm::LineStatus line_status_signals;
 
   skm::SignalCollections signal_collections;
 
   PARSERESULT parse();
+  bool check_1F_2F_55(quint8 byte);
+  quint16 pull_data(modus::BUFF* buff, skm::DATA* data, skm::Header* header);
   void confirmation();
 
 };
