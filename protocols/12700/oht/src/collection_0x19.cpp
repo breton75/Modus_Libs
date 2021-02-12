@@ -29,7 +29,7 @@ void oht::Type0x19::updateSignals(const oht::DATA* data)
   foreach (Signal0x19 signal19, m_signals) {
 
     if(signal19.params.byte < data->data_length)
-      signal19.signal->setValue(int((data->data[signal19.params.byte] ))); // проверка битов делается в агрегате  >> signal19.params.bit) & 1));
+      signal19.signal->setValue(int((data->data[signal19.params.byte] >> signal19.params.bit) & 1));
 
   }
 }

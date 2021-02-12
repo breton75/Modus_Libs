@@ -1,22 +1,23 @@
-﻿#include "proj_12700_oht.h"
+﻿#include "proj_12700_skm.h"
 
-oht::SvOHT::SvOHT():
+skm::SvSKM::SvSKM():
   modus::SvAbstractProtocol()
 {
-//  signal_collections.insert(TYPE_0x33, &type0x33_signals);
-  signal_collections.insert(TYPE_0x13, &type0x03_signals);
-  signal_collections.insert(TYPE_0x14, &type0x04_signals);
+  signal_collections.insert(TYPE_0x33, &type0x33_signals);
+  signal_collections.insert(TYPE_0x02, &type0x02_signals);
+  signal_collections.insert(TYPE_0x03, &type0x03_signals);
+  signal_collections.insert(TYPE_0x04, &type0x04_signals);
   signal_collections.insert(TYPE_0x19, &type0x19_signals);
 }
 
-bool oht::SvOHT::configure(modus::DeviceConfig *config, modus::IOBuffer *iobuffer)
+bool skm::SvSKM::configure(modus::DeviceConfig *config, modus::IOBuffer *iobuffer)
 {
   try {
 
     p_config = config;
     p_io_buffer = iobuffer;
 
-    m_params = oht::DeviceParams::fromJson(p_config->protocol.params);
+    m_params = skm::DeviceParams::fromJson(p_config->protocol.params);
 
     return true;
 
@@ -28,7 +29,7 @@ bool oht::SvOHT::configure(modus::DeviceConfig *config, modus::IOBuffer *iobuffe
   }
 }
 
-void oht::SvOHT::disposeInputSignal (modus::SvSignal* signal)
+void skm::SvSKM::disposeInputSignal (modus::SvSignal* signal)
 {
   try {
 
@@ -47,7 +48,7 @@ void oht::SvOHT::disposeInputSignal (modus::SvSignal* signal)
 
       else {
 
-        message(QString("Сигнал %1: Неопознанный тип \"%2\"").arg(signal->config()->name, signal->config()->type),
+        emit message(QString("Сигнал %1: Неопознанный тип \"%2\"").arg(signal->config()->name).arg(signal->config()->type),
                      sv::log::llError, sv::log::mtError);
 
       }
@@ -59,12 +60,12 @@ void oht::SvOHT::disposeInputSignal (modus::SvSignal* signal)
   }
 }
 
-void oht::SvOHT::disposeOutputSignal (modus::SvSignal* signal)
+void skm::SvSKM::disposeOutputSignal (modus::SvSignal* signal)
 {
   Q_UNUSED(signal);
 }
 
-void oht::SvOHT::run()
+void skm::SvSKM::run()
 {
   p_is_active = bool(p_config) && bool(p_io_buffer);
 
@@ -73,7 +74,7 @@ void oht::SvOHT::run()
     p_io_buffer->confirm->mutex.lock();     // если нужен ответ квитирование
     p_io_buffer->input->mutex.lock();
 
-    oht::PARSERESULT result = parse();
+    skm::PARSERESULT result = parse();
 
     if(result.do_reset == DO_RESET)
       p_io_buffer->input->reset();
@@ -87,27 +88,27 @@ void oht::SvOHT::run()
   }
 }
 
-oht::PARSERESULT oht::SvOHT::parse()
+skm::PARSERESULT skm::SvSKM::parse()
 {
   // проверяем, что длина данных в буфере не меньше длины звголовка
   if(p_io_buffer->input->offset < m_hsz)
-    return oht::PARSERESULT(DO_NOT_RESET);
+    return skm::PARSERESULT(DO_NOT_RESET);
 
   // разбираем заголовок. если адрес или код функции не тот, значит это чужой пакет
   memcpy(&m_header, &p_io_buffer->input->data[0], m_hsz);
   if((m_header.client_addr != 1) || (m_header.func_code != 0x10))
-    return oht::PARSERESULT(DO_RESET);
+    return skm::PARSERESULT(DO_RESET);
 
   // проверяем, что длина данных в буфере не меньше длины всего отправленного пакета
   if(p_io_buffer->input->offset < m_hsz + m_header.byte_count + 2)
-    return oht::PARSERESULT(DO_NOT_RESET);
+    return skm::PARSERESULT(DO_NOT_RESET);
 
   // проверяем начальный и конечный адреса регистров. если не входит в заданный диапазон - чужой пакет
   quint16 current_register = (static_cast<quint16>(m_header.ADDRESS << 8)) + m_header.OFFSET;
 
   if((current_register < m_params.start_register) ||
      (current_register > m_params.last_register))
-    return oht::PARSERESULT(DO_RESET);
+    return skm::PARSERESULT(DO_RESET);
 
   /**
   *  в этой точке в буфере должны находиться правильные данные
@@ -141,7 +142,7 @@ oht::PARSERESULT oht::SvOHT::parse()
                  .arg(quint8(m_data.crc >> 8), 2, 16, QChar('0')),
                  sv::log::llError, sv::log::mtError);
 
-    return oht::PARSERESULT(DO_RESET);
+    return skm::PARSERESULT(DO_RESET);
   }
 
   // если все корректно, то разбираем данные в зависимости от типа
@@ -156,15 +157,16 @@ oht::PARSERESULT oht::SvOHT::parse()
 
         if(m_data.data_type == 0x77) {
 
-          foreach (modus::SvSignal* signal, p_input_signals)
+          for (modus::SvSignal* signal: p_input_signals)
             signal->setValue(0);
         }
 
         break;
 
       case 0x06:
-      case 0xA0:
-      case 0xFA:
+      case 0x10:
+      case 0x50:
+      case 0x90:
       {
          // формируем и отправляем ответ-квитирование
          confirmation();
@@ -176,15 +178,14 @@ oht::PARSERESULT oht::SvOHT::parse()
       }
 
       default:
-        return oht::PARSERESULT(DO_RESET);
-        break;
+          break;
   }
 
-  return oht::PARSERESULT(DO_RESET, QDateTime::currentDateTime());
 
+  return skm::PARSERESULT(DO_RESET, QDateTime::currentDateTime());
 }
 
-void oht::SvOHT::confirmation()
+void skm::SvSKM::confirmation()
 {
   QByteArray confirm;
   confirm.append((const char*)(&m_header), 6);
@@ -203,6 +204,6 @@ void oht::SvOHT::confirmation()
 /** ********** EXPORT ************ **/
 modus::SvAbstractProtocol* create()
 {
-  modus::SvAbstractProtocol* device = new oht::SvOHT();
+  modus::SvAbstractProtocol* device = new skm::SvSKM();
   return device;
 }

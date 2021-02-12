@@ -1,0 +1,12 @@
+#ifndef PROJ_12700_SKM_GLOBAL_H
+#define PROJ_12700_SKM_GLOBAL_H
+
+#include <QtCore/qglobal.h>
+
+#if defined(PROJ_12700_SKM_LIBRARY)
+#  define PROJ_12700_SKM_EXPORT Q_DECL_EXPORT
+#else
+#  define PROJ_12700_SKM_EXPORT Q_DECL_IMPORT
+#endif
+
+#endif // PROJ_12700_SKM_GLOBAL_H

@@ -1,19 +1,19 @@
-﻿#ifndef TYPE0X13_H
-#define TYPE0X13_H
+﻿#ifndef TYPE0X04_H
+#define TYPE0X04_H
 
 #include <QObject>
-#include <QMap>
+#include <QList>
 
-#include "oht_defs.h"
+#include "skm_defs.h"
 
-namespace oht {
+namespace skm {
 
-  struct SignalParams_0x13
+  struct SignalParams_0x04
   {
-    quint16 route  = 0;
-    quint8  number = 0;
+    quint8 byte = 0;
+    quint8 bit  = 0;
 
-    static SignalParams_0x13 fromJson(const QString& json_string) //throw (SvException)
+    static SignalParams_0x04 fromJson(const QString& json_string) //throw (SvException)
     {
       QJsonParseError err;
       QJsonDocument jd = QJsonDocument::fromJson(json_string.toUtf8(), &err);
@@ -31,45 +31,44 @@ namespace oht {
       }
     }
 
-    static SignalParams_0x13 fromJsonObject(const QJsonObject &object) //throw (SvException)
+    static SignalParams_0x04 fromJsonObject(const QJsonObject &object) //throw (SvException)
     {
-      SignalParams_0x13 p;
+      SignalParams_0x04 p;
       QString P;
 
-      P = P_ROUTE;
+      P = P_OPA_BYTE;
       if(object.contains(P)) {
 
         QByteArray h = object.value(P).toString().toUtf8();
 
         bool ok = false;
-        p.route = h.toUShort(&ok, 0);
+        p.byte = h.toUShort(&ok, 0);
 
         if(!ok)
           throw SvException(QString(IMPERMISSIBLE_VALUE)
                             .arg(P)
                             .arg(object.value(P).toVariant().toString())
-                            .arg("Номер направления должен быть задан однобайтовым целым числом в шестнадцатиричном, "
+                            .arg("Номер байта должен быть задан однобайтовым целым числом в шестнадцатеричном, "
                                  "восьмеричном или десятичном формате в кавычках: \"0xFF\" | \"0377\" | \"255\""));
 
       }
       else
         throw SvException(QString(MISSING_PARAM).arg(P));
 
-      P = P_NUMBER;
+      P = P_OPA_BIT;
       if(object.contains(P)) {
 
         QByteArray h = object.value(P).toString().toUtf8();
 
         bool ok = false;
-        p.number = h.toUShort(&ok, 0);
+        p.bit = h.toUShort(&ok, 0);
 
-        if(!ok)
+        if(!ok || p.bit > 7)
           throw SvException(QString(IMPERMISSIBLE_VALUE)
                             .arg(P)
                             .arg(object.value(P).toVariant().toString())
-                            .arg("Номер сигнала в пакете должен быть задан однобайтовым целым числом в шестнадцатиричном, "
-                                 "восьмеричном или десятичном формате в кавычках: \"0xFF\" | \"0377\" | \"255\""));
-
+                            .arg("Номер бита должен быть задан однобайтовым целым числом в шестнадцатеричном, "
+                                 "восьмеричном или десятичном формате в диапазоне [0..7] в кавычках: \"0x07\" | \"07\" | \"7\""));
       }
       else
         throw SvException(QString(MISSING_PARAM).arg(P));
@@ -91,29 +90,40 @@ namespace oht {
     {
       QJsonObject j;
 
-      j.insert(P_ROUTE,  QJsonValue(route).toString());
-      j.insert(P_NUMBER, QJsonValue(number).toString());
+      j.insert(P_OPA_BYTE, QJsonValue(byte).toString());
+      j.insert(P_OPA_BIT,  QJsonValue(bit).toString());
 
       return j;
 
     }
   };
 
-  class Type0x13 : public SvAbstractSignalCollection
+  struct Signal0x04 {
+
+    Signal0x04(modus::SvSignal* signal, SignalParams_0x04 params):
+      signal(signal), params(params)
+    {  }
+
+    modus::SvSignal* signal;
+    SignalParams_0x04 params;
+
+  };
+
+  class Type0x04 : public SvAbstractSignalCollection
   {
     Q_OBJECT
   public:
-    explicit Type0x13();
+    explicit Type0x04();
 
     void addSignal(modus::SvSignal* signal); // throw (SvException);
 
-    void updateSignals(const oht::DATA* data = nullptr);
+    void updateSignals(const skm::DATA* data = nullptr);
 
   private:
-    QMap<quint32, modus::SvSignal*> m_signals;
+    QList<Signal0x04> m_signals;
 
   };
 }
 
 
-#endif // TYPE0X13_H
+#endif // TYPE0X02_H

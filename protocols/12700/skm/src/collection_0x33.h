@@ -1,19 +1,22 @@
-﻿#ifndef TYPE0X13_H
-#define TYPE0X13_H
+﻿#ifndef TYPE0x33_H
+#define TYPE0x33_H
 
 #include <QObject>
-#include <QMap>
+#include <QList>
 
-#include "oht_defs.h"
+#include "skm_defs.h"
 
-namespace oht {
+#include "../../../Modus/global/global_defs.h"
+#include "../../../Modus/global/device/device_defs.h"
 
-  struct SignalParams_0x13
+namespace skm {
+
+  struct SignalParams_0x33
   {
-    quint16 route  = 0;
-    quint8  number = 0;
+    quint8 byte = 0;
+    quint8 bit  = 0;
 
-    static SignalParams_0x13 fromJson(const QString& json_string) //throw (SvException)
+    static SignalParams_0x33 fromJson(const QString& json_string) //throw (SvException)
     {
       QJsonParseError err;
       QJsonDocument jd = QJsonDocument::fromJson(json_string.toUtf8(), &err);
@@ -31,45 +34,44 @@ namespace oht {
       }
     }
 
-    static SignalParams_0x13 fromJsonObject(const QJsonObject &object) //throw (SvException)
+    static SignalParams_0x33 fromJsonObject(const QJsonObject &object) //throw (SvException)
     {
-      SignalParams_0x13 p;
+      SignalParams_0x33 p;
       QString P;
 
-      P = P_ROUTE;
+      P = P_OPA_BYTE;
       if(object.contains(P)) {
 
         QByteArray h = object.value(P).toString().toUtf8();
 
         bool ok = false;
-        p.route = h.toUShort(&ok, 0);
+        p.byte = h.toUShort(&ok, 0);
 
         if(!ok)
           throw SvException(QString(IMPERMISSIBLE_VALUE)
                             .arg(P)
                             .arg(object.value(P).toVariant().toString())
-                            .arg("Номер направления должен быть задан однобайтовым целым числом в шестнадцатиричном, "
+                            .arg("Номер байта должен быть задан однобайтовым целым числом в шестнадцатеричном, "
                                  "восьмеричном или десятичном формате в кавычках: \"0xFF\" | \"0377\" | \"255\""));
 
       }
       else
         throw SvException(QString(MISSING_PARAM).arg(P));
 
-      P = P_NUMBER;
+      P = P_OPA_BIT;
       if(object.contains(P)) {
 
         QByteArray h = object.value(P).toString().toUtf8();
 
         bool ok = false;
-        p.number = h.toUShort(&ok, 0);
+        p.bit = h.toUShort(&ok, 0);
 
-        if(!ok)
+        if(!ok || p.bit > 7)
           throw SvException(QString(IMPERMISSIBLE_VALUE)
                             .arg(P)
                             .arg(object.value(P).toVariant().toString())
-                            .arg("Номер сигнала в пакете должен быть задан однобайтовым целым числом в шестнадцатиричном, "
-                                 "восьмеричном или десятичном формате в кавычках: \"0xFF\" | \"0377\" | \"255\""));
-
+                            .arg("Номер бита должен быть задан однобайтовым целым числом в шестнадцатеричном, "
+                                 "восьмеричном или десятичном формате в диапазоне [0..7] в кавычках: \"0x07\" | \"07\" | \"7\""));
       }
       else
         throw SvException(QString(MISSING_PARAM).arg(P));
@@ -91,29 +93,40 @@ namespace oht {
     {
       QJsonObject j;
 
-      j.insert(P_ROUTE,  QJsonValue(route).toString());
-      j.insert(P_NUMBER, QJsonValue(number).toString());
+      j.insert(P_OPA_BYTE, QJsonValue(QString::number(byte)).toString());
+      j.insert(P_OPA_BIT,  QJsonValue(QString::number(bit)).toString());
 
       return j;
 
     }
   };
 
-  class Type0x13 : public SvAbstractSignalCollection
+  struct Signal0x33 {
+
+    Signal0x33(modus::SvSignal* signal, SignalParams_0x33 params):
+      signal(signal), params(params)
+    {  }
+
+    modus::SvSignal* signal;
+    SignalParams_0x33 params;
+
+  };
+
+  class Type0x33 : public SvAbstractSignalCollection
   {
     Q_OBJECT
   public:
-    explicit Type0x13();
+    explicit Type0x33();
 
     void addSignal(modus::SvSignal* signal); // throw (SvException);
 
-    void updateSignals(const oht::DATA* data = nullptr);
+    void updateSignals(const skm::DATA* data = nullptr);
 
   private:
-    QMap<quint32, modus::SvSignal*> m_signals;
+    QList<Signal0x33> m_signals;
 
   };
 }
 
 
-#endif // TYPE0X13_H
+#endif // TYPE0x33_H

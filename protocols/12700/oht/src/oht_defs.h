@@ -13,10 +13,8 @@
 #define TYPE_0x14 0x14
 #define TYPE_0x19 0x19
 
-#define P_SENSOR  "sensor"
-#define P_FAKTOR  "faktor"
-#define P_ROOM    "room"
-#define P_LEVEL   "level"
+#define P_ROUTE   "route"
+#define P_NUMBER  "number"
 #define P_BYTE    "byte"
 #define P_BIT     "bit"
 
