@@ -12,11 +12,11 @@ void skm::Type0x01::addSignal(modus::SvSignal* signal) //throw (SvException)
   {
     skm::SignalParams_0x01 p = skm::SignalParams_0x01::fromJson(signal->config()->params);
 
-    if(m_signals.contains(getUid(p.vin, p.faktor)))
+    if(m_signals.contains(getUid(0, 0, p.vin, p.faktor)))
       throw SvException(QString("Не уникальные значения параметров: '%1'")
                         .arg(signal->config()->params));
 
-    m_signals.insert(getUid(p.vin, p.faktor), signal);
+    m_signals.insert(getUid(0, 0, p.vin, p.faktor), signal);
 
   }
   catch(SvException& e)
@@ -34,20 +34,20 @@ void skm::Type0x01::updateSignals(const skm::DATA* data)
   quint16 offset        = 0;
   quint8  vin;
 
-  while(data->data.size() - offset > 2) {
+  while(data->len - offset > 2) {
 
-    vin          = (quint8)data->data.at(offset++);
-    faktor_count = (quint8)data->data.at(offset++);
+    vin          = (quint8)data->data[offset++];
+    faktor_count = (quint8)data->data[offset++];
 
-    if(data->data.size() - offset < faktor_count)
+    if(data->len - offset < faktor_count)
       break;
 
     while(faktor_count) {
 
-        quint8 faktor = data->data.at(offset++);
+        quint8 faktor = data->data[offset++];
         if(check_1F_2F_55(faktor)) offset++;
 
-        quint32 uid = getUid(vin, faktor);
+        quint32 uid = getUid(0, 0, vin, faktor);
 
         if(m_signals.contains(uid))
           m_signals.value(uid)->setValue(1);

@@ -36,7 +36,7 @@ void opa::Type0x02::updateSignals(const opa::DATA* data)
   quint16 sensor;
   quint8  faktor;
 
-  while(data_begin < data->data_length) {
+  while(data_begin < data->len) {
 
     memcpy(&sensor, &data->data[data_begin], 2);
     memcpy(&faktor, &data->data[data_begin + 2], 1);
@@ -57,7 +57,7 @@ void opa::Type0x02::updateSignals(const opa::DATA* data)
       foreach (quint32 index, m_signals.keys()) {
 
         if((index >> 8) == sensor){
-          for (modus::SvSignal* signal: m_signals.values(index))
+          foreach (modus::SvSignal* signal, m_signals.values(index))
             signal->setValue(0);
         }
       }

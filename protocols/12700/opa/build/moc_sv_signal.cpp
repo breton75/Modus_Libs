@@ -1,26 +1,23 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'sv_signal.h'
 **
-** Created by: The Qt Meta Object Compiler version 67 (Qt 5.15.2)
+** Created by: The Qt Meta Object Compiler version 67 (Qt 5.6.3)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
-#include <memory>
-#include "../../../Modus/global/signal/sv_signal.h"
+#include "../../../../../Modus/global/signal/sv_signal.h"
 #include <QtCore/qbytearray.h>
 #include <QtCore/qmetatype.h>
 #if !defined(Q_MOC_OUTPUT_REVISION)
 #error "The header file 'sv_signal.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 67
-#error "This file was generated using the moc from 5.15.2. It"
+#error "This file was generated using the moc from 5.6.3. It"
 #error "cannot be used with the include files from this version of Qt."
 #error "(The moc has changed too much.)"
 #endif
 
 QT_BEGIN_MOC_NAMESPACE
-QT_WARNING_PUSH
-QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_modus__SvSignal_t {
     QByteArrayData data[9];
     char stringdata0[85];
@@ -52,7 +49,7 @@ QT_MOC_LITERAL(8, 75, 9) // "alive_age"
 static const uint qt_meta_data_modus__SvSignal[] = {
 
  // content:
-       8,       // revision
+       7,       // revision
        0,       // classname
        0,    0, // classinfo
        3,   14, // methods
@@ -82,7 +79,7 @@ static const uint qt_meta_data_modus__SvSignal[] = {
 void modus::SvSignal::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
-        auto *_t = static_cast<SvSignal *>(_o);
+        SvSignal *_t = static_cast<SvSignal *>(_o);
         Q_UNUSED(_t)
         switch (_id) {
         case 0: _t->changed((*reinterpret_cast< SvSignal*(*)>(_a[1]))); break;
@@ -103,9 +100,10 @@ void modus::SvSignal::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int 
         }
     } else if (_c == QMetaObject::IndexOfMethod) {
         int *result = reinterpret_cast<int *>(_a[0]);
+        void **func = reinterpret_cast<void **>(_a[1]);
         {
-            using _t = void (SvSignal::*)(SvSignal * );
-            if (*reinterpret_cast<_t *>(_a[1]) == static_cast<_t>(&SvSignal::changed)) {
+            typedef void (SvSignal::*_t)(SvSignal * );
+            if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&SvSignal::changed)) {
                 *result = 0;
                 return;
             }
@@ -113,14 +111,10 @@ void modus::SvSignal::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int 
     }
 }
 
-QT_INIT_METAOBJECT const QMetaObject modus::SvSignal::staticMetaObject = { {
-    QMetaObject::SuperData::link<QObject::staticMetaObject>(),
-    qt_meta_stringdata_modus__SvSignal.data,
-    qt_meta_data_modus__SvSignal,
-    qt_static_metacall,
-    nullptr,
-    nullptr
-} };
+const QMetaObject modus::SvSignal::staticMetaObject = {
+    { &QObject::staticMetaObject, qt_meta_stringdata_modus__SvSignal.data,
+      qt_meta_data_modus__SvSignal,  qt_static_metacall, Q_NULLPTR, Q_NULLPTR}
+};
 
 
 const QMetaObject *modus::SvSignal::metaObject() const
@@ -130,9 +124,9 @@ const QMetaObject *modus::SvSignal::metaObject() const
 
 void *modus::SvSignal::qt_metacast(const char *_clname)
 {
-    if (!_clname) return nullptr;
+    if (!_clname) return Q_NULLPTR;
     if (!strcmp(_clname, qt_meta_stringdata_modus__SvSignal.stringdata0))
-        return static_cast<void*>(this);
+        return static_cast<void*>(const_cast< SvSignal*>(this));
     return QObject::qt_metacast(_clname);
 }
 
@@ -156,8 +150,7 @@ int modus::SvSignal::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 // SIGNAL 0
 void modus::SvSignal::changed(SvSignal * _t1)
 {
-    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t1))) };
+    void *_a[] = { Q_NULLPTR, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
     QMetaObject::activate(this, &staticMetaObject, 0, _a);
 }
-QT_WARNING_POP
 QT_END_MOC_NAMESPACE

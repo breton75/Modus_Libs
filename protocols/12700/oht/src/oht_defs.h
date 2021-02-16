@@ -24,14 +24,43 @@ namespace oht {
 
   struct DATA
   {
-    DATA() {}
+    DATA():
+      data(nullptr),
+      bufsize(0)
+    {  }
 
-//    qint8   data[MAX_BUF_SIZE];
-//    quint8  data_length;
+    DATA(quint16 size):
+      data(nullptr),
+      bufsize(size)
+    {
+      data = (quint8*)malloc(size);
+    }
 
-    QByteArray data = QByteArray();
-    quint8     data_type;
-    quint16    crc;
+    ~DATA()
+    {
+      if(data)
+        free(data);
+    }
+
+    bool resize(quint16 size)
+    {
+      if(data)
+        free(data);
+
+      data = nullptr;
+
+      bufsize = size;
+      data = (quint8*)malloc(size);
+
+      return bool(data);
+    }
+
+    quint8* data = nullptr;
+    quint8  type;
+    quint8  len;
+    quint16 crc;
+
+    quint16 bufsize;
 
   };
 

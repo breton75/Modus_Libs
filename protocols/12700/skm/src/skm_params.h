@@ -7,9 +7,9 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-#include "../../../svlib/sv_exception.h"
-#include "../../../Modus/global/global_defs.h"
-#include "../../../Modus/global/device/device_defs.h"
+#include "../../../../../Modus/global/misc/sv_exception.h"
+#include "../../../../../Modus/global/global_defs.h"
+#include "../../../../../Modus/global/device/device_defs.h"
 
 // имена параметров устройства
 #define P_SKM_SRC               "src"

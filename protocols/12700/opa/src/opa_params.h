@@ -7,9 +7,9 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-#include "../../../svlib/sv_exception.h"
-#include "../../../Modus/global/global_defs.h"
-#include "../../../Modus/global/device/device_defs.h"
+#include "../../../../../svlib/sv_exception.h"
+#include "../../../../../Modus/global/global_defs.h"
+#include "../../../../../Modus/global/device/device_defs.h"
 
 #define OPA_RESET_INTERVAL  10
 

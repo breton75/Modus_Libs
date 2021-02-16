@@ -10,7 +10,6 @@
 #include "../../../../../Modus/global/signal/sv_signal.h"
 
 #include "oht_params.h"
-#include "signal_params.h"
 #include "oht_defs.h"
 
 #include "collection_0x13.h"

@@ -6,19 +6,18 @@
 
 #include "proj_12700_skm_global.h"
 
-#include "../../../Modus/global/device/protocol/sv_abstract_protocol.h"
-#include "../../../Modus/global/signal/sv_signal.h"
+#include "../../../../../Modus/global/device/protocol/sv_abstract_protocol.h"
+#include "../../../../../Modus/global/signal/sv_signal.h"
 
 #include "skm_params.h"
-#include "signal_params.h"
 #include "skm_defs.h"
 
 #include "collection_0x02.h"
 #include "collection_0x01.h"
 
-#include "../../../svlib/sv_abstract_logger.h"
-#include "../../../svlib/sv_exception.h"
-#include "../../../svlib/sv_crc.h"
+#include "../../../../../Modus/global/misc/sv_abstract_logger.h"
+#include "../../../../../Modus/global/misc/sv_exception.h"
+#include "../../../../../svlib/sv_crc.h"
 
 extern "C" {
 

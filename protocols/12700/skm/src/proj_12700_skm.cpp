@@ -16,6 +16,9 @@ bool skm::SvSKM::configure(modus::DeviceConfig *config, modus::IOBuffer *iobuffe
 
     m_params = skm::DeviceParams::fromJson(p_config->protocol.params);
 
+    if(!m_data.resize(p_config->bufsize))
+      throw SvException(QString("Не удалось выделить %1 байт памяти для буфера").arg(p_config->bufsize));
+
     return true;
 
   } catch (SvException& e) {
@@ -40,7 +43,7 @@ void skm::SvSKM::disposeInputSignal (modus::SvSignal* signal)
 
     else {
 
-      message(QString("Сигнал %1: Неопознанный тип \"%2\"").arg(signal->config()->name).arg(signal->config()->type),
+      message(QString("Сигнал %1: Неопознанный тип \"%2\"").arg(signal->config()->name, signal->config()->type),
                    sv::log::llError, sv::log::mtError);
 
     }
@@ -117,9 +120,21 @@ skm::PARSERESULT skm::SvSKM::parse()
     // вытаскиваем данные
     // длина данных вычисляется по вормуле:
     // len = [длина пакета] - [длина заголовка] - [1 байт тип данных] - [crc 2 байта] - [2F55 в конце]
-    m_data.data.append(&p_io_buffer->input->data[m_hsz], p_io_buffer->input->offset - (m_hsz + 1 + 2 + 2));
-    memcpy(&m_data.crc,       &p_io_buffer->input->data[p_io_buffer->input->offset - 4], 2);
-    memcpy(&m_data.data_type, &p_io_buffer->input->data[m_hsz], 1);
+    memcpy(&m_data.len,     &p_io_buffer->input->offset - (m_hsz + 1 + 2 + 2), 1);
+    memcpy(&m_data.type,    &p_io_buffer->input->data[m_hsz], 1);
+    memcpy(&m_data.crc,     &p_io_buffer->input->data[p_io_buffer->input->offset - 4], 2);
+
+    // проверяем, что длина данных не превышает размер выделенного буфера
+    if(m_data.len > m_data.bufsize) {
+
+      message(QString("Размер данных превышает размер буфера! Данные %1 байт, буфер %2 байт")
+                   .arg(m_data.len).arg(m_data.bufsize),
+                   sv::log::llError, sv::log::mtError);
+
+      return skm::PARSERESULT(DO_RESET);
+    }
+
+    memcpy(&m_data.data[0], &p_io_buffer->input->data[m_hsz], m_data.len);          // данные
 
     /* программист СКМ говорит, что они никак не анализируют мой ответ на посылку данных
      * поэтому, чтобы не тратить ресурсы, убрал отправку подтверждения.
@@ -127,8 +142,8 @@ skm::PARSERESULT skm::SvSKM::parse()
     if(!sendConfirmation()) return;
     */
 
-    if(signal_collections.contains(m_data.data_type))
-      signal_collections.value(m_data.data_type)->updateSignals(&m_data);
+    if(signal_collections.contains(m_data.type))
+      signal_collections.value(m_data.type)->updateSignals(&m_data);
 
   }
 

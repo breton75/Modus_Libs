@@ -1,26 +1,23 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'collection_status.h'
 **
-** Created by: The Qt Meta Object Compiler version 67 (Qt 5.15.2)
+** Created by: The Qt Meta Object Compiler version 67 (Qt 5.6.3)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
-#include <memory>
 #include "../src/collection_status.h"
 #include <QtCore/qbytearray.h>
 #include <QtCore/qmetatype.h>
 #if !defined(Q_MOC_OUTPUT_REVISION)
 #error "The header file 'collection_status.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 67
-#error "This file was generated using the moc from 5.15.2. It"
+#error "This file was generated using the moc from 5.6.3. It"
 #error "cannot be used with the include files from this version of Qt."
 #error "(The moc has changed too much.)"
 #endif
 
 QT_BEGIN_MOC_NAMESPACE
-QT_WARNING_PUSH
-QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_opa__LineStatus_t {
     QByteArrayData data[1];
     char stringdata0[16];
@@ -42,7 +39,7 @@ QT_MOC_LITERAL(0, 0, 15) // "opa::LineStatus"
 static const uint qt_meta_data_opa__LineStatus[] = {
 
  // content:
-       8,       // revision
+       7,       // revision
        0,       // classname
        0,    0, // classinfo
        0,    0, // methods
@@ -63,14 +60,10 @@ void opa::LineStatus::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int 
     Q_UNUSED(_a);
 }
 
-QT_INIT_METAOBJECT const QMetaObject opa::LineStatus::staticMetaObject = { {
-    QMetaObject::SuperData::link<SvAbstractSignalCollection::staticMetaObject>(),
-    qt_meta_stringdata_opa__LineStatus.data,
-    qt_meta_data_opa__LineStatus,
-    qt_static_metacall,
-    nullptr,
-    nullptr
-} };
+const QMetaObject opa::LineStatus::staticMetaObject = {
+    { &SvAbstractSignalCollection::staticMetaObject, qt_meta_stringdata_opa__LineStatus.data,
+      qt_meta_data_opa__LineStatus,  qt_static_metacall, Q_NULLPTR, Q_NULLPTR}
+};
 
 
 const QMetaObject *opa::LineStatus::metaObject() const
@@ -80,16 +73,17 @@ const QMetaObject *opa::LineStatus::metaObject() const
 
 void *opa::LineStatus::qt_metacast(const char *_clname)
 {
-    if (!_clname) return nullptr;
+    if (!_clname) return Q_NULLPTR;
     if (!strcmp(_clname, qt_meta_stringdata_opa__LineStatus.stringdata0))
-        return static_cast<void*>(this);
+        return static_cast<void*>(const_cast< LineStatus*>(this));
     return SvAbstractSignalCollection::qt_metacast(_clname);
 }
 
 int opa::LineStatus::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = SvAbstractSignalCollection::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
     return _id;
 }
-QT_WARNING_POP
 QT_END_MOC_NAMESPACE

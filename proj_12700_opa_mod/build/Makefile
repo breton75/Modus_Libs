@@ -254,7 +254,6 @@ DIST          = ../../Qt/5.15.2/gcc_64/mkspecs/features/spec_pre.prf \
 		../../protocols/12700/skm/src/skm_params.h \
 		../../protocols/12700/skm/src/proj_12700_skm_global.h \
 		../../protocols/12700/skm/src/proj_12700_skm.h \
-		../../protocols/12700/skm/src/signal_params.h \
 		../../../Modus/global/signal/sv_signal.h ../../protocols/12700/skm/src/collection_0x01.cpp \
 		../../protocols/12700/skm/src/collection_0x02.cpp \
 		../../protocols/12700/skm/src/proj_12700_skm.cpp \
@@ -644,7 +643,7 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents ../../../../Qt/5.15.2/gcc_64/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents ../../../Modus/global/device/protocol/sv_abstract_protocol.h ../../../Modus/global/global_defs.h ../../protocols/12700/skm/src/collection_0x01.h ../../protocols/12700/skm/src/collection_0x02.h ../../protocols/12700/skm/src/skm_defs.h ../../protocols/12700/skm/src/skm_params.h ../../protocols/12700/skm/src/proj_12700_skm_global.h ../../protocols/12700/skm/src/proj_12700_skm.h ../../protocols/12700/skm/src/signal_params.h ../../../Modus/global/signal/sv_signal.h $(DISTDIR)/
+	$(COPY_FILE) --parents ../../../Modus/global/device/protocol/sv_abstract_protocol.h ../../../Modus/global/global_defs.h ../../protocols/12700/skm/src/collection_0x01.h ../../protocols/12700/skm/src/collection_0x02.h ../../protocols/12700/skm/src/skm_defs.h ../../protocols/12700/skm/src/skm_params.h ../../protocols/12700/skm/src/proj_12700_skm_global.h ../../protocols/12700/skm/src/proj_12700_skm.h ../../../Modus/global/signal/sv_signal.h $(DISTDIR)/
 	$(COPY_FILE) --parents ../../protocols/12700/skm/src/collection_0x01.cpp ../../protocols/12700/skm/src/collection_0x02.cpp ../../protocols/12700/skm/src/proj_12700_skm.cpp ../../../Modus/global/signal/sv_signal.cpp $(DISTDIR)/
 
 
@@ -1255,7 +1254,6 @@ moc_proj_12700_skm.cpp: ../../protocols/12700/skm/src/proj_12700_skm.h \
 		../../../../Qt/5.15.2/gcc_64/include/QtCore/qfiledevice.h \
 		../../protocols/12700/skm/src/skm_params.h \
 		../../../svlib/sv_exception.h \
-		../../protocols/12700/skm/src/signal_params.h \
 		../../protocols/12700/skm/src/skm_defs.h \
 		../../../../Qt/5.15.2/gcc_64/include/QtCore/QMap \
 		../../protocols/12700/skm/src/collection_0x02.h \
@@ -1724,7 +1722,6 @@ proj_12700_skm.o: ../../protocols/12700/skm/src/proj_12700_skm.cpp ../../protoco
 		../../../../Qt/5.15.2/gcc_64/include/QtCore/qfiledevice.h \
 		../../protocols/12700/skm/src/skm_params.h \
 		../../../svlib/sv_exception.h \
-		../../protocols/12700/skm/src/signal_params.h \
 		../../protocols/12700/skm/src/skm_defs.h \
 		../../../../Qt/5.15.2/gcc_64/include/QtCore/QMap \
 		../../protocols/12700/skm/src/collection_0x02.h \

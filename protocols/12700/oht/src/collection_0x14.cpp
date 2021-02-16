@@ -28,7 +28,7 @@ void oht::Type0x14::updateSignals(const oht::DATA* data)
 
   foreach (Signal0x14 signal14, m_signals) {
 
-    if(signal14.params.byte < data->data_length)
+    if(signal14.params.byte < data->len)
       signal14.signal->setValue(int((data->data[signal14.params.byte] >> signal14.params.bit) & 1));
 
   }

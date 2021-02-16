@@ -3,10 +3,10 @@
 
 #include <QMap>
 
-#include "../../../Modus/global/signal/sv_signal.h"
-#include "../../../Modus/global/device/protocol/sv_abstract_protocol.h"
-#include "../../../Modus/global/global_defs.h"
-#include "../../../Modus/global/device/device_defs.h"
+#include "../../../../../Modus/global/signal/sv_signal.h"
+#include "../../../../../Modus/global/device/protocol/sv_abstract_protocol.h"
+#include "../../../../../Modus/global/global_defs.h"
+#include "../../../../../Modus/global/device/device_defs.h"
 
 #define TYPE_0x01 0x01
 #define TYPE_0x02 0x02
@@ -24,13 +24,43 @@ namespace skm {
 
   struct DATA
   {
-    DATA() {}
+    DATA():
+      data(nullptr),
+      bufsize(0)
+    {  }
 
-    QByteArray data = QByteArray();
-//    qint8   data[MAX_BUF_SIZE];
-    quint8  data_type;
-    quint8  data_length;
+    DATA(quint16 size):
+      data(nullptr),
+      bufsize(size)
+    {
+      data = (quint8*)malloc(size);
+    }
+
+    ~DATA()
+    {
+      if(data)
+        free(data);
+    }
+
+    bool resize(quint16 size)
+    {
+      if(data)
+        free(data);
+
+      data = nullptr;
+
+      bufsize = size;
+      data = (quint8*)malloc(size);
+
+      return bool(data);
+    }
+
+    quint8* data = nullptr;
+    quint8  type;
+    quint8  len;
     quint16 crc;
+
+    quint16 bufsize;
 
   };
 

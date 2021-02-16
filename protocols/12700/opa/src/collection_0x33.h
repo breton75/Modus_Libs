@@ -6,8 +6,8 @@
 
 #include "opa_defs.h"
 
-#include "../../../Modus/global/global_defs.h"
-#include "../../../Modus/global/device/device_defs.h"
+#include "../../../../../Modus/global/global_defs.h"
+#include "../../../../../Modus/global/device/device_defs.h"
 
 namespace opa {
 

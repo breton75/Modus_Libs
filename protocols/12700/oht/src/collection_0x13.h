@@ -121,8 +121,10 @@ namespace oht {
     {
       QJsonObject j;
 
-      j.insert(P_ROUTE,  QJsonValue(route).toString());
-      j.insert(P_NUMBER, QJsonValue(number).toString());
+      j.insert(P_ROUTE, route);
+      j.insert(P_BYTE,  byte);
+      j.insert(P_BIT,   bit);
+      j.insert(P_LEN,   len);
 
       return j;
 

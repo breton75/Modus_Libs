@@ -33,7 +33,6 @@ HEADERS += \
     skm_params.h \
     proj_12700_skm_global.h \
     proj_12700_skm.h \
-    signal_params.h \
     ../../../../../Modus/global/signal/sv_signal.h
 
 # Default rules for deployment.

@@ -36,7 +36,7 @@ void opa::Type0x03::updateSignals(const opa::DATA* data)
   quint16 space;
   quint8  level;
 
-  while(data_begin < data->data_length) {
+  while(data_begin < data->len) {
 
     memcpy(&space, &data->data[data_begin], 2);
     memcpy(&level, &data->data[data_begin + 2], 1);

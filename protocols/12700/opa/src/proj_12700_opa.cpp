@@ -1,4 +1,4 @@
-﻿#include "proj_12700_opa_mod.h"
+﻿#include "proj_12700_opa.h"
 
 opa::SvOPA::SvOPA():
   modus::SvAbstractProtocol()
@@ -18,6 +18,9 @@ bool opa::SvOPA::configure(modus::DeviceConfig *config, modus::IOBuffer *iobuffe
     p_io_buffer = iobuffer;
 
     m_params = opa::DeviceParams::fromJson(p_config->protocol.params);
+
+    if(!m_data.resize(p_config->bufsize))
+      throw SvException(QString("Не удалось выделить %1 байт памяти для буфера").arg(p_config->bufsize));
 
     return true;
 
@@ -125,10 +128,21 @@ opa::PARSERESULT opa::SvOPA::parse()
   line_status_signals.updateSignals();
 
   // парсим и проверяем crc
-  memcpy(&m_data.data_type,   &p_io_buffer->input->data[0] + m_hsz, 1);                       // тип данных
-  memcpy(&m_data.data_length, &p_io_buffer->input->data[0] + m_hsz + 1, 1);                   // длина данных
-  memcpy(&m_data.data[0],     &p_io_buffer->input->data[0] + m_hsz + 2, m_data.data_length);  // данные
-  memcpy(&m_data.crc,         &p_io_buffer->input->data[0] + m_hsz + m_header.byte_count, 2); // crc полученная
+  memcpy(&m_data.type, &p_io_buffer->input->data[m_hsz], 1);                       // тип данных
+  memcpy(&m_data.len,  &p_io_buffer->input->data[m_hsz + 1], 1);                   // длина данных
+  memcpy(&m_data.crc,  &p_io_buffer->input->data[m_hsz + m_header.byte_count], 2); // crc полученная
+
+  // проверяем, что длина данных не превышает размер выделенного буфера
+  if(m_data.len > m_data.bufsize) {
+
+    message(QString("Размер данных превышает размер буфера! Данные %1 байт, буфер %2 байт")
+                 .arg(m_data.len).arg(m_data.bufsize),
+                 sv::log::llError, sv::log::mtError);
+
+    return opa::PARSERESULT(DO_RESET);
+  }
+
+  memcpy(&m_data.data[0],     &p_io_buffer->input->data[m_hsz + 2], m_data.len);    // данные
 
   quint16 calc_crc = CRC::MODBUS_CRC16((const quint8*)&p_io_buffer->input->data[0], m_hsz + m_header.byte_count); // вычисляем crc из данных
 
@@ -155,7 +169,7 @@ opa::PARSERESULT opa::SvOPA::parse()
         // здесь просто отправляем ответ-квитирование
         confirmation();
 
-        if(m_data.data_type == 0x77) {
+        if(m_data.type == 0x77) {
 
           for (modus::SvSignal* signal: p_input_signals)
             signal->setValue(0);
@@ -171,8 +185,8 @@ opa::PARSERESULT opa::SvOPA::parse()
          // формируем и отправляем ответ-квитирование
          confirmation();
 
-         if(signal_collections.contains(m_data.data_type))
-           signal_collections.value(m_data.data_type)->updateSignals(&m_data);
+         if(signal_collections.contains(m_data.type))
+           signal_collections.value(m_data.type)->updateSignals(&m_data);
 
          break;
       }

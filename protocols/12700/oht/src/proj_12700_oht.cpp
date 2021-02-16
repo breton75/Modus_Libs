@@ -18,6 +18,9 @@ bool oht::SvOHT::configure(modus::DeviceConfig *config, modus::IOBuffer *iobuffe
 
     m_params = oht::DeviceParams::fromJson(p_config->protocol.params);
 
+    if(!m_data.resize(p_config->bufsize))
+      throw SvException(QString("Не удалось выделить %1 байт памяти для буфера").arg(p_config->bufsize));
+
     return true;
 
   } catch (SvException& e) {
@@ -124,17 +127,29 @@ oht::PARSERESULT oht::SvOHT::parse()
   line_status_signals.updateSignals();
 
   // парсим и проверяем crc
-  memcpy(&m_data.data_type,   &p_io_buffer->input->data[0] + m_hsz, 1);                       // тип данных
-  memcpy(&m_data.data_length, &p_io_buffer->input->data[0] + m_hsz + 1, 1);                   // длина данных
-  memcpy(&m_data.data[0],     &p_io_buffer->input->data[0] + m_hsz + 2, m_data.data_length);  // данные
-  memcpy(&m_data.crc,         &p_io_buffer->input->data[0] + m_hsz + m_header.byte_count, 2); // crc полученная
+  memcpy(&m_data.type,    &p_io_buffer->input->data[m_hsz], 1);                       // тип данных
+  memcpy(&m_data.len,     &p_io_buffer->input->data[m_hsz + 1], 1);                   // длина данных
+  memcpy(&m_data.crc,     &p_io_buffer->input->data[m_hsz + m_header.byte_count], 2); // crc полученная
 
+  // проверяем, что длина данных не превышает размер выделенного буфера
+  if(m_data.len > m_data.bufsize) {
+
+    message(QString("Размер данных превышает размер буфера! Данные %1 байт, буфер %2 байт")
+                 .arg(m_data.len).arg(m_data.bufsize),
+                 sv::log::llError, sv::log::mtError);
+
+    return oht::PARSERESULT(DO_RESET);
+  }
+
+  memcpy(&m_data.data[0], &p_io_buffer->input->data[m_hsz + 2], m_data.len);          // данные
+
+  // вычисляем crc для контроля
   quint16 calc_crc = CRC::MODBUS_CRC16((const quint8*)&p_io_buffer->input->data[0], m_hsz + m_header.byte_count); // вычисляем crc из данных
 
   if(calc_crc != m_data.crc) {
 
     // если crc не совпадает, то выходим без обработки и ответа
-    emit message(QString("Ошибка crc! Ожидалось %1%2, получено %3%4")
+    message(QString("Ошибка crc! Ожидалось %1%2, получено %3%4")
                  .arg(quint8(calc_crc), 2, 16, QChar('0'))
                  .arg(quint8(calc_crc >> 8), 2, 16, QChar('0'))
                  .arg(quint8(m_data.crc), 2, 16, QChar('0'))
@@ -154,7 +169,7 @@ oht::PARSERESULT oht::SvOHT::parse()
         // здесь просто отправляем ответ-квитирование
         confirmation();
 
-        if(m_data.data_type == 0x77) {
+        if(m_data.type == 0x77) {
 
           foreach (modus::SvSignal* signal, p_input_signals)
             signal->setValue(0);
@@ -169,8 +184,8 @@ oht::PARSERESULT oht::SvOHT::parse()
          // формируем и отправляем ответ-квитирование
          confirmation();
 
-         if(signal_collections.contains(m_data.data_type))
-           signal_collections.value(m_data.data_type)->updateSignals(&m_data);
+         if(signal_collections.contains(m_data.type))
+           signal_collections.value(m_data.type)->updateSignals(&m_data);
 
          break;
       }

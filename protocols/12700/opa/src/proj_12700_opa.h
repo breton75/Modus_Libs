@@ -1,16 +1,15 @@
-﻿#ifndef PROJ_12700_OPA_MOD_H
-#define PROJ_12700_OPA_MOD_H
+#ifndef PROJ_12700_OPA_H
+#define PROJ_12700_OPA_H
 
 #include <QMutex>
 #include <QMutexLocker>
 
-#include "proj_12700_opa_mod_global.h"
+#include "proj_12700_opa_global.h"
 
-#include "../../../Modus/global/device/protocol/sv_abstract_protocol.h"
-#include "../../../Modus/global/signal/sv_signal.h"
+#include "../../../../../Modus/global/device/protocol/sv_abstract_protocol.h"
+#include "../../../../../Modus/global/signal/sv_signal.h"
 
 #include "opa_params.h"
-#include "signal_params.h"
 #include "opa_defs.h"
 
 #include "collection_0x02.h"
@@ -20,13 +19,13 @@
 #include "collection_0x19.h"
 #include "collection_status.h"
 
-#include "../../../svlib/sv_abstract_logger.h"
-#include "../../../svlib/sv_exception.h"
-#include "../../../svlib/sv_crc.h"
+#include "../../../../../svlib/sv_abstract_logger.h"
+#include "../../../../../svlib/sv_exception.h"
+#include "../../../../../svlib/sv_crc.h"
 
 extern "C" {
 
-    PROJ_12700_OPA_MOD_EXPORT modus::SvAbstractProtocol* create();
+    PROJ_12700_OPA_EXPORT modus::SvAbstractProtocol* create();
 
 //    VIRTUAL_DEVICESHARED_EXPORT QString defaultDeviceParams();
 //    VIRTUAL_DEVICESHARED_EXPORT QString defaultIfcParams(const QString& ifc);
@@ -113,4 +112,4 @@ private:
 
 };
 
-#endif // PROJ_12700_OPA_MOD_H
+#endif // PROJ_12700_OPA_H

@@ -35,9 +35,9 @@ void oht::Type0x13::updateSignals(const oht::DATA* data)
   quint8 offset = 0;
   quint8 route;
 
-  while(data->data.size() - offset >= ROUTE_DATA_LENGTH) {
+  while(data->len - offset >= ROUTE_DATA_LENGTH) {
 
-    route = data->data.at(offset);
+    route = data->data[offset];
 
     for(int byte = offset + 1; byte < offset + ROUTE_DATA_LENGTH; byte++) {
 
@@ -49,7 +49,7 @@ void oht::Type0x13::updateSignals(const oht::DATA* data)
           continue;
 
         quint8 mask = pow(2, m_signals.value(uid).params.len) - 1;
-        QVariant value = (static_cast<quint8>(data->data.at(byte) >> bit) & mask);
+        QVariant value = (static_cast<quint8>(data->data[byte] >> bit) & mask);
 
         m_signals.value(uid).signal->setValue(value);
 

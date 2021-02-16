@@ -17,7 +17,7 @@ void opa::Type0x04::addSignal(modus::SvSignal* signal) //throw (SvException)
   }
   catch(SvException& e)
   {
-    throw SvException(QString("Сигнал %1: %2").arg(signal->config()->name).arg(e.error));
+    throw SvException(QString("Сигнал %1: %2").arg(signal->config()->name, e.error));
   }
 }
 
@@ -28,7 +28,7 @@ void opa::Type0x04::updateSignals(const opa::DATA* data)
 
   foreach (Signal0x04 signal04, m_signals) {
 
-    if(signal04.params.byte < data->data_length)
+    if(signal04.params.byte < data->len)
       signal04.signal->setValue(int((data->data[signal04.params.byte] >> signal04.params.bit) & 1));
 
   }

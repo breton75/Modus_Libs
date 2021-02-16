@@ -1,10 +1,10 @@
 QT -= gui
 
-DEFINES += PROJ_12700_OPA_MOD_LIBRARY
+DEFINES += PROJ_12700_OPA_LIBRARY
 
 CONFIG += c++11 plugin
 
-TARGET = /home/developer/Modus/lib/protocols/proj_12700_opa_agg_mod
+TARGET = /home/developer/Modus/lib/protocols/proj_12700_opa
 TEMPLATE = lib
 
 # The following define makes your compiler emit warnings if you use
@@ -25,8 +25,8 @@ SOURCES += \
     collection_0x19.cpp \
     collection_0x33.cpp \
     collection_status.cpp \
-    proj_12700_opa_mod.cpp \
-    ../../../../../Modus/global/signal/sv_signal.cpp
+    ../../../../../Modus/global/signal/sv_signal.cpp \
+    proj_12700_opa.cpp
 
 HEADERS += \
     ../../../../../Modus/global/device/protocol/sv_abstract_protocol.h \
@@ -39,9 +39,8 @@ HEADERS += \
     collection_status.h \
     opa_defs.h \
     opa_params.h \
-    proj_12700_opa_mod_global.h \
-    proj_12700_opa_mod.h \
-    signal_params.h \
+    proj_12700_opa.h \
+    proj_12700_opa_global.h \
     ../../../../../Modus/global/signal/sv_signal.h
 
 # Default rules for deployment.
