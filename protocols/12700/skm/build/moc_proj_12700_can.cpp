@@ -1,16 +1,16 @@
 /****************************************************************************
-** Meta object code from reading C++ file 'collection_0x02.h'
+** Meta object code from reading C++ file 'proj_12700_can.h'
 **
 ** Created by: The Qt Meta Object Compiler version 67 (Qt 5.5.1)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
-#include "../src/collection_0x02.h"
+#include "../../can/src/proj_12700_can.h"
 #include <QtCore/qbytearray.h>
 #include <QtCore/qmetatype.h>
 #if !defined(Q_MOC_OUTPUT_REVISION)
-#error "The header file 'collection_0x02.h' doesn't include <QObject>."
+#error "The header file 'proj_12700_can.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 67
 #error "This file was generated using the moc from 5.5.1. It"
 #error "cannot be used with the include files from this version of Qt."
@@ -18,25 +18,25 @@
 #endif
 
 QT_BEGIN_MOC_NAMESPACE
-struct qt_meta_stringdata_skm__Type0x02_t {
+struct qt_meta_stringdata_can__SvCAN12700_t {
     QByteArrayData data[1];
-    char stringdata0[14];
+    char stringdata0[16];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
-    qptrdiff(offsetof(qt_meta_stringdata_skm__Type0x02_t, stringdata0) + ofs \
+    qptrdiff(offsetof(qt_meta_stringdata_can__SvCAN12700_t, stringdata0) + ofs \
         - idx * sizeof(QByteArrayData)) \
     )
-static const qt_meta_stringdata_skm__Type0x02_t qt_meta_stringdata_skm__Type0x02 = {
+static const qt_meta_stringdata_can__SvCAN12700_t qt_meta_stringdata_can__SvCAN12700 = {
     {
-QT_MOC_LITERAL(0, 0, 13) // "skm::Type0x02"
+QT_MOC_LITERAL(0, 0, 15) // "can::SvCAN12700"
 
     },
-    "skm::Type0x02"
+    "can::SvCAN12700"
 };
 #undef QT_MOC_LITERAL
 
-static const uint qt_meta_data_skm__Type0x02[] = {
+static const uint qt_meta_data_can__SvCAN12700[] = {
 
  // content:
        7,       // revision
@@ -52,7 +52,7 @@ static const uint qt_meta_data_skm__Type0x02[] = {
        0        // eod
 };
 
-void skm::Type0x02::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+void can::SvCAN12700::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     Q_UNUSED(_o);
     Q_UNUSED(_id);
@@ -60,28 +60,28 @@ void skm::Type0x02::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _i
     Q_UNUSED(_a);
 }
 
-const QMetaObject skm::Type0x02::staticMetaObject = {
-    { &SvAbstractSignalCollection::staticMetaObject, qt_meta_stringdata_skm__Type0x02.data,
-      qt_meta_data_skm__Type0x02,  qt_static_metacall, Q_NULLPTR, Q_NULLPTR}
+const QMetaObject can::SvCAN12700::staticMetaObject = {
+    { &modus::SvAbstractProtocol::staticMetaObject, qt_meta_stringdata_can__SvCAN12700.data,
+      qt_meta_data_can__SvCAN12700,  qt_static_metacall, Q_NULLPTR, Q_NULLPTR}
 };
 
 
-const QMetaObject *skm::Type0x02::metaObject() const
+const QMetaObject *can::SvCAN12700::metaObject() const
 {
     return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
-void *skm::Type0x02::qt_metacast(const char *_clname)
+void *can::SvCAN12700::qt_metacast(const char *_clname)
 {
     if (!_clname) return Q_NULLPTR;
-    if (!strcmp(_clname, qt_meta_stringdata_skm__Type0x02.stringdata0))
-        return static_cast<void*>(const_cast< Type0x02*>(this));
-    return SvAbstractSignalCollection::qt_metacast(_clname);
+    if (!strcmp(_clname, qt_meta_stringdata_can__SvCAN12700.stringdata0))
+        return static_cast<void*>(const_cast< SvCAN12700*>(this));
+    return modus::SvAbstractProtocol::qt_metacast(_clname);
 }
 
-int skm::Type0x02::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+int can::SvCAN12700::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
-    _id = SvAbstractSignalCollection::qt_metacall(_c, _id, _a);
+    _id = modus::SvAbstractProtocol::qt_metacall(_c, _id, _a);
     if (_id < 0)
         return _id;
     return _id;

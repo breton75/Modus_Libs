@@ -115,7 +115,9 @@ void SvCAN::run()
 
     p_io_buffer->output->mutex.unlock();
 
-    msleep(1);
+    QThread::yieldCurrentThread();
+
+//    msleep(1);
 
   }
 }
