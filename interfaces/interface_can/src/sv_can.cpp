@@ -1,29 +1,37 @@
-#include "sv_can.h"
+﻿#include "sv_can.h"
 
-SvCAN::SvCAN()
+SvCAN::SvCAN():
+  sock(0)
 {
+
 }
 
-bool SvCAN::configure(const modus::DeviceConfig &config)
+SvCAN::~SvCAN()
+{
+  close(sock);
+}
+
+bool SvCAN::configure(modus::DeviceConfig *config, modus::IOBuffer *iobuffer)
 {
   try {
 
     p_config = config;
+    p_io_buffer = iobuffer;
 
-    m_params = SerialParams::fromJsonString(p_config.interface.params);
+    m_params = CANParams::fromJsonString(p_config->interface.params);
 
-    m_port = new QSerialPort();
-    m_port->setPortName(m_params.portname);
-    m_port->setBaudRate(m_params.baudrate);
-    m_port->setDataBits(m_params.databits);
-    m_port->setFlowControl(m_params.flowcontrol);
-    m_port->setParity(m_params.parity);
-    m_port->setStopBits(m_params.stopbits);
+    if((sock = socket(PF_CAN, SOCK_RAW, CAN_RAW)) < 0)
+        throw SvException("Error while opening socket");
 
-    if(!m_port->open(QIODevice::ReadWrite))
-      throw SvException(m_port->errorString());
 
-    m_port->moveToThread(this);
+    strcpy(ifr.ifr_name, m_params.portname.toStdString().c_str());
+    ioctl(sock, SIOCGIFINDEX, &ifr);
+
+    addr.can_family  = AF_CAN;
+    addr.can_ifindex = ifr.ifr_ifindex;
+
+    if(bind(sock, (struct sockaddr*)&addr, sizeof(addr)) < 0)
+        throw SvException("Error in socket bind on init");
 
     return true;
 
@@ -39,46 +47,76 @@ void SvCAN::run()
 {
   p_is_active = true;
 
+  QString err;
+  int nbytes;
+  int framesz = sizeof(frame);
+
   while(p_is_active) {
 
-    while(m_port->waitForReadyRead(p_config.interface.buffer_reset_interval) && p_is_active) {
+    memset(&frame, 0, framesz);
 
-      p_io_buffer->input.mutex.lock();
+    nbytes = read(sock, &frame, framesz);
 
-      if(p_io_buffer->input.offset > p_config.bufsize)
-        p_io_buffer->input.reset();
+    if (nbytes < 0) {
 
-      p_io_buffer->input.offset += m_port->read((char*)(&p_io_buffer->input.data[p_io_buffer->input.offset]), p_config.bufsize - p_io_buffer->input.offset);
+      switch (errno) {
 
-      p_io_buffer->input.mutex.unlock();
+        case EAGAIN:
+        case EINVAL:
+          err = QString("Неверный файловый дескриптор 'sock'. Код ошибки %1").arg(errno);
+          break;
+
+        case EIO:
+        case EINTR:
+          err = QString("Ошибка ввода/вывода. Код ошибки %1").arg(errno);
+          break;
+
+        default:
+          err = QString("Ошибка при чтении данных. Код ошибки %1").arg(errno);
+          break;
+
+      }
+
+      message(QString("Устройство %1: %2").arg(p_config->name).arg(err));
 
     }
 
-    // отправляем ответ-квитирование, если он был сформирован в parse_input_data
-    p_io_buffer->confirm.mutex.lock();
-    write(&p_io_buffer->confirm);
-    p_io_buffer->confirm.mutex.unlock();
+    else if ((nbytes > 0) && (nbytes != framesz))
+
+      message(QString("Неверный размер пакета. %1 байт вместо %2").arg(nbytes).arg(framesz));
+
+
+    else if (nbytes == framesz) {
+
+      p_io_buffer->input->mutex.lock();
+
+      if(p_io_buffer->input->offset + framesz > p_config->bufsize)
+        p_io_buffer->input->reset();
+
+      memcpy(&p_io_buffer->input->data[p_io_buffer->input->offset], &frame, framesz);
+      p_io_buffer->input->offset += framesz;
+
+      p_io_buffer->input->mutex.unlock();
+
+    }
 
     // отправляем управляющие данные, если они есть
-    p_io_buffer->output.mutex.lock();
-    write(&p_io_buffer->output);
-    p_io_buffer->output.mutex.unlock();
+    p_io_buffer->output->mutex.lock();
 
-  }
-}
+    if(p_io_buffer->output->ready()) {
 
+      int nbytes = write(sock, &p_io_buffer->output->data[0], sizeof(struct can_frame));
 
-void SvCAN::write(modus::BUFF* buffer)
-{
-  if(!buffer->ready())
-    return;
+      if(nbytes > 0) {
+        message(QString("<< %1").arg(QString(QByteArray((const char*)&p_io_buffer->output->data[0], p_io_buffer->output->offset).toHex())));
+        p_io_buffer->output->reset();
+      }
+    }
 
-  bool written = m_port->write(&buffer->data[0], buffer->offset) > 0;
-  m_port->flush();
+    p_io_buffer->output->mutex.unlock();
 
-  if(written) {
-    emit message(QString("<< %1").arg(QString(QByteArray((const char*)&buffer->data[0], buffer->offset).toHex())));
-    buffer->reset();
+    msleep(1);
+
   }
 }
 

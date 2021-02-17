@@ -10,7 +10,7 @@ QT       -= gui
 
 CONFIG += c++11 plugin
 
-TARGET = /home/developer/Modus/lib/storages/pgdb_stored_proc_aggregate
+TARGET = /home/user/Modus/lib/storages/pgdb_stored_proc_aggregate
 TEMPLATE = lib
 
 DEFINES += PGDB_STORED_PROC_AGGREGATE_LIBRARY

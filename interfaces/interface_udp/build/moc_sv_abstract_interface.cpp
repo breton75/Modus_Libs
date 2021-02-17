@@ -1,26 +1,23 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'sv_abstract_interface.h'
 **
-** Created by: The Qt Meta Object Compiler version 67 (Qt 5.15.2)
+** Created by: The Qt Meta Object Compiler version 67 (Qt 5.5.1)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
-#include <memory>
 #include "../../../../Modus/global/device/interface/sv_abstract_interface.h"
 #include <QtCore/qbytearray.h>
 #include <QtCore/qmetatype.h>
 #if !defined(Q_MOC_OUTPUT_REVISION)
 #error "The header file 'sv_abstract_interface.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 67
-#error "This file was generated using the moc from 5.15.2. It"
+#error "This file was generated using the moc from 5.5.1. It"
 #error "cannot be used with the include files from this version of Qt."
 #error "(The moc has changed too much.)"
 #endif
 
 QT_BEGIN_MOC_NAMESPACE
-QT_WARNING_PUSH
-QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_modus__SvAbstractInterface_t {
     QByteArrayData data[8];
     char stringdata0[74];
@@ -50,7 +47,7 @@ QT_MOC_LITERAL(7, 69, 4) // "stop"
 static const uint qt_meta_data_modus__SvAbstractInterface[] = {
 
  // content:
-       8,       // revision
+       7,       // revision
        0,       // classname
        0,    0, // classinfo
        5,   14, // methods
@@ -84,7 +81,7 @@ static const uint qt_meta_data_modus__SvAbstractInterface[] = {
 void modus::SvAbstractInterface::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
-        auto *_t = static_cast<SvAbstractInterface *>(_o);
+        SvAbstractInterface *_t = static_cast<SvAbstractInterface *>(_o);
         Q_UNUSED(_t)
         switch (_id) {
         case 0: _t->affirmDeviceAlive(); break;
@@ -96,31 +93,26 @@ void modus::SvAbstractInterface::qt_static_metacall(QObject *_o, QMetaObject::Ca
         }
     } else if (_c == QMetaObject::IndexOfMethod) {
         int *result = reinterpret_cast<int *>(_a[0]);
+        void **func = reinterpret_cast<void **>(_a[1]);
         {
-            using _t = void (SvAbstractInterface::*)();
-            if (*reinterpret_cast<_t *>(_a[1]) == static_cast<_t>(&SvAbstractInterface::affirmDeviceAlive)) {
+            typedef void (SvAbstractInterface::*_t)();
+            if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&SvAbstractInterface::affirmDeviceAlive)) {
                 *result = 0;
-                return;
             }
         }
         {
-            using _t = void (SvAbstractInterface::*)(const QString , int , int );
-            if (*reinterpret_cast<_t *>(_a[1]) == static_cast<_t>(&SvAbstractInterface::message)) {
+            typedef void (SvAbstractInterface::*_t)(const QString , int , int );
+            if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&SvAbstractInterface::message)) {
                 *result = 1;
-                return;
             }
         }
     }
 }
 
-QT_INIT_METAOBJECT const QMetaObject modus::SvAbstractInterface::staticMetaObject = { {
-    QMetaObject::SuperData::link<QThread::staticMetaObject>(),
-    qt_meta_stringdata_modus__SvAbstractInterface.data,
-    qt_meta_data_modus__SvAbstractInterface,
-    qt_static_metacall,
-    nullptr,
-    nullptr
-} };
+const QMetaObject modus::SvAbstractInterface::staticMetaObject = {
+    { &QThread::staticMetaObject, qt_meta_stringdata_modus__SvAbstractInterface.data,
+      qt_meta_data_modus__SvAbstractInterface,  qt_static_metacall, Q_NULLPTR, Q_NULLPTR}
+};
 
 
 const QMetaObject *modus::SvAbstractInterface::metaObject() const
@@ -130,9 +122,9 @@ const QMetaObject *modus::SvAbstractInterface::metaObject() const
 
 void *modus::SvAbstractInterface::qt_metacast(const char *_clname)
 {
-    if (!_clname) return nullptr;
+    if (!_clname) return Q_NULLPTR;
     if (!strcmp(_clname, qt_meta_stringdata_modus__SvAbstractInterface.stringdata0))
-        return static_cast<void*>(this);
+        return static_cast<void*>(const_cast< SvAbstractInterface*>(this));
     return QThread::qt_metacast(_clname);
 }
 
@@ -156,14 +148,13 @@ int modus::SvAbstractInterface::qt_metacall(QMetaObject::Call _c, int _id, void 
 // SIGNAL 0
 void modus::SvAbstractInterface::affirmDeviceAlive()
 {
-    QMetaObject::activate(this, &staticMetaObject, 0, nullptr);
+    QMetaObject::activate(this, &staticMetaObject, 0, Q_NULLPTR);
 }
 
 // SIGNAL 1
 void modus::SvAbstractInterface::message(const QString _t1, int _t2, int _t3)
 {
-    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t1))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t2))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t3))) };
+    void *_a[] = { Q_NULLPTR, const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)), const_cast<void*>(reinterpret_cast<const void*>(&_t3)) };
     QMetaObject::activate(this, &staticMetaObject, 1, _a);
 }
-QT_WARNING_POP
 QT_END_MOC_NAMESPACE

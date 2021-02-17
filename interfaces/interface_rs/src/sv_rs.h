@@ -1,4 +1,4 @@
-#ifndef SV_RS_H
+﻿#ifndef SV_RS_H
 #define SV_RS_H
 
 #include <QSerialPort>
@@ -22,7 +22,7 @@ class SvRS: public modus::SvAbstractInterface
 public:
   SvRS();
 
-  virtual bool configure(const modus::DeviceConfig& config) override;
+  virtual bool configure(modus::DeviceConfig* config, modus::IOBuffer*iobuffer) override;
 
 protected:
   virtual void run() override;

@@ -4,7 +4,7 @@ DEFINES += PROJ_12700_OPA_LIBRARY
 
 CONFIG += c++11 plugin
 
-TARGET = /home/developer/Modus/lib/protocols/proj_12700_opa
+TARGET = /home/user/Modus/lib/protocols/proj_12700_opa
 TEMPLATE = lib
 
 # The following define makes your compiler emit warnings if you use

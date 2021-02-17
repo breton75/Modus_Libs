@@ -1,7 +1,15 @@
-#ifndef SV_CAN_H
+﻿#ifndef SV_CAN_H
 #define SV_CAN_H
 
-#include <QSerialPort>
+#include <linux/can.h>
+#include <sys/ioctl.h>
+#include <net/if.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <errno.h>
+//#include <string.h>
 
 #include "ifc_can_global.h"
 #include "can_defs.h"
@@ -21,17 +29,22 @@ class SvCAN: public modus::SvAbstractInterface
 {
 public:
   SvCAN();
+  ~SvCAN();
 
-  virtual bool configure(const modus::DeviceConfig& config) override;
+  virtual bool configure(modus::DeviceConfig* config, modus::IOBuffer*iobuffer) override;
 
 protected:
   virtual void run() override;
 
 private:
-  QSerialPort*  m_port    = nullptr;
-  SerialParams  m_params;
+  CANParams     m_params;
 
-  void write(modus::BUFF* buffer);
+  int sock = 0;
+  struct sockaddr_can addr;
+  struct can_frame frame;
+  struct ifreq ifr;
+
+//  void write(modus::BUFF* buffer);
 
 };
 

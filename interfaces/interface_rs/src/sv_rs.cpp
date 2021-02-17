@@ -1,16 +1,17 @@
-#include "sv_rs.h"
+﻿#include "sv_rs.h"
 
 SvRS::SvRS()
 {
 }
 
-bool SvRS::configure(const modus::DeviceConfig &config)
+bool SvRS::configure(modus::DeviceConfig *config, modus::IOBuffer *iobuffer)
 {
   try {
 
     p_config = config;
+    p_io_buffer = iobuffer;
 
-    m_params = SerialParams::fromJsonString(p_config.interface.params);
+    m_params = SerialParams::fromJsonString(p_config->interface.params);
 
     m_port = new QSerialPort();
     m_port->setPortName(m_params.portname);
@@ -41,28 +42,28 @@ void SvRS::run()
 
   while(p_is_active) {
 
-    while(m_port->waitForReadyRead(p_config.interface.buffer_reset_interval) && p_is_active) {
+    while(m_port->waitForReadyRead(p_config->interface.buffer_reset_interval) && p_is_active) {
 
-      p_io_buffer->input.mutex.lock();
+      p_io_buffer->input->mutex.lock();
 
-      if(p_io_buffer->input.offset > p_config.bufsize)
-        p_io_buffer->input.reset();
+      if(p_io_buffer->input->offset > p_config->bufsize)
+        p_io_buffer->input->reset();
 
-      p_io_buffer->input.offset += m_port->read((char*)(&p_io_buffer->input.data[p_io_buffer->input.offset]), p_config.bufsize - p_io_buffer->input.offset);
+      p_io_buffer->input->offset += m_port->read((char*)(&p_io_buffer->input->data[p_io_buffer->input->offset]), p_config->bufsize - p_io_buffer->input->offset);
 
-      p_io_buffer->input.mutex.unlock();
+      p_io_buffer->input->mutex.unlock();
 
     }
 
     // отправляем ответ-квитирование, если он был сформирован в parse_input_data
-    p_io_buffer->confirm.mutex.lock();
-    write(&p_io_buffer->confirm);
-    p_io_buffer->confirm.mutex.unlock();
+    p_io_buffer->confirm->mutex.lock();
+    write(p_io_buffer->confirm);
+    p_io_buffer->confirm->mutex.unlock();
 
     // отправляем управляющие данные, если они есть
-    p_io_buffer->output.mutex.lock();
-    write(&p_io_buffer->output);
-    p_io_buffer->output.mutex.unlock();
+    p_io_buffer->output->mutex.lock();
+    write(p_io_buffer->output);
+    p_io_buffer->output->mutex.unlock();
 
   }
 }

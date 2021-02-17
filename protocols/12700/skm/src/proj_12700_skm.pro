@@ -4,7 +4,7 @@ DEFINES += PROJ_12700_SKM_LIBRARY
 
 CONFIG += c++11 plugin
 
-TARGET = /home/developer/Modus/lib/protocols/proj_12700_SKM
+TARGET = /home/user/Modus/lib/protocols/proj_12700_SKM
 TEMPLATE = lib
 
 # The following define makes your compiler emit warnings if you use
