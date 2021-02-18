@@ -87,10 +87,10 @@ private:
 
 //  can::DeviceParams m_params;
 
-  can::DATA m_data;
+  modus::DATA m_data;
 
 //  skm::Header m_header;
-  size_t m_hsz = sizeof(struct canfd_frame) - 8;
+  size_t m_framesz = sizeof(can_frame);
 
   can::CANSignalCollection signal_collection;
 

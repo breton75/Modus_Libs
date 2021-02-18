@@ -16,7 +16,7 @@
 
 namespace can {
 
-  struct DeviceParams {
+/*  struct DeviceParams {
 
 //    quint8 param = 0;
 
@@ -44,7 +44,7 @@ namespace can {
       QString P;
 
       // canid
-/*      P = P_CANID;
+      P = P_CANID;
       if(object.contains(P)) {
 
         QByteArray h = object.value(P).toString().toUtf8();
@@ -61,7 +61,7 @@ namespace can {
       }
       else
         throw SvException(QString(MISSING_PARAM).arg(P));
-*/
+
       return p;
 
     }
@@ -84,48 +84,7 @@ namespace can {
 
     }
   };
-
-  struct DATA
-  {
-    DATA():
-      data(nullptr),
-      bufsize(0)
-    {  }
-
-    DATA(quint16 size):
-      data(nullptr),
-      bufsize(size)
-    {
-      data = (quint8*)malloc(size);
-    }
-
-    ~DATA()
-    {
-      if(data)
-        free(data);
-    }
-
-    bool resize(quint16 size)
-    {
-      if(data)
-        free(data);
-
-      data = nullptr;
-
-      bufsize = size;
-      data = (quint8*)malloc(size);
-
-      return bool(data);
-    }
-
-    quint8* data = nullptr;
-    quint8  type;
-    quint8  len;
-    quint16 crc;
-
-    quint16 bufsize;
-
-  };
+*/
 
 }
 

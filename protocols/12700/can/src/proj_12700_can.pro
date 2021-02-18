@@ -30,7 +30,8 @@ HEADERS += \
     proj_12700_can_global.h \
     proj_12700_can.h \
     ../../../../../Modus/global/signal/sv_signal.h \
-    can12700_signal.h
+    can12700_signal.h \
+    ../../../../../Modus/global/signal/sv_abstract_signal_collection.h
 
 # Default rules for deployment.
 unix {

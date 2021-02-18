@@ -53,14 +53,16 @@ SOURCES       = ../../can/src/proj_12700_can.cpp \
 		../../can/src/can12700_signal.cpp moc_sv_abstract_protocol.cpp \
 		moc_proj_12700_can.cpp \
 		moc_sv_signal.cpp \
-		moc_can12700_signal.cpp
+		moc_can12700_signal.cpp \
+		moc_sv_abstract_signal_collection.cpp
 OBJECTS       = proj_12700_can.o \
 		sv_signal.o \
 		can12700_signal.o \
 		moc_sv_abstract_protocol.o \
 		moc_proj_12700_can.o \
 		moc_sv_signal.o \
-		moc_can12700_signal.o
+		moc_can12700_signal.o \
+		moc_sv_abstract_signal_collection.o
 DIST          = /opt/Qt5.5.1/5.5/gcc_64/mkspecs/features/spec_pre.prf \
 		/opt/Qt5.5.1/5.5/gcc_64/mkspecs/common/unix.conf \
 		/opt/Qt5.5.1/5.5/gcc_64/mkspecs/common/linux.conf \
@@ -200,7 +202,8 @@ DIST          = /opt/Qt5.5.1/5.5/gcc_64/mkspecs/features/spec_pre.prf \
 		../../can/src/proj_12700_can_global.h \
 		../../can/src/proj_12700_can.h \
 		/home/user/c++/Modus/global/signal/sv_signal.h \
-		../../can/src/can12700_signal.h ../../can/src/proj_12700_can.cpp \
+		../../can/src/can12700_signal.h \
+		/home/user/c++/Modus/global/signal/sv_abstract_signal_collection.h ../../can/src/proj_12700_can.cpp \
 		/home/user/c++/Modus/global/signal/sv_signal.cpp \
 		../../can/src/can12700_signal.cpp
 QMAKE_TARGET  = proj_12700_can
@@ -524,7 +527,7 @@ dist: distdir FORCE
 distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
-	$(COPY_FILE) --parents /home/user/c++/Modus/global/device/protocol/sv_abstract_protocol.h /home/user/c++/Modus/global/global_defs.h ../../can/src/can_defs.h ../../can/src/proj_12700_can_global.h ../../can/src/proj_12700_can.h /home/user/c++/Modus/global/signal/sv_signal.h ../../can/src/can12700_signal.h $(DISTDIR)/
+	$(COPY_FILE) --parents /home/user/c++/Modus/global/device/protocol/sv_abstract_protocol.h /home/user/c++/Modus/global/global_defs.h ../../can/src/can_defs.h ../../can/src/proj_12700_can_global.h ../../can/src/proj_12700_can.h /home/user/c++/Modus/global/signal/sv_signal.h ../../can/src/can12700_signal.h /home/user/c++/Modus/global/signal/sv_abstract_signal_collection.h $(DISTDIR)/
 	$(COPY_FILE) --parents ../../can/src/proj_12700_can.cpp /home/user/c++/Modus/global/signal/sv_signal.cpp ../../can/src/can12700_signal.cpp $(DISTDIR)/
 
 
@@ -548,9 +551,9 @@ check: first
 
 compiler_rcc_make_all:
 compiler_rcc_clean:
-compiler_moc_header_make_all: moc_sv_abstract_protocol.cpp moc_proj_12700_can.cpp moc_sv_signal.cpp moc_can12700_signal.cpp
+compiler_moc_header_make_all: moc_sv_abstract_protocol.cpp moc_proj_12700_can.cpp moc_sv_signal.cpp moc_can12700_signal.cpp moc_sv_abstract_signal_collection.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) moc_sv_abstract_protocol.cpp moc_proj_12700_can.cpp moc_sv_signal.cpp moc_can12700_signal.cpp
+	-$(DEL_FILE) moc_sv_abstract_protocol.cpp moc_proj_12700_can.cpp moc_sv_signal.cpp moc_can12700_signal.cpp moc_sv_abstract_signal_collection.cpp
 moc_sv_abstract_protocol.cpp: /opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QObject \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qobject.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qobjectdefs.h \
@@ -1285,6 +1288,62 @@ moc_can12700_signal.cpp: /opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QObject \
 		../../can/src/can12700_signal.h
 	/opt/Qt5.5.1/5.5/gcc_64/bin/moc $(DEFINES) -I/opt/Qt5.5.1/5.5/gcc_64/mkspecs/linux-g++ -I/home/user/c++/Modus_Libs/protocols/12700/can/src -I/opt/Qt5.5.1/5.5/gcc_64/include -I/opt/Qt5.5.1/5.5/gcc_64/include/QtCore -I. ../../can/src/can12700_signal.h -o moc_can12700_signal.cpp
 
+moc_sv_abstract_signal_collection.cpp: /opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QObject \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qobject.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qobjectdefs.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qnamespace.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qglobal.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qconfig.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qfeatures.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qsystemdetection.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qprocessordetection.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qcompilerdetection.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qtypeinfo.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qtypetraits.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qsysinfo.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qlogging.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qflags.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qbasicatomic.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_bootstrap.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qgenericatomic.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_cxx11.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_gcc.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_msvc.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_armv7.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_armv6.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_armv5.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_ia64.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_mips.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_x86.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qatomic_unix.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qglobalstatic.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qmutex.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qnumeric.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qobjectdefs_impl.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qstring.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qchar.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qbytearray.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qrefcount.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qarraydata.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qstringbuilder.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qlist.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qalgorithms.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qiterator.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qbytearraylist.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qstringlist.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qregexp.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qstringmatcher.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qcoreevent.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qscopedpointer.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qmetatype.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qvarlengtharray.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qcontainerfwd.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qisenum.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qobject_impl.h \
+		/home/user/c++/Modus/global/signal/sv_abstract_signal_collection.h
+	/opt/Qt5.5.1/5.5/gcc_64/bin/moc $(DEFINES) -I/opt/Qt5.5.1/5.5/gcc_64/mkspecs/linux-g++ -I/home/user/c++/Modus_Libs/protocols/12700/can/src -I/opt/Qt5.5.1/5.5/gcc_64/include -I/opt/Qt5.5.1/5.5/gcc_64/include/QtCore -I. /home/user/c++/Modus/global/signal/sv_abstract_signal_collection.h -o moc_sv_abstract_signal_collection.cpp
+
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
 compiler_yacc_decl_make_all:
@@ -1317,6 +1376,9 @@ moc_sv_signal.o: moc_sv_signal.cpp
 
 moc_can12700_signal.o: moc_can12700_signal.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_can12700_signal.o moc_can12700_signal.cpp
+
+moc_sv_abstract_signal_collection.o: moc_sv_abstract_signal_collection.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_sv_abstract_signal_collection.o moc_sv_abstract_signal_collection.cpp
 
 ####### Install
 

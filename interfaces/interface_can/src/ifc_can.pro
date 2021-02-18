@@ -24,7 +24,8 @@ SOURCES += \
 HEADERS += \
     ifc_can_global.h \
     sv_can.h \
-    can_defs.h
+    can_defs.h \
+    ../../../../Modus/global/device/interface/sv_abstract_interface.h
 
 # Default rules for deployment.
 unix {

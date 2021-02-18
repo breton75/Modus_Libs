@@ -49,7 +49,7 @@ void SvCAN::run()
 
   QString err;
   int nbytes;
-  int framesz = sizeof(frame);
+  int framesz = sizeof(can_frame);
 
   while(p_is_active) {
 
@@ -81,24 +81,33 @@ void SvCAN::run()
 
     }
 
-    else if ((nbytes > 0) && (nbytes != framesz))
+    else if (nbytes > 0) {
 
-      message(QString("Неверный размер пакета. %1 байт вместо %2").arg(nbytes).arg(framesz));
+      if(nbytes != framesz)
+        message(QString("Неверный размер пакета. %1 байт вместо %2").arg(nbytes).arg(framesz));
 
 
-    else if (nbytes == framesz) {
+      else { // if (nbytes == framesz) {
 
-      p_io_buffer->input->mutex.lock();
+        p_io_buffer->input->mutex.lock();
 
-      if(p_io_buffer->input->offset + framesz > p_config->bufsize)
-        p_io_buffer->input->reset();
+        if(p_io_buffer->input->offset + framesz > p_config->bufsize)
+          p_io_buffer->input->reset();
 
-      memcpy(&p_io_buffer->input->data[p_io_buffer->input->offset], &frame, framesz);
-      p_io_buffer->input->offset += framesz;
+        memcpy(&p_io_buffer->input->data[p_io_buffer->input->offset], &frame, framesz);
+        p_io_buffer->input->offset += framesz;
 
-      p_io_buffer->input->mutex.unlock();
+        qDebug() << p_io_buffer->input->offset << QDateTime::currentDateTime().currentMSecsSinceEpoch() << QString(QByteArray(&((const char*)(&frame))[0], framesz).toHex());
+        p_io_buffer->input->mutex.unlock();
+
+      }
+
 
     }
+
+    else
+      qDebug() << "no data";
+
 
     // отправляем управляющие данные, если они есть
     p_io_buffer->output->mutex.lock();

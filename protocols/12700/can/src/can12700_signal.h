@@ -59,7 +59,7 @@ namespace can {
       P = P_OFFSET;
       if(object.contains(P)) {
 
-        if(object.value(P).toInt(-1) <= 0)
+        if(object.value(P).toInt(-1) < 0)
           throw SvException(QString(IMPERMISSIBLE_VALUE)
                              .arg(P).arg(object.value(P).toVariant().toString())
                              .arg("Параметр 'offset' должен быть задан целым положительным числом"));
@@ -77,7 +77,7 @@ namespace can {
         if(object.value(P).toInt(-1) <= 0)
           throw SvException(QString(IMPERMISSIBLE_VALUE)
                              .arg(P).arg(object.value(P).toVariant().toString())
-                             .arg("Параметр 'len' должен быть задан целым положительным числом"));
+                             .arg("Параметр 'len' должен быть задан целым положительным числом > 0"));
 
         p.len = object.value(P).toInt();
 
@@ -133,10 +133,12 @@ namespace can {
 
     void addSignal(modus::SvSignal* signal) override; // throw (SvException);
 
-    void updateSignals(const can::DATA* data = nullptr) override;
+    void updateSignals(const modus::DATA* data = nullptr) override;
+
+    void updateSignals(const can_frame &frame);
 
   private:
-    QMap<quint32, can::CANSignal> m_signals;
+    QMap<quint64, can::CANSignal> m_signals;
 
 
   };

@@ -25,17 +25,16 @@ void can::CANSignalCollection::addSignal(modus::SvSignal* signal) //throw (SvExc
   }
 }
 
-void can::CANSignalCollection::updateSignals(const can::DATA* data)
+void can::CANSignalCollection::updateSignals(const modus::DATA* data)
 {
-  if(!data)
-    return;
+  Q_UNUSED(data);
+}
 
+void can::CANSignalCollection::updateSignals(const can_frame& frame)
+{
   quint64 uid;
 
-  canfd_frame frame;
-  memcpy(&frame, data, sizeof(canfd_frame));
-
-  for(int byte = 0; byte < frame.len; byte++) {
+  for(int byte = 0; byte < frame.can_dlc; byte++) {
     for(int bit = 0; bit < 8; bit++) {
 
       uid = getUid(frame.can_id, 0, 0, byte, bit);
