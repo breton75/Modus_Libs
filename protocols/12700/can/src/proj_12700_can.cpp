@@ -66,7 +66,7 @@ void can::SvCAN12700::run()
     if(result.parse_time.isValid())
       validateSignals(result.parse_time);
 
-//    usleep(1000);
+    msleep(1);
 
   }
 }
@@ -74,16 +74,21 @@ void can::SvCAN12700::run()
 can::PARSERESULT can::SvCAN12700::parse()
 {
 //  qDebug() << p_io_buffer->input->offset << m_framesz;
-  // проверяем, что длина данных в буфере не меньше длины заголовка
-  if(p_io_buffer->input->offset < m_framesz)
-    return can::PARSERESULT(DO_NOT_RESET);
 
-  can_frame frame;
-  memcpy(&frame, &p_io_buffer->input->data[0], m_framesz);
+  // проходим по буферу, с учетом того, что там могут быть несколько фреймов
+  for(quint64 oof = 0; oof < p_io_buffer->input->offset; oof += m_framesz) {
 
-  message(QString(QByteArray((const char*)&p_io_buffer->input->data[0], p_io_buffer->input->offset).toHex()));
+    can_frame frame;
+    memcpy(&frame, &p_io_buffer->input->data[oof], m_framesz);
 
-  signal_collection.updateSignals(frame);
+    message(QString()
+                .append(QDateTime::currentDateTime().toString("hhmmss.zzz"))
+                .append(" >> ")
+                .append(QByteArray((const char*)&p_io_buffer->input->data[oof], m_framesz).toHex()));
+
+    signal_collection.updateSignals(frame);
+
+  }
 
   return can::PARSERESULT(DO_RESET, QDateTime::currentDateTime());
 }

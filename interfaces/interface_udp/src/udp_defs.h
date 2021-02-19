@@ -2,8 +2,8 @@
  *  автор Свиридов С.А. НИИ РПИ
  * *********************************************************************/
 
-#ifndef UDP_DEFS
-#define UDP_DEFS
+#ifndef UDP_IFC_DEFS
+#define UDP_IFC_DEFS
 
 #include <QtGlobal>
 #include <QHostAddress>
@@ -148,5 +148,5 @@ struct UdpParams {
 };
 
 
-#endif // UDP_DEFS
+#endif // UDP_IFC_DEFS
 

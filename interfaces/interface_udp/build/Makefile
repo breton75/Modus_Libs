@@ -190,7 +190,7 @@ DIST          = /opt/Qt5.5.1/5.5/gcc_64/mkspecs/features/spec_pre.prf \
 		../src/sv_udp.h \
 		../src/udp_defs.h ../src/sv_udp.cpp
 QMAKE_TARGET  = udp
-DESTDIR       = /home/developer/Modus/lib/interfaces/#avoid trailing-slash linebreak
+DESTDIR       = /home/user/Modus/lib/interfaces/#avoid trailing-slash linebreak
 TARGET        = libudp.so
 TARGETD       = libudp.so
 
@@ -217,11 +217,11 @@ first: all
 
 ####### Build rules
 
-/home/developer/Modus/lib/interfaces/$(TARGET):  $(OBJECTS) $(SUBLIBS) $(OBJCOMP)  
-	@test -d /home/developer/Modus/lib/interfaces/ || mkdir -p /home/developer/Modus/lib/interfaces/
+/home/user/Modus/lib/interfaces/$(TARGET):  $(OBJECTS) $(SUBLIBS) $(OBJCOMP)  
+	@test -d /home/user/Modus/lib/interfaces/ || mkdir -p /home/user/Modus/lib/interfaces/
 	-$(DEL_FILE) $(TARGET)
 	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS) $(LIBS) $(OBJCOMP)
-	-$(MOVE) $(TARGET) /home/developer/Modus/lib/interfaces/ 
+	-$(MOVE) $(TARGET) /home/user/Modus/lib/interfaces/ 
 
 
 
@@ -506,7 +506,7 @@ qmake: FORCE
 qmake_all: FORCE
 
 
-all: Makefile /home/developer/Modus/lib/interfaces/$(TARGET)
+all: Makefile /home/user/Modus/lib/interfaces/$(TARGET)
 
 dist: distdir FORCE
 	(cd `dirname $(DISTDIR)` && $(TAR) $(DISTNAME).tar $(DISTNAME) && $(COMPRESS) $(DISTNAME).tar) && $(MOVE) `dirname $(DISTDIR)`/$(DISTNAME).tar.gz . && $(DEL_FILE) -r $(DISTDIR)
@@ -524,7 +524,7 @@ clean: compiler_clean
 
 
 distclean: clean 
-	-$(DEL_FILE) /home/developer/Modus/lib/interfaces/$(TARGET) 
+	-$(DEL_FILE) /home/user/Modus/lib/interfaces/$(TARGET) 
 	-$(DEL_FILE) .qmake.stash
 	-$(DEL_FILE) Makefile
 
@@ -739,12 +739,6 @@ moc_sv_abstract_interface.cpp: /opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QObject \
 		../../../../svlib/sv_abstract_logger.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDate \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QTime \
-		../../../../Modus/global/signal/sv_signal.h \
-		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDateTime \
-		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QList \
-		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QJsonArray \
-		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QFile \
-		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QMutex \
 		../../../../Modus/global/device/interface/sv_abstract_interface.h
 	/opt/Qt5.5.1/5.5/gcc_64/bin/moc $(DEFINES) -I/opt/Qt5.5.1/5.5/gcc_64/mkspecs/linux-g++ -I/home/user/c++/Modus_Libs/interfaces/interface_udp/src -I/opt/Qt5.5.1/5.5/gcc_64/include -I/opt/Qt5.5.1/5.5/gcc_64/include/QtNetwork -I/opt/Qt5.5.1/5.5/gcc_64/include/QtCore -I. ../../../../Modus/global/device/interface/sv_abstract_interface.h -o moc_sv_abstract_interface.cpp
 
@@ -966,13 +960,7 @@ sv_udp.o: ../src/sv_udp.cpp ../src/sv_udp.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qtimeline.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qtimezone.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qxmlstream.h \
-		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qtcoreversion.h \
-		../../../../Modus/global/signal/sv_signal.h \
-		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDateTime \
-		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QList \
-		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QJsonArray \
-		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QFile \
-		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QMutex
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qtcoreversion.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o sv_udp.o ../src/sv_udp.cpp
 
 moc_sv_abstract_interface.o: moc_sv_abstract_interface.cpp 
@@ -982,7 +970,7 @@ moc_sv_abstract_interface.o: moc_sv_abstract_interface.cpp
 
 install_target: first FORCE
 	@test -d $(INSTALL_ROOT)/usr/lib || mkdir -p $(INSTALL_ROOT)/usr/lib
-	-$(INSTALL_PROGRAM) /home/developer/Modus/lib/interfaces/$(TARGET) $(INSTALL_ROOT)/usr/lib/$(TARGET)
+	-$(INSTALL_PROGRAM) /home/user/Modus/lib/interfaces/$(TARGET) $(INSTALL_ROOT)/usr/lib/$(TARGET)
 	-$(STRIP) --strip-unneeded $(INSTALL_ROOT)/usr/lib/$(TARGET)
 
 uninstall_target: FORCE

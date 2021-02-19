@@ -20,8 +20,61 @@ bool SvCAN::configure(modus::DeviceConfig *config, modus::IOBuffer *iobuffer)
 
     m_params = CANParams::fromJsonString(p_config->interface.params);
 
+    {
+      // задаем парметры порта с помощью ip link
+      QProcess p(this);
+      QByteArray b;
+
+      p.start(QString("sudo ip link set %1 down").arg(m_params.portname));
+
+      if(p.waitForFinished(1000)) {
+
+        b = p.readAllStandardError();
+
+        if(!b.isEmpty())
+          throw SvException(QString("Ошибка при настроке порта %1: %2")
+                            .arg(m_params.portname)
+                            .arg(QString(b)));
+      }
+      else
+        throw SvException(QString("Ошибка при настроке порта %1: %2")
+                          .arg(m_params.portname)
+                          .arg(p.errorString()));
+
+      p.start(QString("sudo ip link set %1 type can bitrate %2")
+            .arg(m_params.portname)
+            .arg(m_params.bitrate));
+
+      if(p.waitForFinished(1000)) {
+
+        b = p.readAllStandardError();
+
+        if(!b.isEmpty())
+          throw SvException(QString("Ошибка при настроке порта %1: %2")
+                            .arg(m_params.portname)
+                            .arg(QString(b)));
+      }
+      else
+        throw SvException(QString("Ошибка при настроке порта %1: %2")
+                          .arg(m_params.portname)
+                          .arg(p.errorString()));
+
+      p.start(QString("sudo ip link set %1 up").arg(m_params.portname));
+
+      if(p.waitForFinished(1000)) {
+
+        b = p.readAllStandardError();
+
+        if(!b.isEmpty())
+          throw SvException(QString("Ошибка при настроке порта %1: %2")
+                            .arg(m_params.portname)
+                            .arg(QString(b)));
+
+      }
+    }
+
     if((sock = socket(PF_CAN, SOCK_RAW, CAN_RAW)) < 0)
-        throw SvException("Error while opening socket");
+      throw SvException("Ошибка при открытии порта");
 
 
     strcpy(ifr.ifr_name, m_params.portname.toStdString().c_str());
@@ -32,6 +85,8 @@ bool SvCAN::configure(modus::DeviceConfig *config, modus::IOBuffer *iobuffer)
 
     if(bind(sock, (struct sockaddr*)&addr, sizeof(addr)) < 0)
         throw SvException("Error in socket bind on init");
+
+
 
     return true;
 
@@ -50,6 +105,12 @@ void SvCAN::run()
   QString err;
   int nbytes;
   int framesz = sizeof(can_frame);
+//  qint64 reset_time = QDateTime::currentMSecsSinceEpoch() + p_config->interface.buffer_reset_interval;
+
+  // по стандарту CAN между фреймами должен быть интервал длиной минимум 3 бита
+  quint32 interval = int((1.0 / m_params.bitrate) * 1000000) * 3;
+
+  qDebug() << interval;
 
   while(p_is_active) {
 
@@ -57,6 +118,16 @@ void SvCAN::run()
 
     nbytes = read(sock, &frame, framesz);
 
+//    if(nbytes == 0) {
+
+//      if(reset_time > QDateTime::currentMSecsSinceEpoch()) {
+
+//        p_io_buffer->input->reset();
+//        reset_time = QDateTime::currentMSecsSinceEpoch() + p_config->interface.buffer_reset_interval;
+
+//      }
+//    }
+//    else
     if (nbytes < 0) {
 
       switch (errno) {
@@ -83,30 +154,28 @@ void SvCAN::run()
 
     else if (nbytes > 0) {
 
-      if(nbytes != framesz)
+      if(nbytes != framesz) {
+
+        p_io_buffer->input->reset();
+
         message(QString("Неверный размер пакета. %1 байт вместо %2").arg(nbytes).arg(framesz));
 
-
+      }
       else { // if (nbytes == framesz) {
 
         p_io_buffer->input->mutex.lock();
 
-        if(p_io_buffer->input->offset + framesz > p_config->bufsize)
+        if(p_io_buffer->input->offset + framesz > p_io_buffer->input->size)
           p_io_buffer->input->reset();
 
         memcpy(&p_io_buffer->input->data[p_io_buffer->input->offset], &frame, framesz);
         p_io_buffer->input->offset += framesz;
 
-        qDebug() << p_io_buffer->input->offset << QDateTime::currentDateTime().currentMSecsSinceEpoch() << QString(QByteArray(&((const char*)(&frame))[0], framesz).toHex());
+//        qDebug() << p_io_buffer->input->offset << QDateTime::currentDateTime().currentMSecsSinceEpoch() << QString(QByteArray(&((const char*)(&frame))[0], framesz).toHex());
         p_io_buffer->input->mutex.unlock();
 
       }
-
-
     }
-
-    else
-      qDebug() << "no data";
 
 
     // отправляем управляющие данные, если они есть
@@ -124,9 +193,9 @@ void SvCAN::run()
 
     p_io_buffer->output->mutex.unlock();
 
-    QThread::yieldCurrentThread();
+//    QThread::yieldCurrentThread();
 
-//    msleep(1);
+    usleep(interval);
 
   }
 }

@@ -231,7 +231,7 @@ DIST          = /opt/Qt5.5.1/5.5/gcc_64/mkspecs/features/spec_pre.prf \
 		../src/proj_12700_oht.cpp \
 		/home/user/c++/Modus/global/signal/sv_signal.cpp
 QMAKE_TARGET  = proj_12700_oht_agg
-DESTDIR       = /home/developer/Modus/lib/protocols/#avoid trailing-slash linebreak
+DESTDIR       = /home/user/Modus/lib/protocols/#avoid trailing-slash linebreak
 TARGET        = libproj_12700_oht_agg.so
 TARGETD       = libproj_12700_oht_agg.so
 
@@ -258,11 +258,11 @@ first: all
 
 ####### Build rules
 
-/home/developer/Modus/lib/protocols/$(TARGET):  $(OBJECTS) $(SUBLIBS) $(OBJCOMP)  
-	@test -d /home/developer/Modus/lib/protocols/ || mkdir -p /home/developer/Modus/lib/protocols/
+/home/user/Modus/lib/protocols/$(TARGET):  $(OBJECTS) $(SUBLIBS) $(OBJCOMP)  
+	@test -d /home/user/Modus/lib/protocols/ || mkdir -p /home/user/Modus/lib/protocols/
 	-$(DEL_FILE) $(TARGET)
 	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS) $(LIBS) $(OBJCOMP)
-	-$(MOVE) $(TARGET) /home/developer/Modus/lib/protocols/ 
+	-$(MOVE) $(TARGET) /home/user/Modus/lib/protocols/ 
 
 
 
@@ -543,7 +543,7 @@ qmake: FORCE
 qmake_all: FORCE
 
 
-all: Makefile /home/developer/Modus/lib/protocols/$(TARGET)
+all: Makefile /home/user/Modus/lib/protocols/$(TARGET)
 
 dist: distdir FORCE
 	(cd `dirname $(DISTDIR)` && $(TAR) $(DISTNAME).tar $(DISTNAME) && $(COMPRESS) $(DISTNAME).tar) && $(MOVE) `dirname $(DISTDIR)`/$(DISTNAME).tar.gz . && $(DEL_FILE) -r $(DISTDIR)
@@ -561,7 +561,7 @@ clean: compiler_clean
 
 
 distclean: clean 
-	-$(DEL_FILE) /home/developer/Modus/lib/protocols/$(TARGET) 
+	-$(DEL_FILE) /home/user/Modus/lib/protocols/$(TARGET) 
 	-$(DEL_FILE) Makefile
 
 
@@ -2440,7 +2440,7 @@ moc_sv_signal.o: moc_sv_signal.cpp
 
 install_target: first FORCE
 	@test -d $(INSTALL_ROOT)/usr/lib || mkdir -p $(INSTALL_ROOT)/usr/lib
-	-$(INSTALL_PROGRAM) /home/developer/Modus/lib/protocols/$(TARGET) $(INSTALL_ROOT)/usr/lib/$(TARGET)
+	-$(INSTALL_PROGRAM) /home/user/Modus/lib/protocols/$(TARGET) $(INSTALL_ROOT)/usr/lib/$(TARGET)
 	-$(STRIP) --strip-unneeded $(INSTALL_ROOT)/usr/lib/$(TARGET)
 
 uninstall_target: FORCE

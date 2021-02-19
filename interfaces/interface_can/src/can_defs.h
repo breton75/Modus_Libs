@@ -16,11 +16,14 @@
 
 // имена параметров для CAN
 #define P_PORTNAME "portname"
+#define P_BITRATE  "bitrate"
 
+#define DEFAULT_CAN_BITRATE 125000
 
 struct CANParams {
 
   QString                   portname    =     "can0";
+  int                       bitrate     =     DEFAULT_CAN_BITRATE;
 
   bool isValid = true;
 
@@ -56,9 +59,24 @@ struct CANParams {
                            .arg("Имя порта не может быть пустым"));
     }
     else
-      throw SvException(QString(IMPERMISSIBLE_VALUE)
-                         .arg(P).arg(object.value(P).toVariant().toString())
-                         .arg("Должно быть задано имя порта"));
+      throw SvException(QString(MISSING_PARAM).arg(QString("%1/%2").arg(P_INTERFACE).arg(P_PARAMS)).arg(P));
+
+
+    // offset
+    P = P_BITRATE;
+    if(object.contains(P)) {
+
+      if(object.value(P).toInt(-1) < 0)
+        throw SvException(QString(IMPERMISSIBLE_VALUE)
+                           .arg(P).arg(object.value(P).toVariant().toString())
+                           .arg("Параметр 'offset' должен быть задан целым положительным числом"));
+
+      p.bitrate = object.value(P).toInt();
+
+    }
+    else
+      throw SvException(QString(MISSING_PARAM).arg(QString("%1/%2").arg(P_INTERFACE).arg(P_PARAMS)).arg(P));
+
 
     return p;
 
@@ -77,6 +95,7 @@ struct CANParams {
     QJsonObject j;
 
     j.insert(P_PORTNAME, QJsonValue(portname).toString());
+    j.insert(P_BITRATE,  QJsonValue(bitrate).toInt());
 
     return j;
 

@@ -116,8 +116,10 @@ oht::PARSERESULT oht::SvOHT::parse()
   *  в этой точке в буфере должны находиться правильные данные
   *  производим непосредственно разбор данных и назначаем значения сигналам
   **/
-//  qDebug() << QString(QByteArray((const char*)&p_io_buffer->input->data[0], p_io_buffer->input->offset).toHex());
-  message(QString(">> %1").arg(QString(QByteArray((const char*)&p_io_buffer->input->data[0], p_io_buffer->input->offset).toHex())));
+  message(QString()
+          .append(QDateTime::currentDateTime().toString("hhmmss.zzz"))
+          .append(" >> ")
+          .append(QString(QByteArray((const char*)&p_io_buffer->input->data[0], p_io_buffer->input->offset).toHex())));
 
   // если хоть какие то пакеты сыпятся (для данного получателя), то
   // считаем, что линия передачи в порядке и задаем новую контрольную точку времени
@@ -135,8 +137,8 @@ oht::PARSERESULT oht::SvOHT::parse()
   if(m_data.len > m_data.bufsize) {
 
     message(QString("Размер данных превышает размер буфера! Данные %1 байт, буфер %2 байт")
-                 .arg(m_data.len).arg(m_data.bufsize),
-                 sv::log::llError, sv::log::mtError);
+                          .arg(m_data.len).arg(m_data.bufsize),
+                    sv::log::llError, sv::log::mtError);
 
     return oht::PARSERESULT(DO_RESET);
   }
@@ -150,11 +152,11 @@ oht::PARSERESULT oht::SvOHT::parse()
 
     // если crc не совпадает, то выходим без обработки и ответа
     message(QString("Ошибка crc! Ожидалось %1%2, получено %3%4")
-                 .arg(quint8(calc_crc), 2, 16, QChar('0'))
-                 .arg(quint8(calc_crc >> 8), 2, 16, QChar('0'))
-                 .arg(quint8(m_data.crc), 2, 16, QChar('0'))
-                 .arg(quint8(m_data.crc >> 8), 2, 16, QChar('0')),
-                 sv::log::llError, sv::log::mtError);
+                           .arg(quint8(calc_crc), 2, 16, QChar('0'))
+                           .arg(quint8(calc_crc >> 8), 2, 16, QChar('0'))
+                           .arg(quint8(m_data.crc), 2, 16, QChar('0'))
+                           .arg(quint8(m_data.crc >> 8), 2, 16, QChar('0')),
+                    sv::log::llError, sv::log::mtError);
 
     return oht::PARSERESULT(DO_RESET);
   }

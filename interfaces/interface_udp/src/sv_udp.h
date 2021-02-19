@@ -1,4 +1,4 @@
-#ifndef SV_UDP_H
+﻿#ifndef SV_UDP_H
 #define SV_UDP_H
 
 #include <QUdpSocket>
@@ -7,7 +7,6 @@
 #include "udp_defs.h"
 
 #include "../../../../Modus/global/device/interface/sv_abstract_interface.h"
-#include "../../../../Modus/global/signal/sv_signal.h"
 
 extern "C" {
 

@@ -9,6 +9,10 @@
 #include "can_defs.h"
 #include "../../../../../Modus/global/signal/sv_abstract_signal_collection.h"
 
+#define P_CANID   "canid"
+#define P_OFFSET  "offset"
+#define P_LEN     "len"
+
 namespace can {
 
   struct SignalParams
@@ -53,7 +57,7 @@ namespace can {
 
       }
       else
-        throw SvException(QString(MISSING_PARAM).arg(P));
+        throw SvException(QString(MISSING_PARAM).arg(QString("%1/%2").arg(P_PROTOCOL).arg(P_PARAMS)).arg(P));
 
       // offset
       P = P_OFFSET;
@@ -68,7 +72,7 @@ namespace can {
 
       }
       else
-        throw SvException(QString(MISSING_PARAM).arg(P));
+        throw SvException(QString(MISSING_PARAM).arg(QString("%1/%2").arg(P_PROTOCOL).arg(P_PARAMS)).arg(P));
 
       // len
       P = P_LEN;
@@ -83,7 +87,7 @@ namespace can {
 
       }
       else
-        throw SvException(QString(MISSING_PARAM).arg(P));
+        throw SvException(QString(MISSING_PARAM).arg(QString("%1/%2").arg(P_PROTOCOL).arg(P_PARAMS)).arg(P));
 
       return p;
 

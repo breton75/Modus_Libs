@@ -1,6 +1,8 @@
 ﻿#ifndef SV_CAN_H
 #define SV_CAN_H
 
+#include <QProcess>
+
 #include <linux/can.h>
 #include <sys/ioctl.h>
 #include <net/if.h>
@@ -43,8 +45,6 @@ private:
   struct sockaddr_can addr;
   struct can_frame frame;
   struct ifreq ifr;
-
-//  void write(modus::BUFF* buffer);
 
 };
 

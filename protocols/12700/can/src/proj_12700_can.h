@@ -9,15 +9,14 @@
 #include "proj_12700_can_global.h"
 
 #include "../../../../../Modus/global/device/protocol/sv_abstract_protocol.h"
-#include "../../../../../Modus/global/signal/sv_signal.h"
+//#include "../../../../../Modus/global/signal/sv_signal.h"
+//#include "../../../../../Modus/global/misc/sv_exception.h"
+#include "../../../../../svlib/sv_crc.h"
 
 //#include "can_params.h"
-#include "can_defs.h"
+//#include "can_defs.h"
 #include "can12700_signal.h"
 
-#include "../../../../../Modus/global/misc/sv_abstract_logger.h"
-#include "../../../../../Modus/global/misc/sv_exception.h"
-#include "../../../../../svlib/sv_crc.h"
 
 extern "C" {
 
