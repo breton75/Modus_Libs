@@ -1,11 +1,11 @@
-﻿#include "sv_restapi_server.h"
+﻿#include "sv_log_server.h"
 
 //using namespace sv::log;
 
 
 /** ********** SvWebServer ************ **/
 
-restapi::SvRestAPI::SvRestAPI():
+logapi::SvLogAPI::SvLogAPI():
   modus::SvAbstractInteract(),
   m_web_server(new QTcpServer(this)),
   m_is_active(false)
@@ -13,18 +13,18 @@ restapi::SvRestAPI::SvRestAPI():
 
 }
 
-restapi::SvRestAPI::~SvRestAPI()
+logapi::SvLogAPI::~SvLogAPI()
 {
 
 }
 
-bool restapi::SvRestAPI::configure(modus::InteractConfig* config)
+bool logapi::SvLogAPI::init(modus::InteractConfig* config)
 {
   p_config = config;
 
   try {
 
-    m_params = restapi::Params::fromJsonString(p_config->params);
+    m_params = logapi::Params::fromJsonString(p_config->params);
 
     if (!m_web_server->listen(QHostAddress::Any, m_params.port))
     {
@@ -34,7 +34,7 @@ bool restapi::SvRestAPI::configure(modus::InteractConfig* config)
 
     };
 
-//    connect(m_web_server, &QTcpServer::newConnection, this, &restapi::SvRestAPI::newConnection);
+//    connect(m_web_server, &QTcpServer::newConnection, this, &logapi::SvLogAPI::newConnection);
 
     return true;
 
@@ -47,26 +47,26 @@ bool restapi::SvRestAPI::configure(modus::InteractConfig* config)
   }
 }
 
-//void restapi::SvRestAPI::stop()
-//{
-//  m_is_active = false;
-//  m_web_server->close();
-//  qDeleteAll(m_clients.begin(), m_clients.end());
+void logapi::SvLogAPI::stop()
+{
+  m_is_active = false;
+  m_web_server->close();
+  qDeleteAll(m_clients.begin(), m_clients.end());
 
-//}
+}
 
-//void restapi::SvRestAPI::newConnection()
+//void logapi::SvLogAPI::newConnection()
 //{
 //  QTcpSocket *client = m_web_server->nextPendingConnection();
 
-//  connect(client, &QTcpSocket::readyRead, this, &restapi::SvRestAPI::processRequest);
-//  connect(client, &QTcpSocket::disconnected, this, &restapi::SvRestAPI::socketDisconnected);
+//  connect(client, &QTcpSocket::readyRead, this, &logapi::SvLogAPI::processRequest);
+//  connect(client, &QTcpSocket::disconnected, this, &logapi::SvLogAPI::socketDisconnected);
 
 //  m_clients << client;
 
 //}
 
-void restapi::SvRestAPI::socketDisconnected()
+void logapi::SvLogAPI::socketDisconnected()
 {
     QTcpSocket *client = qobject_cast<QTcpSocket *>(sender());
 
@@ -76,7 +76,7 @@ void restapi::SvRestAPI::socketDisconnected()
     }
 }
 
-void restapi::SvRestAPI::processOneRequest()
+void logapi::SvLogAPI::processRequest()
 {
     QTcpSocket *m_client = qobject_cast<QTcpSocket *>(sender());
 
@@ -86,6 +86,10 @@ void restapi::SvRestAPI::processOneRequest()
 
     if((parts.count() < 2))
       return;
+
+    QNetworkRequest
+    QTextStream serialized(m_client);
+    serialized.readAll();
 
     bool is_GET  = parts.at(0).toUpper().startsWith("GET");
     bool is_POST = parts.at(0).toUpper().startsWith("POST");
@@ -116,21 +120,24 @@ void restapi::SvRestAPI::processOneRequest()
 
 }
 
-void restapi::SvRestAPI::processRequests()
+void logapi::SvLogAPI::run()
 {
-  if(m_web_server->waitForNewConnection(100))
+  while(true)
   {
-    QTcpSocket *client = m_web_server->nextPendingConnection();
+    if(m_web_server->waitForNewConnection(100))
+    {
+      QTcpSocket *client = m_web_server->nextPendingConnection();
 
-    connect(client, &QTcpSocket::readyRead, this, &restapi::SvRestAPI::processOneRequest);
-    connect(client, &QTcpSocket::disconnected, this, &restapi::SvRestAPI::socketDisconnected);
+      connect(client, &QTcpSocket::readyRead, this, &logapi::SvLogAPI::processRequest);
+      connect(client, &QTcpSocket::disconnected, this, &logapi::SvLogAPI::socketDisconnected);
 
-    m_clients << client;
+      m_clients << client;
 
+    }
   }
 }
 
-QByteArray restapi::SvRestAPI::reply_GET(QList<QByteArray> &parts)
+QByteArray logapi::SvLogAPI::reply_GET(QList<QByteArray> &parts)
 {
   auto getErr = [=](int errorCode, QString errorString) -> QByteArray {
 
@@ -197,7 +204,7 @@ QByteArray restapi::SvRestAPI::reply_GET(QList<QByteArray> &parts)
 
 }
 
-QByteArray restapi::SvRestAPI::reply_POST(QList<QByteArray> &parts)
+QByteArray logapi::SvLogAPI::reply_POST(QList<QByteArray> &parts)
 {
   auto Var2Str = [](QVariant value) -> QString {
 
@@ -324,6 +331,6 @@ QByteArray restapi::SvRestAPI::reply_POST(QList<QByteArray> &parts)
 /** ********** EXPORT ************ **/
 modus::SvAbstractInteract* create()
 {
-  modus::SvAbstractInteract* server = new restapi::SvRestAPI();
-  return server;
+//  wd::SvAbstractServer* server = ;
+  return new logapi::SvLogAPI();
 }

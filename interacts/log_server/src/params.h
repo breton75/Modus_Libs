@@ -7,8 +7,8 @@
  *  автор Свиридов С.А. Авиационные и Морская Электроника
  * *********************************************************************/
 
-#ifndef RESTAPI_PARAMS
-#define RESTAPI_PARAMS
+#ifndef LOGAPI_PARAMS
+#define LOGAPI_PARAMS
 
 #include <QtGlobal>
 #include <QtCore/QCommandLineParser>
@@ -21,20 +21,23 @@
 #include "../../../../svlib/sv_exception.h"
 #include "../../../../Modus/global/global_defs.h"
 
-// имена параметров для UDP
-#define P_PORT        "port"
-#define P_INDEX_FILE  "index_file"
-#define P_HTML_PATH   "html_path"
+// имена параметров
+#define P_PORT                  "port"
+#define P_INDEX_FILE_NAME       "index_file_name"
+#define P_PATH                  "path"
 
+#define DEFAULT_PORT            80
+#define DEFAULT_INDEX_FILE_NAME "index.html"
+#define DEFAULT_PATH            "html/log"
 
-/** структура для хранения параметров udp **/
-namespace restapi {
+/** структура для хранения параметров **/
+namespace logapi {
 
   struct Params {
 
     quint16 port       = 80;
-    QString index_file = "index.html";
-    QString html_path  = "html";
+    QString index_file = DEFAULT_INDEX_FILE_NAME;
+    QString html_path  = DEFAULT_PATH;
 
     static Params fromJsonString(const QString& json) throw (SvException)
     {
@@ -72,12 +75,12 @@ namespace restapi {
       else p.port = 80;
 
       /* index file name */
-      P = P_INDEX_FILE;
-      p.index_file = object.contains(P) ? object.value(P).toString() : "index.html";
+      P = P_INDEX_FILE_NAME;
+      p.index_file = object.contains(P) ? object.value(P).toString() : DEFAULT_INDEX_FILE_NAME;
 
       /* html_path */
-      P = P_HTML_PATH;
-      p.html_path = object.contains(P) ? object.value(P).toString() : "html";
+      P = P_PATH;
+      p.html_path = object.contains(P) ? object.value(P).toString() : DEFAULT_PATH;
 
 
       return p;
@@ -96,9 +99,9 @@ namespace restapi {
     {
       QJsonObject j;
 
-      j.insert(P_PORT, QJsonValue(static_cast<int>(port)).toInt());
-      j.insert(P_INDEX_FILE, QJsonValue(index_file).toString());
-      j.insert(P_HTML_PATH, QJsonValue(html_path).toString());
+      j.insert(P_PORT,            QJsonValue(static_cast<int>(port)).toInt());
+      j.insert(P_INDEX_FILE_NAME, QJsonValue(index_file).toString());
+      j.insert(P_PATH,            QJsonValue(html_path).toString());
 
       return j;
 
@@ -107,5 +110,5 @@ namespace restapi {
 }
 
 
-#endif // RESTAPI_PARAMS
+#endif // LOGAPI_PARAMS
 

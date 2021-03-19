@@ -83,8 +83,12 @@ can::PARSERESULT can::SvCAN12700::parse()
 
     message(QString()
                 .append(QDateTime::currentDateTime().toString("hhmmss.zzz"))
-                .append(" >> ")
-                .append(QByteArray((const char*)&p_io_buffer->input->data[oof], m_framesz).toHex()));
+                .append(";")
+                .append(QByteArray((const char*)&p_io_buffer->input->data[oof], 1).toHex())
+            .append((";"))
+            .append(QByteArray((const char*)&p_io_buffer->input->data[oof+1], 1).toHex())
+            .append((";"))
+            .append(QByteArray((const char*)&p_io_buffer->input->data[oof + 2], m_framesz - 2).toHex()));
 
     signal_collection.updateSignals(frame);
 
@@ -97,6 +101,5 @@ can::PARSERESULT can::SvCAN12700::parse()
 /** ********** EXPORT ************ **/
 modus::SvAbstractProtocol* create()
 {
-  modus::SvAbstractProtocol* device = new can::SvCAN12700();
-  return device;
+  return new can::SvCAN12700();
 }

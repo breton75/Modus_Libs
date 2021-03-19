@@ -1,5 +1,5 @@
-﻿#ifndef SV_RESTAPI_SERVER_H
-#define SV_RESTAPI_SERVER_H
+﻿#ifndef SV_LOG_SERVER_H
+#define SV_LOG_SERVER_H
 
 //#include "QtWebSockets/QTcpSocketserver.h"
 //#include "QtWebSockets/QTcpSocket.h"
@@ -19,7 +19,7 @@
 #include <QByteArray>
 #include <QDataStream>
 
-#include "restapi_server_global.h"
+#include "log_server_global.h"
 
 #include "../../../../Modus/global/interact/sv_abstract_interact.h"
 #include "../../../../Modus/global/global_defs.h"
@@ -35,7 +35,7 @@ extern "C" {
 
 }
 
-namespace restapi {
+namespace logapi {
 
   const QMap<QString, QString> ContentTypeBySuffix = {{"html", "text/html"},
                                                       {"cmd",  "text/cmd"},
@@ -56,21 +56,21 @@ namespace restapi {
                                                       {"json", "application/json"}
                                                      };
 
-  class SvRestAPI;
+  class SvLogAPI;
 
 }
 
-class restapi::SvRestAPI: public modus::SvAbstractInteract
+class logapi::SvLogAPI: public modus::SvAbstractInteract
 {
   Q_OBJECT
 
 public:
-  explicit SvRestAPI();
-  ~SvRestAPI();
+  explicit SvLogAPI();
+  ~SvLogAPI();
 
   bool configure(modus::InteractConfig* config) override;
 
-//  void stop() override;
+  void stop() override;
 
   const QMap<int, modus::SvSignal*>*      signalsById()   const { return &m_signals_by_id;   }
   const QHash<QString, modus::SvSignal*>* signalsByName() const { return &m_signals_by_name; }
@@ -79,7 +79,7 @@ private:
   QTcpServer* m_web_server;
   QList<QTcpSocket*> m_clients;
 
-  restapi::Params m_params;
+  logapi::Params m_params;
 
   QMap<int, modus::SvSignal*>      m_signals_by_id;
   QHash<QString, modus::SvSignal*> m_signals_by_name;
@@ -89,10 +89,10 @@ private:
   QByteArray reply_GET(QList<QByteArray> &parts);
   QByteArray reply_POST(QList<QByteArray> &parts);
 
-  void processRequests() override;
+  void run() override;
 
 private slots:
-  void processOneRequest();
+  void processRequest();
   void socketDisconnected();
 
 };
