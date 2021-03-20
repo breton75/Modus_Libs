@@ -7,7 +7,7 @@
 
 restapi::SvRestAPI::SvRestAPI():
   modus::SvAbstractInteract(),
-  m_web_server(new QTcpServer(this)),
+  m_web_server(new QTcpServer()),
   m_is_active(false)
 {
 
@@ -25,6 +25,8 @@ bool restapi::SvRestAPI::configure(modus::InteractConfig* config)
   try {
 
     m_params = restapi::Params::fromJsonString(p_config->params);
+
+//    m_web_server->moveToThread(this);
 
     if (!m_web_server->listen(QHostAddress::Any, m_params.port))
     {
@@ -47,27 +49,32 @@ bool restapi::SvRestAPI::configure(modus::InteractConfig* config)
   }
 }
 
-//void restapi::SvRestAPI::stop()
-//{
-//  m_is_active = false;
-//  m_web_server->close();
-//  qDeleteAll(m_clients.begin(), m_clients.end());
+void restapi::SvRestAPI::start()
+{
+  connect(m_web_server, &QTcpServer::newConnection, this, &restapi::SvRestAPI::newConnection);
+}
 
-//}
+void restapi::SvRestAPI::stop()
+{
+  m_is_active = false;
+  m_web_server->close();
+  qDeleteAll(m_clients.begin(), m_clients.end());
+}
 
-//void restapi::SvRestAPI::newConnection()
-//{
-//  QTcpSocket *client = m_web_server->nextPendingConnection();
+void restapi::SvRestAPI::newConnection()
+{
+  QTcpSocket *client = m_web_server->nextPendingConnection();
 
-//  connect(client, &QTcpSocket::readyRead, this, &restapi::SvRestAPI::processRequest);
-//  connect(client, &QTcpSocket::disconnected, this, &restapi::SvRestAPI::socketDisconnected);
+  connect(client, &QTcpSocket::readyRead, this, &restapi::SvRestAPI::processOneRequest);
+  connect(client, &QTcpSocket::disconnected, this, &restapi::SvRestAPI::socketDisconnected);
 
-//  m_clients << client;
+  m_clients << client;
 
-//}
+}
 
 void restapi::SvRestAPI::socketDisconnected()
 {
+  qDebug() << 3;
     QTcpSocket *client = qobject_cast<QTcpSocket *>(sender());
 
     if (client) {
@@ -78,27 +85,31 @@ void restapi::SvRestAPI::socketDisconnected()
 
 void restapi::SvRestAPI::processOneRequest()
 {
+  qDebug() << 2;
     QTcpSocket *m_client = qobject_cast<QTcpSocket *>(sender());
+
+//    QTextStream serialized(m_client);
+//    serialized.readAll();
 
     QByteArray request = m_client->readAll();
 
     QList<QByteArray> parts = request.split('\n');
-
     if((parts.count() < 2))
       return;
 
     bool is_GET  = parts.at(0).toUpper().startsWith("GET");
     bool is_POST = parts.at(0).toUpper().startsWith("POST");
 
-    if(!(is_GET || is_POST))
-      return;
+//    if(!(is_GET || is_POST))
+//      return;
 
-    emit message(QString(request), sv::log::llDebug2, sv::log::mtDebug);
+
 
 //    if(m_logger && m_logger->options().log_level >= sv::log::llDebug2)
 //    {
-//      QStringList sd = QString(request).split("\r\n");
-//      for(QString d: sd)
+      QStringList sd = QString(request).split("\r\n");
+      for(QString d: sd)
+        emit message(QString(request), sv::log::llDebug2, sv::log::mtDebug);
 //        *m_logger << sv::log::llDebug2 << sv::log::mtDebug << d << sv::log::endl;
 //    }
 
@@ -116,19 +127,22 @@ void restapi::SvRestAPI::processOneRequest()
 
 }
 
-void restapi::SvRestAPI::processRequests()
-{
-  if(m_web_server->waitForNewConnection(100))
-  {
-    QTcpSocket *client = m_web_server->nextPendingConnection();
+//void restapi::SvRestAPI::processRequests()
+//{
+////  msleep(1);
+////  if(m_web_server->waitForNewConnection(100))
+////  {
+////    qDebug() << 1; //(client->waitForReadyRead(2000) ? QString(client->readAll()) : "false");
+////    QTcpSocket *client = m_web_server->nextPendingConnection();
 
-    connect(client, &QTcpSocket::readyRead, this, &restapi::SvRestAPI::processOneRequest);
-    connect(client, &QTcpSocket::disconnected, this, &restapi::SvRestAPI::socketDisconnected);
 
-    m_clients << client;
+////    connect(client, &QTcpSocket::readyRead, this, &restapi::SvRestAPI::processOneRequest);
+////    connect(client, &QTcpSocket::disconnected, this, &restapi::SvRestAPI::socketDisconnected);
+//////client->moveToThread(this);
+////    m_clients << client;
 
-  }
-}
+////  }
+//}
 
 QByteArray restapi::SvRestAPI::reply_GET(QList<QByteArray> &parts)
 {

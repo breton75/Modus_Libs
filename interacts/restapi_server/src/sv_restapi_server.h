@@ -70,7 +70,8 @@ public:
 
   bool configure(modus::InteractConfig* config) override;
 
-//  void stop() override;
+  void start() override;
+  void stop() override;
 
   const QMap<int, modus::SvSignal*>*      signalsById()   const { return &m_signals_by_id;   }
   const QHash<QString, modus::SvSignal*>* signalsByName() const { return &m_signals_by_name; }
@@ -89,9 +90,10 @@ private:
   QByteArray reply_GET(QList<QByteArray> &parts);
   QByteArray reply_POST(QList<QByteArray> &parts);
 
-  void processRequests() override;
+//  void processRequests() override;
 
 private slots:
+  void newConnection();
   void processOneRequest();
   void socketDisconnected();
 

@@ -87,7 +87,6 @@ void logapi::SvLogAPI::processRequest()
     if((parts.count() < 2))
       return;
 
-    QNetworkRequest
     QTextStream serialized(m_client);
     serialized.readAll();
 

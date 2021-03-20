@@ -100,7 +100,7 @@ void modus::SvAbstractInteract::qt_static_metacall(QObject *_o, QMetaObject::Cal
 }
 
 const QMetaObject modus::SvAbstractInteract::staticMetaObject = {
-    { &QThread::staticMetaObject, qt_meta_stringdata_modus__SvAbstractInteract.data,
+    { &QObject::staticMetaObject, qt_meta_stringdata_modus__SvAbstractInteract.data,
       qt_meta_data_modus__SvAbstractInteract,  qt_static_metacall, Q_NULLPTR, Q_NULLPTR}
 };
 
@@ -115,12 +115,12 @@ void *modus::SvAbstractInteract::qt_metacast(const char *_clname)
     if (!_clname) return Q_NULLPTR;
     if (!strcmp(_clname, qt_meta_stringdata_modus__SvAbstractInteract.stringdata0))
         return static_cast<void*>(const_cast< SvAbstractInteract*>(this));
-    return QThread::qt_metacast(_clname);
+    return QObject::qt_metacast(_clname);
 }
 
 int modus::SvAbstractInteract::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
-    _id = QThread::qt_metacall(_c, _id, _a);
+    _id = QObject::qt_metacall(_c, _id, _a);
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
