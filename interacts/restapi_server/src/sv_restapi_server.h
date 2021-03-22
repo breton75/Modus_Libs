@@ -37,6 +37,46 @@ extern "C" {
 
 namespace restapi {
 
+  struct HttpRequest {
+
+    QString                 method;
+    QString                 resourse;
+    QString                 params;
+    QMap<QString, QString>  attributes;
+    QString                 protocol;
+    QString                 version;
+    QByteArray              data;
+  };
+
+  struct HttpReply {
+
+    explicit HttpReply()
+    {
+      this->data      = QByteArray();
+      this->protocol  = "HTTP";
+      this->version   = "1.0";
+      this->code      = 200;
+      this->status    = "Ok";
+    }
+
+    explicit HttpReply(const QByteArray data, const QString protocol = "HTTP", const QString version = "1.0",
+                       const int code = 200, const QString status = "Ok")
+    {
+      this->data      = data;
+      this->protocol  = protocol;
+      this->version   = version;
+      this->code      = code;
+      this->status    = status;
+    }
+
+    QString protocol;
+    QString version;
+    int     code;
+    QString status;
+    QByteArray data;
+
+  };
+
   const QMap<QString, QString> ContentTypeBySuffix = {{"html", "text/html"},
                                                       {"cmd",  "text/cmd"},
                                                       {"css",  "text/css"},
@@ -77,8 +117,8 @@ public:
   const QHash<QString, modus::SvSignal*>* signalsByName() const { return &m_signals_by_name; }
 
 private:
-  QTcpServer* m_web_server;
-  QList<QTcpSocket*> m_clients;
+  QTcpServer* m_server;
+  QList<QTcpSocket*> m_websocket_clients;
 
   restapi::Params m_params;
 
@@ -86,15 +126,18 @@ private:
   QHash<QString, modus::SvSignal*> m_signals_by_name;
 
   bool m_is_active;
+  bool m_is_websocket = false;
 
-  QByteArray reply_GET(QList<QByteArray> &parts);
-  QByteArray reply_POST(QList<QByteArray> &parts);
+  QByteArray reply_http_get(HttpRequest &request);
+  QByteArray reply_http_post(HttpRequest &request);
+  QByteArray reply_ws_get(HttpRequest &request);
 
 //  void processRequests() override;
 
 private slots:
   void newConnection();
-  void processOneRequest();
+  void processHttpRequest();
+  void processWebSocketRequest();
   void socketDisconnected();
 
 };

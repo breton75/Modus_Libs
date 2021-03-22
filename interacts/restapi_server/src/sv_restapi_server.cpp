@@ -7,7 +7,7 @@
 
 restapi::SvRestAPI::SvRestAPI():
   modus::SvAbstractInteract(),
-  m_web_server(new QTcpServer()),
+  m_server(new QTcpServer()),
   m_is_active(false)
 {
 
@@ -28,9 +28,9 @@ bool restapi::SvRestAPI::configure(modus::InteractConfig* config)
 
 //    m_web_server->moveToThread(this);
 
-    if (!m_web_server->listen(QHostAddress::Any, m_params.port))
+    if (!m_server->listen(QHostAddress::Any, m_params.port))
     {
-      p_last_error = QString("Ошибка запуска сервера %1: %2").arg(p_config->name).arg(m_web_server->errorString());
+      p_last_error = QString("Ошибка запуска сервера %1: %2").arg(p_config->name).arg(m_server->errorString());
 
       return false;
 
@@ -51,100 +51,144 @@ bool restapi::SvRestAPI::configure(modus::InteractConfig* config)
 
 void restapi::SvRestAPI::start()
 {
-  connect(m_web_server, &QTcpServer::newConnection, this, &restapi::SvRestAPI::newConnection);
+  connect(m_server, &QTcpServer::newConnection, this, &restapi::SvRestAPI::newConnection);
 }
 
 void restapi::SvRestAPI::stop()
 {
+  disconnect(m_server, &QTcpServer::newConnection, this, &restapi::SvRestAPI::newConnection);
   m_is_active = false;
-  m_web_server->close();
-  qDeleteAll(m_clients.begin(), m_clients.end());
+
+  foreach (QTcpSocket* client, m_websocket_clients)
+    client->close();
+
+  qDeleteAll(m_websocket_clients.begin(), m_websocket_clients.end());
+
+  m_server->close();
+  delete m_server;
+
 }
 
 void restapi::SvRestAPI::newConnection()
 {
-  QTcpSocket *client = m_web_server->nextPendingConnection();
+  QTcpSocket *client = m_server->nextPendingConnection();
 
-  connect(client, &QTcpSocket::readyRead, this, &restapi::SvRestAPI::processOneRequest);
+  connect(client, &QTcpSocket::readyRead, this, &restapi::SvRestAPI::processHttpRequest);
   connect(client, &QTcpSocket::disconnected, this, &restapi::SvRestAPI::socketDisconnected);
-
-  m_clients << client;
 
 }
 
 void restapi::SvRestAPI::socketDisconnected()
 {
-  qDebug() << 3;
     QTcpSocket *client = qobject_cast<QTcpSocket *>(sender());
 
-    if (client) {
-        m_clients.removeAll(client);
+    if (client)
         client->deleteLater();
-    }
+
 }
 
-void restapi::SvRestAPI::processOneRequest()
+void restapi::SvRestAPI::processHttpRequest()
 {
-  qDebug() << 2;
-    QTcpSocket *m_client = qobject_cast<QTcpSocket *>(sender());
+  QTcpSocket *client = qobject_cast<QTcpSocket *>(sender());
 
-//    QTextStream serialized(m_client);
+//    QTextStream serialized(client);
 //    serialized.readAll();
 
-    QByteArray request = m_client->readAll();
+  QList<QByteArray> rawreq = client->readAll().split('\n');
+  if(!rawreq.count())
+    return;
 
-    QList<QByteArray> parts = request.split('\n');
-    if((parts.count() < 2))
+  QList<QByteArray> rawheader = rawreq.at(0).split(' ');
+  if(rawheader.count() < 3)
+    return;
+
+  for(QByteArray line: rawreq)
+    emit message(QString(line), sv::log::llDebug2, sv::log::mtDebug);
+
+  HttpRequest request;
+
+  // разбираем заголовок запроса
+  request.method   = QString(rawheader.at(0).trimmed());
+  request.resourse = QString(rawheader.at(1).split('?').count() > 0 ? rawheader.at(1).split('?').at(0).trimmed() : rawheader.at(1));
+  request.params   = QString(rawheader.at(1).split('?').count() > 1 ? rawheader.at(1).split('?').at(1).trimmed() : "");
+  request.protocol = QString(rawheader.at(2).split('/').count() > 0 ? rawheader.at(2).split('/').at(0).trimmed() : rawheader.at(2));
+  request.version  = QString(rawheader.at(2).split('/').count() > 1 ? rawheader.at(2).split('/').at(1).trimmed() : "");
+
+  // разбираем поля запроса
+  int i = 1;
+  while(i < rawreq.count() && !rawreq.at(i).trimmed().isEmpty())
+  {
+    QList<QByteArray> attr = rawreq.at(i).split(':');
+    if(attr.count() != 2)
       return;
 
-    bool is_GET  = parts.at(0).toUpper().startsWith("GET");
-    bool is_POST = parts.at(0).toUpper().startsWith("POST");
+    request.attributes.insert(QString(attr.at(0).trimmed()), QString(attr.at(1).trimmed()));
 
-//    if(!(is_GET || is_POST))
-//      return;
+    i++;
+  }
 
-
-
-//    if(m_logger && m_logger->options().log_level >= sv::log::llDebug2)
-//    {
-      QStringList sd = QString(request).split("\r\n");
-      for(QString d: sd)
-        emit message(QString(request), sv::log::llDebug2, sv::log::mtDebug);
-//        *m_logger << sv::log::llDebug2 << sv::log::mtDebug << d << sv::log::endl;
-//    }
-
-    if(is_GET)
-      m_client->write(reply_GET(parts));
-
-    else if (is_POST)
-      m_client->write(reply_POST(parts));
-
-    m_client->flush(); // waitForBytesWritten(); //
+  // выбираем данные запроса
+  i++;
+  if(i < rawreq.count() && !rawreq.at(i).trimmed().isEmpty())
+  {
+    request.data = rawreq.at(i).trimmed();
+  }
 
 
-  // нужно закрыть сокет
-  m_client->close();
+  // если клиент запрашивает изменение протокола на WebSocket, то отвечаем на запрос http, меняем обработчик и НЕ закрываем сокет
+  if(request.attributes.contains("Upgrade") && request.attributes.value("Upgrade") == "websocket")
+  {
+    if(request.method == "GET")
+      client->write(reply_ws_get(request));
 
+    disconnect(client, &QTcpSocket::readyRead, this, &restapi::SvRestAPI::processHttpRequest);
+    connect(client, &QTcpSocket::readyRead, this, &restapi::SvRestAPI::processWebSocketRequest);
+
+    m_websocket_clients << client;
+
+  }
+  else {
+
+    if(request.method == "GET")
+      client->write(reply_http_get(request));
+
+    else if (request.method == "POST")
+      client->write(reply_http_post(request));
+
+    client->flush(); // waitForBytesWritten(); //
+
+    // нужно закрыть сокет
+    client->close();
+
+  }
 }
 
-//void restapi::SvRestAPI::processRequests()
-//{
-////  msleep(1);
-////  if(m_web_server->waitForNewConnection(100))
-////  {
-////    qDebug() << 1; //(client->waitForReadyRead(2000) ? QString(client->readAll()) : "false");
-////    QTcpSocket *client = m_web_server->nextPendingConnection();
+void restapi::SvRestAPI::processWebSocketRequest()
+{
+  QTcpSocket *client = qobject_cast<QTcpSocket *>(sender());
 
+  QList<QByteArray> rawreq = client->readAll().split('\n');
+  if(!rawreq.count())
+    return;
 
-////    connect(client, &QTcpSocket::readyRead, this, &restapi::SvRestAPI::processOneRequest);
-////    connect(client, &QTcpSocket::disconnected, this, &restapi::SvRestAPI::socketDisconnected);
-//////client->moveToThread(this);
-////    m_clients << client;
+  QList<QByteArray> rawheader = rawreq.at(0).split(' ');
+  if(rawheader.count() < 3)
+    return;
 
-////  }
-//}
+  for(QByteArray line: rawreq)
+    emit message(QString(line), sv::log::llDebug2, sv::log::mtDebug);
 
-QByteArray restapi::SvRestAPI::reply_GET(QList<QByteArray> &parts)
+  HttpRequest request;
+
+  // разбираем заголовок запроса
+  request.method   = QString(rawheader.at(0).trimmed());
+  request.resourse = QString(rawheader.at(1).split('?').count() > 0 ? rawheader.at(1).split('?').at(0).trimmed() : rawheader.at(1));
+  request.params   = QString(rawheader.at(1).split('?').count() > 1 ? rawheader.at(1).split('?').at(1).trimmed() : "");
+  request.protocol = QString(rawheader.at(2).split('/').count() > 0 ? rawheader.at(2).split('/').at(0).trimmed() : rawheader.at(2));
+  request.version  = QString(rawheader.at(2).split('/').count() > 1 ? rawheader.at(2).split('/').at(1).trimmed() : "");
+}
+
+QByteArray restapi::SvRestAPI::reply_http_get(HttpRequest &request)
 {
   auto getErr = [=](int errorCode, QString errorString) -> QByteArray {
 
@@ -171,7 +215,7 @@ QByteArray restapi::SvRestAPI::reply_GET(QList<QByteArray> &parts)
 
   QDir dir(m_params.html_path);
 
-  QString file = QString(parts.at(0).split(' ').at(1));
+  QString file = QString(request.resourse);
 
   if(file.startsWith('/'))
     file.remove(0, 1);
@@ -211,7 +255,7 @@ QByteArray restapi::SvRestAPI::reply_GET(QList<QByteArray> &parts)
 
 }
 
-QByteArray restapi::SvRestAPI::reply_POST(QList<QByteArray> &parts)
+QByteArray restapi::SvRestAPI::reply_http_post(HttpRequest &request)
 {
   auto Var2Str = [](QVariant value) -> QString {
 
@@ -238,7 +282,7 @@ QByteArray restapi::SvRestAPI::reply_POST(QList<QByteArray> &parts)
 
   };
 
-  QStringList r1 = QString(parts.last()).split('?');
+  QStringList r1 = QString(request.data).split('?');
 
   if(r1.count() < 2)
     return QByteArray();
@@ -307,32 +351,42 @@ QByteArray restapi::SvRestAPI::reply_POST(QList<QByteArray> &parts)
 
 }
 
-//void websrv::SvWebServerThread::reply_GET_error(QTcpSocket& m_client, int errorCode, QString errorString)
-//{
-//  if(m_logger)
-//    *m_logger <<llError << mtError << errorString << sv::log::endl;
+QByteArray restapi::SvRestAPI::reply_ws_get(HttpRequest &request)
+{
+  auto getErr = [=](int errorCode, QString errorString) -> QByteArray {
 
-//  QTextStream replay(&m_client);
-//  replay.setAutoDetectUnicode(true);
+    emit message(errorString, sv::log::llError, sv::log::mtError);
 
-//  replay << "HTTP/1.1 %1 Error"
-//         << "Content-Type: text/html; charset=\"utf-8\"\r\n\r\n"
-//         << QString("<html>"
-//                        "<head><meta charset=\"UTF-8\"><title>Ошибка</title><head>"
-//                        "<body>"
-//                        "<p style=\"font-size: 16\">%2</p>"
-//                        "<a href=\"index.html\" style=\"font-size: 14\">На главную</a>"
-//                        "<p>%3</p>"
-//                        "</body></html>\n")
-//            .arg(errorCode)
-//            .arg(errorString)
-//            .arg(QDateTime::currentDateTime().toString());
-//}
+//      if(m_logger)
+//        *m_logger <<llError << mtError << errorString << sv::log::endl;
 
-//void websrv::SvWebServerThread::stop()
-//{
-//  m_started = false;
-//}
+      return QByteArray()
+                        .append(QString("HTTP/1.1 %1 Error" \
+                                "Content-Type: text/html; charset=\"utf-8\"\r\n\r\n"
+                                "<html>"
+                                "<head><meta charset=\"UTF-8\"><title>Ошибка</title><head>"
+                                "<body>"
+                                "<p style=\"font-size: 16\">%2</p>"
+                                "<a href=\"index.html\" style=\"font-size: 14\">На главную</a>"
+                                "<p>%3</p>"
+                                "</body></html>\n")
+                                    .arg(errorCode)
+                                    .arg(errorString)
+                                    .arg(QDateTime::currentDateTime().toString())
+                                .toUtf8());
+  };
+
+  QByteArray replay = QByteArray();
+
+  replay.append(QString("%1/%2 101 Switching Protocols\r\n").arg(QString(request.protocol)).arg(QString(request.version)));
+  replay.append(QString("Date: Wed, %1\r\f").arg(QDateTime::currentDateTimeUtc().toString("dd MMM yyyy hh:mm:ss t")));
+  replay.append(QString("Connection: Upgrade\r\n"));
+  replay.append(QString("Upgrade: WebSocket\r\f"));
+
+
+  return replay;
+
+}
 
 
 /** ********** EXPORT ************ **/
