@@ -93,7 +93,7 @@ void restapi::SvRestAPI::processHttpRequest()
 
 //    QTextStream serialized(client);
 //    serialized.readAll();
-
+qDebug() << 1;
   QList<QByteArray> rawreq = client->readAll().split('\n');
   if(!rawreq.count())
     return;
@@ -113,12 +113,13 @@ void restapi::SvRestAPI::processHttpRequest()
   request.params   = QString(rawheader.at(1).split('?').count() > 1 ? rawheader.at(1).split('?').at(1).trimmed() : "");
   request.protocol = QString(rawheader.at(2).split('/').count() > 0 ? rawheader.at(2).split('/').at(0).trimmed() : rawheader.at(2));
   request.version  = QString(rawheader.at(2).split('/').count() > 1 ? rawheader.at(2).split('/').at(1).trimmed() : "");
-
+qDebug() << 2;
   // разбираем поля запроса
   int i = 1;
   while(i < rawreq.count() && !rawreq.at(i).trimmed().isEmpty())
   {
-    QList<QByteArray> attr = rawreq.at(i).split(':');
+    QList<QByteArray> fld = rawreq.at(i).split(':');
+    attr
     if(attr.count() != 2)
       return;
 
@@ -126,7 +127,7 @@ void restapi::SvRestAPI::processHttpRequest()
 
     i++;
   }
-
+qDebug() << 3;
   // выбираем данные запроса
   i++;
   if(i < rawreq.count() && !rawreq.at(i).trimmed().isEmpty())
@@ -134,7 +135,7 @@ void restapi::SvRestAPI::processHttpRequest()
     request.data = rawreq.at(i).trimmed();
   }
 
-
+qDebug() << (request.attributes.contains("Upgrade") ? request.attributes.value("Upgrade") : "no upgrade");
   // если клиент запрашивает изменение протокола на WebSocket, то отвечаем на запрос http, меняем обработчик и НЕ закрываем сокет
   if(request.attributes.contains("Upgrade") && request.attributes.value("Upgrade") == "websocket")
   {
@@ -383,7 +384,7 @@ QByteArray restapi::SvRestAPI::reply_ws_get(HttpRequest &request)
   replay.append(QString("Connection: Upgrade\r\n"));
   replay.append(QString("Upgrade: WebSocket\r\f"));
 
-
+qDebug() << QString(replay);
   return replay;
 
 }

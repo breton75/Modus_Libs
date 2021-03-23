@@ -37,15 +37,36 @@ extern "C" {
 
 namespace restapi {
 
+  typedef QMap<QString, QString> HttpFields;
+
+  struct HttpFld {
+
+    const QList<QString> fields = QList<QString>() << "Date"
+                                                   << "Content-Type"
+                                                   << "Content-Length"
+                                                   << "Last-Modified"
+                                                   << "Connection"
+                                                   << "Upgrade"
+                                                   << "Origin" << "Host" << "Sec-WebSocket-Key"
+                                                   << "Sec-WebSocket-Version" << "Sec-WebSocket-Accept"
+                                                   << "Sec-WebSocket-Protocol";
+
+  };
+
   struct HttpRequest {
 
-    QString                 method;
-    QString                 resourse;
-    QString                 params;
-    QMap<QString, QString>  attributes;
-    QString                 protocol;
-    QString                 version;
-    QByteArray              data;
+    HttpRequest() {
+
+      qFill() fields.insertMulti()
+    }
+
+    QString     method;
+    QString     resourse;
+    QString     params;
+    HttpFields  fields;
+    QString     protocol;
+    QString     version;
+    QByteArray  data;
   };
 
   struct HttpReply {
