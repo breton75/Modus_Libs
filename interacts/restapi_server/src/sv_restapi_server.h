@@ -18,6 +18,7 @@
 #include <QThreadPool>
 #include <QByteArray>
 #include <QDataStream>
+#include <QCryptographicHash>
 
 #include "restapi_server_global.h"
 
@@ -35,30 +36,28 @@ extern "C" {
 
 }
 
+const QList<QString> Http_Field_List = QList<QString>() << "date"
+                                                        << "content-type"
+                                                        << "content-length"
+                                                        << "last-modified"
+                                                        << "connection"
+                                                        << "upgrade"
+                                                        << "origin"
+                                                        << "host"
+                                                        << "sec-websocket-key"
+                                                        << "sec-websocket-version"
+                                                        << "sec-websocket-accept"
+                                                        << "sec-websocket-protocol";
+
 namespace restapi {
 
   typedef QMap<QString, QString> HttpFields;
 
   struct HttpFld {
 
-    const QList<QString> fields = QList<QString>() << "Date"
-                                                   << "Content-Type"
-                                                   << "Content-Length"
-                                                   << "Last-Modified"
-                                                   << "Connection"
-                                                   << "Upgrade"
-                                                   << "Origin" << "Host" << "Sec-WebSocket-Key"
-                                                   << "Sec-WebSocket-Version" << "Sec-WebSocket-Accept"
-                                                   << "Sec-WebSocket-Protocol";
-
   };
 
   struct HttpRequest {
-
-    HttpRequest() {
-
-      qFill() fields.insertMulti()
-    }
 
     QString     method;
     QString     resourse;
@@ -67,6 +66,7 @@ namespace restapi {
     QString     protocol;
     QString     version;
     QByteArray  data;
+
   };
 
   struct HttpReply {
@@ -149,9 +149,9 @@ private:
   bool m_is_active;
   bool m_is_websocket = false;
 
-  QByteArray reply_http_get(HttpRequest &request);
-  QByteArray reply_http_post(HttpRequest &request);
-  QByteArray reply_ws_get(HttpRequest &request);
+  QByteArray reply_http_get(const HttpRequest &request);
+  QByteArray reply_http_post(const HttpRequest &request);
+  QByteArray reply_ws_get(const HttpRequest &request);
 
 //  void processRequests() override;
 

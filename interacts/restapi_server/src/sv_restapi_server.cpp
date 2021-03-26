@@ -93,7 +93,7 @@ void restapi::SvRestAPI::processHttpRequest()
 
 //    QTextStream serialized(client);
 //    serialized.readAll();
-qDebug() << 1;
+
   QList<QByteArray> rawreq = client->readAll().split('\n');
   if(!rawreq.count())
     return;
@@ -103,7 +103,7 @@ qDebug() << 1;
     return;
 
   for(QByteArray line: rawreq)
-    emit message(QString(line), sv::log::llDebug2, sv::log::mtDebug);
+    emit message(QString(line.trimmed()), sv::log::llDebug2, sv::log::mtDebug);
 
   HttpRequest request;
 
@@ -113,21 +113,28 @@ qDebug() << 1;
   request.params   = QString(rawheader.at(1).split('?').count() > 1 ? rawheader.at(1).split('?').at(1).trimmed() : "");
   request.protocol = QString(rawheader.at(2).split('/').count() > 0 ? rawheader.at(2).split('/').at(0).trimmed() : rawheader.at(2));
   request.version  = QString(rawheader.at(2).split('/').count() > 1 ? rawheader.at(2).split('/').at(1).trimmed() : "");
-qDebug() << 2;
+
   // разбираем поля запроса
   int i = 1;
   while(i < rawreq.count() && !rawreq.at(i).trimmed().isEmpty())
   {
-    QList<QByteArray> fld = rawreq.at(i).split(':');
-    attr
-    if(attr.count() != 2)
-      return;
+    QString r = QString(rawreq.at(i));
 
-    request.attributes.insert(QString(attr.at(0).trimmed()), QString(attr.at(1).trimmed()));
+    int p = r.indexOf(QChar(':'));
+
+    if(p >= 0) {
+
+      QString field = r.left(p).toLower().trimmed();
+      QString token = r.right(r.length() - p - 1).trimmed();
+
+      if(Http_Field_List.contains(field))
+        request.fields.insert(field, token);
+
+    }
 
     i++;
   }
-qDebug() << 3;
+
   // выбираем данные запроса
   i++;
   if(i < rawreq.count() && !rawreq.at(i).trimmed().isEmpty())
@@ -135,9 +142,8 @@ qDebug() << 3;
     request.data = rawreq.at(i).trimmed();
   }
 
-qDebug() << (request.attributes.contains("Upgrade") ? request.attributes.value("Upgrade") : "no upgrade");
   // если клиент запрашивает изменение протокола на WebSocket, то отвечаем на запрос http, меняем обработчик и НЕ закрываем сокет
-  if(request.attributes.contains("Upgrade") && request.attributes.value("Upgrade") == "websocket")
+  if(request.fields.contains("upgrade") && request.fields.value("upgrade") == "websocket")
   {
     if(request.method == "GET")
       client->write(reply_ws_get(request));
@@ -146,6 +152,16 @@ qDebug() << (request.attributes.contains("Upgrade") ? request.attributes.value("
     connect(client, &QTcpSocket::readyRead, this, &restapi::SvRestAPI::processWebSocketRequest);
 
     m_websocket_clients << client;
+
+    QByteArray b;
+    b.append(char(0x81));
+    b.append(char(0x05));
+//    b.append(char(0x00));
+//    b.append(char(0x00));
+    b.append("hello");
+
+    client->write(b);
+
 
   }
   else {
@@ -189,7 +205,7 @@ void restapi::SvRestAPI::processWebSocketRequest()
   request.version  = QString(rawheader.at(2).split('/').count() > 1 ? rawheader.at(2).split('/').at(1).trimmed() : "");
 }
 
-QByteArray restapi::SvRestAPI::reply_http_get(HttpRequest &request)
+QByteArray restapi::SvRestAPI::reply_http_get(const HttpRequest &request)
 {
   auto getErr = [=](int errorCode, QString errorString) -> QByteArray {
 
@@ -256,7 +272,7 @@ QByteArray restapi::SvRestAPI::reply_http_get(HttpRequest &request)
 
 }
 
-QByteArray restapi::SvRestAPI::reply_http_post(HttpRequest &request)
+QByteArray restapi::SvRestAPI::reply_http_post(const HttpRequest &request)
 {
   auto Var2Str = [](QVariant value) -> QString {
 
@@ -352,7 +368,7 @@ QByteArray restapi::SvRestAPI::reply_http_post(HttpRequest &request)
 
 }
 
-QByteArray restapi::SvRestAPI::reply_ws_get(HttpRequest &request)
+QByteArray restapi::SvRestAPI::reply_ws_get(const HttpRequest &request)
 {
   auto getErr = [=](int errorCode, QString errorString) -> QByteArray {
 
@@ -380,11 +396,22 @@ QByteArray restapi::SvRestAPI::reply_ws_get(HttpRequest &request)
   QByteArray replay = QByteArray();
 
   replay.append(QString("%1/%2 101 Switching Protocols\r\n").arg(QString(request.protocol)).arg(QString(request.version)));
-  replay.append(QString("Date: Wed, %1\r\f").arg(QDateTime::currentDateTimeUtc().toString("dd MMM yyyy hh:mm:ss t")));
+//  replay.append(QString("Date: Wed, %1\r\n").arg(QDateTime::currentDateTimeUtc().toString("dd MMM yyyy hh:mm:ss t")));
+  replay.append(QString("Upgrade: websocket\r\n"));
   replay.append(QString("Connection: Upgrade\r\n"));
-  replay.append(QString("Upgrade: WebSocket\r\f"));
 
-qDebug() << QString(replay);
+  if(request.fields.contains("sec-websocket-key")) {
+
+    QString key = request.fields.value("sec-websocket-key");
+    key.append("258EAFA5-E914-47DA-95CA-C5AB0DC85B11");
+//qDebug() << key;
+    QByteArray hash64 = QCryptographicHash::hash(key.toUtf8(), QCryptographicHash::Sha1).toBase64();
+    qDebug() << QString(hash64);
+
+    replay.append(QString("Sec-WebSocket-Accept: %1\r\n\r\n").arg(QString(hash64)));
+
+  }
+
   return replay;
 
 }
