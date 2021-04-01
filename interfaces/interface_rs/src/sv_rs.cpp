@@ -53,12 +53,18 @@ void SvRS::run()
 
       p_io_buffer->input->mutex.unlock();
 
+      QThread::yieldCurrentThread();
+
+      // отправляем ответ-квитирование, если он был сформирован в parse_input_data
+      p_io_buffer->confirm->mutex.lock();
+      write(p_io_buffer->confirm);
+      p_io_buffer->confirm->mutex.unlock();
+
     }
 
-    // отправляем ответ-квитирование, если он был сформирован в parse_input_data
-    p_io_buffer->confirm->mutex.lock();
-    write(p_io_buffer->confirm);
-    p_io_buffer->confirm->mutex.unlock();
+    p_io_buffer->input->mutex.lock();
+    p_io_buffer->input->reset();
+    p_io_buffer->input->mutex.unlock();
 
     // отправляем управляющие данные, если они есть
     p_io_buffer->output->mutex.lock();

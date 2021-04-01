@@ -1,4 +1,4 @@
-#include "sv_udp.h"
+﻿#include "sv_udp.h"
 
 SvUdp::SvUdp()
 {
@@ -39,8 +39,8 @@ void SvUdp::run()
 
     while(m_socket->waitForReadyRead(m_params.buffer_reset_interval) && p_is_active) {
 
-      while(m_socket->hasPendingDatagrams() && p_is_active)
-      {
+      while(m_socket->hasPendingDatagrams() && p_is_active) {
+
         if(m_socket->pendingDatagramSize() <= 0)
           continue;
 
@@ -62,24 +62,26 @@ void SvUdp::run()
         p_io_buffer->confirm->mutex.unlock();
 
       }
-
-      // отправляенм ответ-квитирование, если он был сформирован в parse_input_data
-//      p_io_buffer->confirm.mutex.lock();
-//      write(&p_io_buffer->confirm);
-//      p_io_buffer->confirm.mutex.unlock();
-
-//      // отправляем управляющие данные, если они есть
-//      p_io_buffer->output.mutex.lock();
-//      write(&p_io_buffer->output);
-//      p_io_buffer->output.mutex.unlock();
-
     }
+
+    p_io_buffer->input->mutex.lock();
+    p_io_buffer->input->reset();
+    p_io_buffer->input->mutex.unlock();
+
+    // отправляем управляющие данные, если они есть
+    p_io_buffer->output.mutex.lock();
+    write(&p_io_buffer->output);
+    p_io_buffer->output.mutex.unlock();
+
   }
 }
 
 
 void SvUdp::write(modus::BUFF* buffer)
 {
+  if(!buffer->ready())
+    return;
+
   bool written = m_socket->writeDatagram(&buffer->data[0], buffer->offset, m_params.host, m_params.send_port) > 0;
   m_socket->flush();
 
