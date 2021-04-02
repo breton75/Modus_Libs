@@ -12,12 +12,7 @@
 #include "protocol_params.h"
 #include "raduga_defs.h"
 
-#include "collection_0x02.h"
-#include "collection_0x03.h"
-#include "collection_data_type_1.h"
-#include "collection_0x33.h"
-#include "collection_0x19.h"
-#include "collection_status.h"
+#include "data_type_collection.h"
 
 #include "../../../../../svlib/sv_abstract_logger.h"
 #include "../../../../../svlib/sv_exception.h"
@@ -45,15 +40,15 @@ namespace raduga {
     char    system_name[16];
     quint16 abonent_id;
     quint16 activity_id;
-    quint16 data_type;
+    quint16 pack_id;
     char    reserv[10];
   };
   #pragma pack(pop)
 
-  struct PARSERESULT {
+  struct TREATRESULT {
 
-    PARSERESULT();
-    PARSERESULT(bool reset, QDateTime dt = QDateTime())
+    TREATRESULT();
+    TREATRESULT(bool reset, QDateTime dt = QDateTime())
     { do_reset = reset; parse_time = dt; }
 
     bool do_reset;
@@ -62,10 +57,6 @@ namespace raduga {
   };
 
   class SvRaduga;
-
-  typedef QMap<int, SvAbstractSignalCollection*> SignalCollections;
-
-//  bool parse_signal(modus::SvSignal* signal);
 
 }
 
@@ -81,33 +72,48 @@ public:
 protected:
   void run() override;
 
-  void disposeInputSignal (modus::SvSignal* signal) override;
+  void disposeInputSignal (modus::SvSignal* signal)  override;
   void disposeOutputSignal (modus::SvSignal* signal) override;
 
 //  void validateSignals(QDateTime& lastParsedTime) override;
 
 private:
-  QList<modus::SvSignal*>   p_input_signals;
-  QList<modus::SvSignal*>   p_output_signals;
+  QList<modus::SvSignal*>    p_input_signals;
+  QList<modus::SvSignal*>    p_output_signals;
 
-  raduga::DeviceParams m_params;
+  raduga::ProtocolParams     m_params;
 
-  raduga::DATA m_data;
+  raduga::DATA               m_data;
 
-  raduga::Header m_header;
-  size_t m_hsz = sizeof(opa::Header);
+  raduga::Header             m_header;
+  size_t                     m_hsz = sizeof(raduga::Header);
 
-  opa::Type0x02   type0x02_signals;
-  opa::Type0x03   type0x03_signals;
-  opa::Type0x04   type0x04_signals;
-  opa::Type0x19   type0x19_signals;
-  opa::Type0x33   type0x33_signals;
-  opa::LineStatus line_status_signals;
+  /* intput signals */
+  raduga::DataTypeCollection type1_input_signals;
+  raduga::DataTypeCollection type2_input_signals;
+  raduga::DataTypeCollection type3_input_signals;
+  raduga::DataTypeCollection type5_input_signals;
+  raduga::DataTypeCollection type9_input_signals;
+  raduga::DataTypeCollection type53_input_signals;
 
-  raduga::SignalCollections signal_collections;
+  QMap<quint16, raduga::SvAbstractSignalCollection*> input_signal_collections;
 
-  PARSERESULT parse();
+  raduga::TREATRESULT parse();
+
   void confirmation();
+
+  /* output signals */
+  raduga::DataTypeCollection type1_output_signals;
+  raduga::DataTypeCollection type2_output_signals;
+  raduga::DataTypeCollection type3_output_signals;
+  raduga::DataTypeCollection type5_output_signals;
+  raduga::DataTypeCollection type9_output_signals;
+  raduga::DataTypeCollection type53_output_signals;
+
+  QMap<quint16, raduga::SvAbstractSignalCollection*> output_signal_collections;
+
+  raduga::TREATRESULT putout();
+
 
 };
 

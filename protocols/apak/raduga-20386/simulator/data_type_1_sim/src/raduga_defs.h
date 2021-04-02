@@ -66,9 +66,9 @@ namespace raduga {
 
   struct SignalParams
   {
-    quint16 byte    = 0;
-    quint8  offset  = 0;
-    quint8  len     = 0;
+    quint16 byte     = 0;
+    quint8  offset   = 0;
+    quint8  len      = 0;
 
     static SignalParams fromJson(const QString& json_string) //throw (SvException)
     {

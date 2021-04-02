@@ -19,29 +19,19 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    collection_0x02.cpp \
-    collection_0x03.cpp \
-    collection_0x19.cpp \
-    collection_0x33.cpp \
-    collection_status.cpp \
     ../../../../../Modus/global/signal/sv_signal.cpp \
-    apak_raduga_data_type_1_sim.cpp \
-    collection_data_type_1.cpp
+    data_type_collection.cpp \
+    apak_raduga_sim.cpp
 
 HEADERS += \
     ../../../../../Modus/global/device/protocol/sv_abstract_protocol.h \
     ../../../../../Modus/global/global_defs.h \
-    collection_0x02.h \
-    collection_0x03.h \
-    collection_0x19.h \
-    collection_0x33.h \
-    collection_status.h \
-    apak_raduga_data_type_1_sim.h \
     apak_raduga_data_type_1_sim_global.h \
     ../../../../../Modus/global/signal/sv_signal.h \
     raduga_defs.h \
-    protocol_params.h \
-    collection_data_type_1.h
+    data_type_collection.h \
+    apak_raduga_sim.h \
+    protocol_params.h
 
 # Default rules for deployment.
 unix {

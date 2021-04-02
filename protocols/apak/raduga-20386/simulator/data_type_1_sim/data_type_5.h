@@ -10,12 +10,12 @@ namespace raduga {
 
   struct SignalType1 {
 
-    SignalType1(modus::SvSignal* signal, SignalParams_0x04 params):
+    SignalType1(modus::SvSignal* signal, raduga::SignalParams params):
       signal(signal), params(params)
     {  }
 
-    modus::SvSignal* signal;
-    SignalParams     params;
+    modus::SvSignal*      signal;
+    raduga::SignalParams  params;
 
   };
 
