@@ -3,12 +3,12 @@
 raduga::SvRaduga::SvRaduga():
   modus::SvAbstractProtocol()
 {
-  input_signal_collections.insert(TYPE_1,   &type1_input_signals);
-  input_signal_collections.insert(TYPE_2,   &type2_input_signals);
-  input_signal_collections.insert(TYPE_3,   &type3_input_signals);
-  input_signal_collections.insert(TYPE_5,   &type5_input_signals);
-  input_signal_collections.insert(TYPE_9,   &type9_input_signals);
-  input_signal_collections.insert(TYPE_53,  &type53_input_signals);
+//  input_signal_collections.insert(TYPE_1,   &type1_input_signals);
+//  input_signal_collections.insert(TYPE_2,   &type2_input_signals);
+//  input_signal_collections.insert(TYPE_3,   &type3_input_signals);
+//  input_signal_collections.insert(TYPE_5,   &type5_input_signals);
+//  input_signal_collections.insert(TYPE_9,   &type9_input_signals);
+//  input_signal_collections.insert(TYPE_53,  &type53_input_signals);
 
   output_signal_collections.insert(TYPE_1,  &type1_output_signals);
   output_signal_collections.insert(TYPE_2,  &type2_output_signals);
@@ -26,7 +26,7 @@ bool raduga::SvRaduga::configure(modus::DeviceConfig *config, modus::IOBuffer *i
     p_config = config;
     p_io_buffer = iobuffer;
 
-//    m_params = raduga::ProtocolParams::fromJson(p_config->protocol.params);
+    m_params = raduga::ProtocolParams::fromJson(p_config->protocol.params);
 
     if(!m_data.resize(p_config->bufsize))
       throw SvException(QString("Не удалось выделить %1 байт памяти для буфера").arg(p_config->bufsize));
@@ -51,7 +51,7 @@ void raduga::SvRaduga::disposeInputSignal (modus::SvSignal* signal)
     quint16 itype = type.toUInt(&ok, 0);
 
     if(ok && input_signal_collections.contains(itype))
-      input_signal_collections.value(itype)->addSignal(signal);
+      input_signal_collections.value(itype)->addSignal(signal, p_config->bufsize);
 
     else {
 
@@ -70,17 +70,15 @@ void raduga::SvRaduga::disposeOutputSignal (modus::SvSignal* signal)
 {
   try {
 
-    QString pack_id = signal->config()->packid;
-
     bool ok;
-    quint16 ipack = pack_id.toUInt(&ok, 0);
+    quint16 itype = signal->config()->type.toUInt(&ok, 0);
 
-    if(ok && output_signal_collections.contains(ipack))
-      output_signal_collections.value(itype)->addSignal(signal);
+    if(ok && output_signal_collections.contains(itype))
+      output_signal_collections.value(itype)->addSignal(signal, p_config->bufsize);
 
     else {
 
-      emit message(QString("Сигнал %1: Неопознанный тип \"%2\"").arg(signal->config()->name).arg(signal->config()->type),
+      emit message(QString("Сигнал %1: Неопознанный тип данных \"%2\"").arg(signal->config()->name).arg(signal->config()->tag),
                    sv::log::llError, sv::log::mtError);
 
     }
@@ -238,30 +236,60 @@ void raduga::SvRaduga::confirmation()
 
 raduga::TREATRESULT raduga::SvRaduga::putout()
 {
+  p_io_buffer->output->offset = 0;
+
+  memcpy(&p_io_buffer->output->data[p_io_buffer->output->offset], &SYSNAME, SYSNAME_LEN);
+  p_io_buffer->output->offset += SYSNAME_LEN;
+
+  memcpy(&p_io_buffer->output->data[p_io_buffer->output->offset], &m_params.abonent, sizeof(quint8));
+  p_io_buffer->output->offset += sizeof(quint8);
+
+  memcpy(&p_io_buffer->output->data[p_io_buffer->output->offset], &m_params.activity, sizeof(quint8));
+  p_io_buffer->output->offset += sizeof(quint8);
+
+  memcpy(&p_io_buffer->output->data[p_io_buffer->output->offset], &m_params.packid, sizeof(quint16));
+  p_io_buffer->output->offset += sizeof(quint16);
+
   switch (m_params.packid) {
-  case 101:
-  case 105:
-  case 106:
-  case 110:
-    //data_type_1
-    break;
 
-  case 102:
-  case 107:
-    //data_type_2
-    //data_type_3
-    break;
+    case 101:
+    case 105:
+    case 106:
+    case 110: {
 
-  case 103:
-  case 108:
-    //data_type_5
-    break;
+      output_signal_collections.value(TYPE_1)->updateOutput(&p_io_buffer->output);
+      p_io_buffer->output->offset += 1152;
 
-  case 104:
-  case 109:
-    //data_type_9
-    //data_type_53
-    break;
+      break;
+    }
+
+    case 102:
+    case 107:
+
+      output_signal_collections.value(TYPE_2)->updateOutput(p_io_buffer->output);
+      p_io_buffer->output->offset += 384;
+      output_signal_collections.value(TYPE_3)->updateOutput(p_io_buffer->output);
+      p_io_buffer->output->offset += 384;
+
+      break;
+
+    case 103:
+    case 108:
+
+      output_signal_collections.value(TYPE_5)->updateOutput(p_io_buffer->output);
+      p_io_buffer->output->offset += 1284;
+
+      break;
+
+    case 104:
+    case 109:
+
+      output_signal_collections.value(TYPE_9)-> updateOutput(p_io_buffer->output);
+      p_io_buffer->output->offset += 316;
+      output_signal_collections.value(TYPE_53)->updateOutput(p_io_buffer->output);
+      p_io_buffer->output->offset += 384;
+
+      break;
 
   }
 }

@@ -28,6 +28,9 @@ extern "C" {
 
 }
 
+const int  SYSNAME_LEN = 16;
+const char SYSNAME[SYSNAME_LEN] = ("R","a","d","u","g","a","-","2","0","3","8","6"," "," "," "," " );
+
 #define GOOD_PARSED   0
 #define DO_RESET      1
 #define DO_NOT_RESET  2
@@ -37,7 +40,7 @@ namespace raduga {
   #pragma pack(push,1)
   struct Header
   {
-    char    system_name[16];
+    char    system_name[SYSNAME_LEN];
     quint16 abonent_id;
     quint16 activity_id;
     quint16 pack_id;

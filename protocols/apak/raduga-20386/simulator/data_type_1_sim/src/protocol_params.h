@@ -11,14 +11,16 @@
 #include "../../../../../Modus/global/global_defs.h"
 //#include "../../../../../Modus/global/device/device_defs.h"
 
-#define P_ABONENT "abonent"
+#define P_ABONENT  "abonent"
+#define P_ACTIVITY "activity"
 
 namespace raduga {
 
   struct ProtocolParams {
 
-    quint16   packid  = 0;
-    quint16   abonent = 0;
+    quint16   packid   = 0;
+    quint8    abonent  = 0;
+    quint8    activity = 0;
 
     static ProtocolParams fromJson(const QString& json_string) //throw (SvException)
     {
@@ -46,11 +48,11 @@ namespace raduga {
       P = P_PACKID;
       if(object.contains(P)) {
 
-        if(object.value(P).toInt(-1) < 1)
+        if(object.value(P).toInt(-1) < 0)
           throw SvException(QString(IMPERMISSIBLE_VALUE)
                             .arg(P)
                             .arg(object.value(P).toVariant().toString())
-                            .arg("Идентификатор пакета должен быть задан целым числом"));
+                            .arg("Идентификатор пакета должен быть задан двухбайтным целым числом"));
 
         p.packid = object.value(P).toInt();
 
@@ -61,11 +63,11 @@ namespace raduga {
       P = P_ABONENT;
       if(object.contains(P)) {
 
-        if(object.value(P).toInt(-1) < 1)
+        if(object.value(P).toInt(-1) < 0)
           throw SvException(QString(IMPERMISSIBLE_VALUE)
                                  .arg(P)
                                  .arg(object.value(P).toVariant().toString())
-                                 .arg("Идентификатор абонента должен быть задан целым числом"));
+                                 .arg("Идентификатор абонента должен быть задан однобайтным целым числом"));
 
         p.abonent = object.value(P).toInt();
 
@@ -73,6 +75,20 @@ namespace raduga {
       else
         throw SvException(QString(MISSING_PARAM).arg(P));
 
+      P = P_ACTIVITY;
+      if(object.contains(P)) {
+
+        if(object.value(P).toInt(-1) < 0)
+          throw SvException(QString(IMPERMISSIBLE_VALUE)
+                                 .arg(P)
+                                 .arg(object.value(P).toVariant().toString())
+                                 .arg("Индикатор активности прибора должен быть задан однобайтным целым числом"));
+
+        p.activity = object.value(P).toInt();
+
+      }
+      else
+        throw SvException(QString(MISSING_PARAM).arg(P));
 
       return p;
 
@@ -90,8 +106,9 @@ namespace raduga {
     {
       QJsonObject j;
 
-      j.insert(P_PACKID, QJsonValue(packid).toString());
-      j.insert(P_ABONENT, QJsonValue(abonent).toInt());
+      j.insert(P_PACKID,   QJsonValue(packid).toString());
+      j.insert(P_ABONENT,  QJsonValue(abonent).toInt());
+      j.insert(P_ACTIVITY, QJsonValue(activity).toInt());
 
       return j;
 

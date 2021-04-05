@@ -18,9 +18,23 @@
 #define P_RADUGA_BYTE   "byte"
 #define P_RADUGA_OFFSET "offset"
 #define P_RADUGA_LEN    "len"
-
+#define P_RADUGA_TIP    "tip"
 
 namespace raduga {
+
+  enum TIP {
+    Unknown = -1,
+    Discrete,
+    Short,
+    Ustavka,
+    Long,
+    Analog,
+    Float
+  };
+
+  const QMap<QString, TIP> tips = {{"discrete", TIP::Discrete }, {"short", TIP::Short },
+                                   {"ustavka",  TIP::Ustavka  }, {"long",  TIP::Long  },
+                                   {"analog",   TIP::Analog   }, {"float", TIP::Float } };
 
   struct DATA
   {
@@ -69,6 +83,7 @@ namespace raduga {
     quint16 byte     = 0;
     quint8  offset   = 0;
     quint8  len      = 0;
+    TIP     tip      = TIP::Unknown;
 
     static SignalParams fromJson(const QString& json_string) //throw (SvException)
     {
@@ -93,6 +108,7 @@ namespace raduga {
       SignalParams p;
       QString P;
 
+      /* byte */
       P = P_RADUGA_BYTE;
       if(object.contains(P)) {
 
@@ -111,6 +127,7 @@ namespace raduga {
       else
         throw SvException(QString(MISSING_PARAM).arg(P));
 
+      /* offset */
       P = P_RADUGA_OFFSET;
       if(object.contains(P)) {
 
@@ -128,7 +145,7 @@ namespace raduga {
       else
         throw SvException(QString(MISSING_PARAM).arg(P));
 
-
+      /* len */
       P = P_RADUGA_LEN;
       if(object.contains(P)) {
 
@@ -142,6 +159,28 @@ namespace raduga {
                             .arg(P)
                             .arg(object.value(P).toVariant().toString())
                             .arg("Кол-во бит должено быть задано однобайтовым целым числом в десятичном формате в диапазоне [0..7]"));
+      }
+      else
+        throw SvException(QString(MISSING_PARAM).arg(P));
+
+      /* tip */
+      P = P_RADUGA_TIP;
+      if(object.contains(P)) {
+
+        if(object.value(P).toString("").isEmpty())
+          throw SvException(QString(IMPERMISSIBLE_VALUE)
+                            .arg(P)
+                            .arg(object.value(P).toVariant().toString())
+                            .arg("Тип сигнала не может быть пустым"));
+
+        if(!tips.contains(object.value(P).toString().toLower()))
+          throw SvException(QString(IMPERMISSIBLE_VALUE)
+                            .arg(P)
+                            .arg(object.value(P).toVariant().toString())
+                            .arg(QString("Неверный тип сигнала \"%1\"").arg(object.value(P).toString())));
+
+        p.tip = tips.value(object.value(P).toString());
+
       }
       else
         throw SvException(QString(MISSING_PARAM).arg(P));
@@ -162,9 +201,10 @@ namespace raduga {
     {
       QJsonObject j;
 
-      j.insert(P_RADUGA_BYTE,   QJsonValue(byte).toString());
-      j.insert(P_RADUGA_OFFSET, QJsonValue(offset).toString());
-      j.insert(P_RADUGA_LEN,    QJsonValue(len).toString());
+      j.insert(P_RADUGA_BYTE,   QJsonValue(byte).toInt());
+      j.insert(P_RADUGA_OFFSET, QJsonValue(offset).toInt());
+      j.insert(P_RADUGA_LEN,    QJsonValue(len).toInt());
+      j.insert(P_RADUGA_TIP,    QJsonValue(tips.key(tip)).toString());
 
       return j;
 
@@ -182,9 +222,11 @@ namespace raduga {
     virtual ~SvAbstractSignalCollection()
     {  }
 
-    virtual void addSignal(modus::SvSignal* signal) = 0;
+    virtual void addSignal(modus::SvSignal* signal, quint16 bufsize) = 0;
 
     virtual void updateSignals(const raduga::DATA* data = nullptr) = 0;
+
+    virtual void updateOutput(const modus::BUFF* data = nullptr) = 0;
 
   };
 }
