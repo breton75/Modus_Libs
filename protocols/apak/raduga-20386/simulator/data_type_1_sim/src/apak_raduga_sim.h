@@ -29,7 +29,7 @@ extern "C" {
 }
 
 const int  SYSNAME_LEN = 16;
-const char SYSNAME[SYSNAME_LEN] = ("R","a","d","u","g","a","-","2","0","3","8","6"," "," "," "," " );
+const char SYSNAME[SYSNAME_LEN] = {'R','a','d','u','g','a','-','2','0','3','8','6',' ',' ',' ',' ' };
 
 #define GOOD_PARSED   0
 #define DO_RESET      1
@@ -115,7 +115,7 @@ private:
 
   QMap<quint16, raduga::SvAbstractSignalCollection*> output_signal_collections;
 
-  raduga::TREATRESULT putout();
+  void putout();
 
 
 };

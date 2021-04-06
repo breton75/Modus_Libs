@@ -69,9 +69,9 @@ void SvUdp::run()
     p_io_buffer->input->mutex.unlock();
 
     // отправляем управляющие данные, если они есть
-    p_io_buffer->output.mutex.lock();
-    write(&p_io_buffer->output);
-    p_io_buffer->output.mutex.unlock();
+    p_io_buffer->output->mutex.lock();
+    write(p_io_buffer->output);
+    p_io_buffer->output->mutex.unlock();
 
   }
 }

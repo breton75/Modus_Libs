@@ -117,6 +117,47 @@ namespace restapi {
                                                       {"json", "application/json"}
                                                      };
 
+  enum RestGetFields {
+    entity,
+    action,
+    param
+  };
+
+  enum RestGetEntities {
+    signal,
+    device,
+    storage,
+    analize,
+    configuration
+  };
+
+  enum RestGetActions {
+    value,
+    definition
+  };
+
+  enum RestGetParams {
+    byname,
+    byids
+  };
+
+  const QMap<QString, RestGetFields> RestGetFieldsMap =     {{"entity",         RestGetFields::entity         },
+                                                             {"action",         RestGetFields::action         },
+                                                             {"param",          RestGetFields::param          }};
+
+                                                             }
+  const QMap<QString, RestGetEntities> RestGetEntitiesMap = {{"signal",         RestGetEntities::signal        },
+                                                             {"device",         RestGetEntities::device        },
+                                                             {"storage",        RestGetEntities::storage       },
+                                                             {"analize",        RestGetEntities::analize       },
+                                                             {"configuration",  RestGetEntities::configuration }};
+
+  const QMap<QString, RestGetActions> RestGetActionsMap   = {{"value",          RestGetActions::value          },
+                                                             {"definition",     RestGetActions::definition     }};
+
+  const QMap<QString, RestGetParams> RestGetParamsMap     = {{"byname",         RestGetParams::byname          },
+                                                             {"byids",          RestGetParams::byids           }};
+
   class SvRestAPI;
 
 }
@@ -150,6 +191,7 @@ private:
   bool m_is_websocket = false;
 
   QByteArray reply_http_get(const HttpRequest &request);
+  QByteArray reply_http_get_params(const HttpRequest &request);
   QByteArray reply_http_post(const HttpRequest &request);
   QByteArray reply_ws_get(const HttpRequest &request);
 

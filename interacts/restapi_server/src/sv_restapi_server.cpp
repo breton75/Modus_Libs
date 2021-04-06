@@ -166,8 +166,15 @@ void restapi::SvRestAPI::processHttpRequest()
   }
   else {
 
-    if(request.method == "GET")
-      client->write(reply_http_get(request));
+    if(request.method == "GET") {
+
+      if(request.params.isEmpty())
+        client->write(reply_http_get(request));
+
+      else
+        client->write(reply_http_get_params(request));
+
+    }
 
     else if (request.method == "POST")
       client->write(reply_http_post(request));
@@ -272,6 +279,164 @@ QByteArray restapi::SvRestAPI::reply_http_get(const HttpRequest &request)
 
 }
 
+QByteArray restapi::SvRestAPI::reply_http_get_params(const HttpRequest &request)
+{
+  auto Var2Str = [](QVariant value) -> QString {
+
+      if(value.isValid())
+      {
+        switch (value.type()) {
+          case QVariant::Int:
+
+            return QString::number(value.toInt());
+            break;
+
+          case QVariant::Double:
+
+            return QString::number(value.toDouble());
+            break;
+
+          default:
+            return "";
+
+        }
+      }
+
+      return "";
+
+  };
+
+  auto getErr = [=](int errorCode, QString errorString) -> QByteArray {
+
+    emit message(errorString, sv::log::llError, sv::log::mtError);
+
+//      if(m_logger)
+//        *m_logger <<llError << mtError << errorString << sv::log::endl;
+
+      return QByteArray()
+                        .append(QString("HTTP/1.1 %1 Error" \
+                                "Content-Type: text/html; charset=\"utf-8\"\r\n\r\n"
+                                "<html>"
+                                "<head><meta charset=\"UTF-8\"><title>Ошибка</title><head>"
+                                "<body>"
+                                "<p style=\"font-size: 16\">%2</p>"
+                                "<a href=\"index.html\" style=\"font-size: 14\">На главную</a>"
+                                "<p>%3</p>"
+                                "</body></html>\n")
+                                    .arg(errorCode)
+                                    .arg(errorString)
+                                    .arg(QDateTime::currentDateTime().toString())
+                                .toUtf8());
+  };
+
+  QStringList queries = QString(request.data).split('&');
+
+  if(queries.count() == 0)
+    return getErr(404, QString("Неверный запрос"));
+
+  QString query = QString(queries.at(0));
+
+  if(query.indexOf('=') < 1)
+    return getErr(404, QString("Неверный запрос"));
+
+  QString tag    = query.left(query.indexOf('='));
+  QString entity = query.right(query.length() - query.indexOf('=') - 1);
+
+  if(!RestGetFieldsMap.contains(tag))
+    return getErr(404, QString("Неизвестный параметр запроса %1").arg(tag));
+
+  if(RestGetFieldsMap.value(tag) != RestGetFields::entity)
+    return getErr(404, QString("Ожидалось поле 'entity'. Получено '%1'").arg(tag));
+
+  if(!RestGetEntitiesMap.contains(entity))
+    return getErr(404, QString("Неизвестный параметр запроса %1").arg(tag));
+
+  QString json = ""; // формируем ответ в формате JSON
+
+  for(QString query: queries) {
+
+    if(query.indexOf('=') < 1)
+      continue;
+
+    QString query_field = query.left(query.indexOf('='));
+    QString query_data  = query.right(query.length() - query.indexOf('=') - 1);
+
+    if(!RestGetEntitiesMap.contains(query_field))
+      continue;
+
+    switch (RestGetEntitiesMap.value(query_field)) {
+    case RestGetEntities::signal:
+
+      json = handle_signal_request();
+
+      break;
+    default:
+      break;
+    }
+
+    if(query_field == "names")
+    {
+
+      QStringList names = query_data.split(',');
+
+      for(QString name: names)
+      {
+        if(name.trimmed().isEmpty())
+          continue;
+
+        if(signalsByName()->contains(name))
+          json.append(QString("{\"name\":\"%1\",\"value\":\"%2\"},")
+                        .arg(name).arg(Var2Str(signalsByName()->value(name)->value())));
+
+      }
+
+
+      if(!json.isEmpty()) json.chop(1);
+
+
+    }
+
+    else if(query_field == "ids")
+    {
+      QStringList ids = query_data.split(',');
+
+      for(QString curid: ids)
+      {
+        if(curid.trimmed().isEmpty())
+          continue;
+
+        bool ok;
+        int id = curid.toInt(&ok);
+
+        if(ok && signalsById()->contains(id))
+          json.append(QString("{\"id\":\"%1\",\"value\":\"%2\"},")
+                        .arg(id).arg(Var2Str(signalsById()->value(id)->value())));
+
+      }
+
+      if(!json.isEmpty()) json.chop(1);
+
+    }
+  }
+
+  QByteArray http = QByteArray()
+                    .append("HTTP/1.0 200 Ok\r\n")
+                    .append("Content-Type: text/json; charset=\"utf-8\"\r\n")
+                    .append(QString("Content-Length: %1\r\n").arg(json.length() + 2))
+                    .append("Access-Control-Allow-Origin: *\r\n")
+                    .append("Access-Control-Allow-Headers: *\r\n")
+                    .append("Origin: file://\r\n\r\n")        //! обязательно два!
+                    .append("[").append(json).append("]\r\n");
+
+//  if(m_logger && m_logger->options().log_level >= sv::log::llDebug2)
+//    *m_logger << sv::log::llDebug2 << sv::log::mtDebug << QString(http) << sv::log::endl;
+
+  emit message(QString(http), sv::log::llDebug2, sv::log::mtDebug);
+
+  return http;
+
+}
+
 QByteArray restapi::SvRestAPI::reply_http_post(const HttpRequest &request)
 {
   auto Var2Str = [](QVariant value) -> QString {
@@ -299,54 +464,62 @@ QByteArray restapi::SvRestAPI::reply_http_post(const HttpRequest &request)
 
   };
 
-  QStringList r1 = QString(request.data).split('?');
-
-  if(r1.count() < 2)
-    return QByteArray();
+  QStringList queries = QString(request.data).split('&');
 
   QString json = ""; // формируем ответ в формате JSON
 
-  if(r1.at(0) == "names")
-  {
+  for(QString query: queries) {
 
-    QStringList names = QString(r1.at(1)).split(',');
+    if(query.indexOf('=') < 1)
+      continue;
 
-    for(QString name: names)
+    QString query_field = query.left(query.indexOf('='));
+    QString query_data  = query.right(query.length() - query.indexOf('=') - 1);
+
+    if(r1.at(0) == "names")
     {
-      if(name.trimmed().isEmpty())
-        continue;
 
-      if(signalsByName()->contains(name))
-        json.append(QString("{\"name\":\"%1\",\"value\":\"%2\"},")
-                      .arg(name).arg(Var2Str(signalsByName()->value(name)->value())));
+      QStringList names = QString(r1.at(1)).split(',');
+
+      for(QString name: names)
+      {
+        if(name.trimmed().isEmpty())
+          continue;
+
+        if(signalsByName()->contains(name))
+          json.append(QString("{\"name\":\"%1\",\"value\":\"%2\"},")
+                        .arg(name).arg(Var2Str(signalsByName()->value(name)->value())));
+
+      }
+
+
+      if(!json.isEmpty()) json.chop(1);
+
 
     }
 
-
-    if(!json.isEmpty()) json.chop(1);
-
-
-  }
-
-  else if(r1.at(0) == "ids")
-  {
-    QStringList ids = QString(r1.at(1)).split(',');
-
-    for(QString curid: ids)
+    else if(r1.at(0) == "ids")
     {
-      if(curid.trimmed().isEmpty())
-        continue;
+      QStringList ids = QString(r1.at(1)).split(',');
 
-      bool ok;
-      int id = curid.toInt(&ok);
+      for(QString curid: ids)
+      {
+        if(curid.trimmed().isEmpty())
+          continue;
 
-      if(ok && signalsById()->contains(id))
-        json.append(QString("{\"id\":\"%1\",\"value\":\"%2\"},")
-                      .arg(id).arg(Var2Str(signalsById()->value(id)->value())));
+        bool ok;
+        int id = curid.toInt(&ok);
+
+        if(ok && signalsById()->contains(id))
+          json.append(QString("{\"id\":\"%1\",\"value\":\"%2\"},")
+                        .arg(id).arg(Var2Str(signalsById()->value(id)->value())));
+
+      }
+
+      if(!json.isEmpty()) json.chop(1);
 
     }
 
-    if(!json.isEmpty()) json.chop(1);
 
   }
 

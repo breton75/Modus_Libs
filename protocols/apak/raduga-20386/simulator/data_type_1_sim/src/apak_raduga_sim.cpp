@@ -95,19 +95,19 @@ void raduga::SvRaduga::run()
 
   while(p_is_active) {
 
-//    p_io_buffer->confirm->mutex.lock();     // если нужен ответ квитирование
-    p_io_buffer->input->mutex.lock();
+////    p_io_buffer->confirm->mutex.lock();     // если нужен ответ квитирование
+//    p_io_buffer->input->mutex.lock();
 
-    raduga::TREATRESULT result = parse();
+//    raduga::TREATRESULT result = parse();
 
-    if(result.do_reset == DO_RESET)
-      p_io_buffer->input->reset();
+//    if(result.do_reset == DO_RESET)
+//      p_io_buffer->input->reset();
 
-    p_io_buffer->input->mutex.unlock();
-//    p_io_buffer->confirm->mutex.unlock();   // если нужен ответ квитирование
+//    p_io_buffer->input->mutex.unlock();
+////    p_io_buffer->confirm->mutex.unlock();   // если нужен ответ квитирование
 
-    if(result.parse_time.isValid())
-      validateSignals(result.parse_time);
+//    if(result.parse_time.isValid())
+//      validateSignals(result.parse_time);
 
     p_io_buffer->output->mutex.lock();
 
@@ -117,7 +117,7 @@ void raduga::SvRaduga::run()
 
     QThread::yieldCurrentThread();
 
-    msleep(1);
+    msleep(m_params.interval);
 
   }
 }
@@ -234,7 +234,7 @@ void raduga::SvRaduga::confirmation()
 
 }
 
-raduga::TREATRESULT raduga::SvRaduga::putout()
+void raduga::SvRaduga::putout()
 {
   p_io_buffer->output->offset = 0;
 
@@ -257,7 +257,7 @@ raduga::TREATRESULT raduga::SvRaduga::putout()
     case 106:
     case 110: {
 
-      output_signal_collections.value(TYPE_1)->updateOutput(&p_io_buffer->output);
+      output_signal_collections.value(TYPE_1)->updateOutput(p_io_buffer->output);
       p_io_buffer->output->offset += 1152;
 
       break;

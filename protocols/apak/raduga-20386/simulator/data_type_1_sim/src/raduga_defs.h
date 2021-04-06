@@ -32,8 +32,9 @@ namespace raduga {
     Float
   };
 
-  const QMap<QString, TIP> tips = {{"discrete", TIP::Discrete }, {"short", TIP::Short },
-                                   {"ustavka",  TIP::Ustavka  }, {"long",  TIP::Long  },
+  const QMap<QString, TIP> tips = {{"discrete", TIP::Discrete }, {"short",  TIP::Short },
+                                   {"word", TIP::Short        }, {"ushort", TIP::Short },
+                                   {"ustavka",  TIP::Ustavka  }, {"long",  TIP::Long  }, {"ulong",  TIP::Long  },
                                    {"analog",   TIP::Analog   }, {"float", TIP::Float } };
 
   struct DATA
@@ -112,16 +113,13 @@ namespace raduga {
       P = P_RADUGA_BYTE;
       if(object.contains(P)) {
 
-        QByteArray h = object.value(P).toString().toUtf8();
-
-        bool ok = false;
-        p.byte = h.toUShort(&ok, 0);
-
-        if(!ok)
+        if(object.value(P).toInt(-1) == -1)
           throw SvException(QString(IMPERMISSIBLE_VALUE)
                             .arg(P)
                             .arg(object.value(P).toVariant().toString())
                             .arg("Номер байта должен быть задан двухбайтовым целым числом в десятичном формате"));
+
+        p.byte = object.value(P).toInt();
 
       }
       else
@@ -131,16 +129,14 @@ namespace raduga {
       P = P_RADUGA_OFFSET;
       if(object.contains(P)) {
 
-        QByteArray h = object.value(P).toString().toUtf8();
-
-        bool ok = false;
-        p.offset = h.toUShort(&ok, 0);
-
-        if(!ok || p.offset > 7)
+        if((object.value(P).toInt(-1) == -1) || (object.value(P).toInt(-1) > 7))
           throw SvException(QString(IMPERMISSIBLE_VALUE)
                             .arg(P)
                             .arg(object.value(P).toVariant().toString())
                             .arg("Сдвиг должен быть задан однобайтовым целым числом в десятичном формате в диапазоне [0..7]"));
+
+        p.offset = object.value(P).toInt();
+
       }
       else
         throw SvException(QString(MISSING_PARAM).arg(P));
@@ -149,16 +145,14 @@ namespace raduga {
       P = P_RADUGA_LEN;
       if(object.contains(P)) {
 
-        QByteArray h = object.value(P).toString().toUtf8();
-
-        bool ok = false;
-        p.len = h.toUShort(&ok, 0);
-
-        if(!ok || p.len > 7)
+        if(object.value(P).toInt(-1) == -1)
           throw SvException(QString(IMPERMISSIBLE_VALUE)
                             .arg(P)
                             .arg(object.value(P).toVariant().toString())
-                            .arg("Кол-во бит должено быть задано однобайтовым целым числом в десятичном формате в диапазоне [0..7]"));
+                            .arg("Кол-во бит должено быть задано однобайтовым целым числом в десятичном формате"));
+
+        p.len = object.value(P).toInt();
+
       }
       else
         throw SvException(QString(MISSING_PARAM).arg(P));

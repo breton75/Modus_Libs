@@ -21,6 +21,7 @@ namespace raduga {
     quint16   packid   = 0;
     quint8    abonent  = 0;
     quint8    activity = 0;
+    quint16   interval = 1000;
 
     static ProtocolParams fromJson(const QString& json_string) //throw (SvException)
     {
@@ -90,6 +91,21 @@ namespace raduga {
       else
         throw SvException(QString(MISSING_PARAM).arg(P));
 
+      P = P_INTERVAL;
+      if(object.contains(P)) {
+
+        if(object.value(P).toInt(-1) < 0)
+          throw SvException(QString(IMPERMISSIBLE_VALUE)
+                            .arg(P)
+                            .arg(object.value(P).toVariant().toString())
+                            .arg("Интервал выгрузки данных должен быть задан двухбайтным целым числом"));
+
+        p.interval = object.value(P).toInt();
+
+      }
+      else
+        p.interval = 1000;
+
       return p;
 
     }
@@ -109,6 +125,7 @@ namespace raduga {
       j.insert(P_PACKID,   QJsonValue(packid).toString());
       j.insert(P_ABONENT,  QJsonValue(abonent).toInt());
       j.insert(P_ACTIVITY, QJsonValue(activity).toInt());
+      j.insert(P_INTERVAL, QJsonValue(interval).toInt());
 
       return j;
 
