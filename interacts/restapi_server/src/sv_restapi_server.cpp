@@ -329,31 +329,59 @@ QByteArray restapi::SvRestAPI::reply_http_get_params(const HttpRequest &request)
                                 .toUtf8());
   };
 
-  QStringList queries = QString(request.data).split('&');
+  QStringList get_params = QString(request.params).split('&');
 
-  if(queries.count() == 0)
+  if(get_params.count() == 0)
     return getErr(404, QString("Неверный запрос"));
 
-  QString query = QString(queries.at(0));
+  QString entity_param = QString(get_params.at(0));
 
-  if(query.indexOf('=') < 1)
+  if(entity_param.indexOf('=') < 1)
     return getErr(404, QString("Неверный запрос"));
 
-  QString tag    = query.left(query.indexOf('='));
-  QString entity = query.right(query.length() - query.indexOf('=') - 1);
+  QString tag    = entity_param.left(entity_param.indexOf('='));
+  QString entity = entity_param.right(entity_param.length() - entity_param.indexOf('=') - 1);
 
   if(!RestGetFieldsMap.contains(tag))
-    return getErr(404, QString("Неизвестный параметр запроса %1").arg(tag));
+    return getErr(404, QString("Неизвестный параметр запроса '%1'").arg(tag));
 
   if(RestGetFieldsMap.value(tag) != RestGetFields::entity)
-    return getErr(404, QString("Ожидалось поле 'entity'. Получено '%1'").arg(tag));
+    return getErr(404, QString("Неверный запрос. Ожидалось поле 'entity'. Получено '%1'").arg(tag));
 
   if(!RestGetEntitiesMap.contains(entity))
-    return getErr(404, QString("Неизвестный параметр запроса %1").arg(tag));
+    return getErr(404, QString("Неверный запрос. Неизвестная сущность '%1'").arg(entity));
 
+  get_params.pop_front();
   QString json = ""; // формируем ответ в формате JSON
 
-  for(QString query: queries) {
+  switch (RestGetEntitiesMap.value(entity)) {
+
+    case RestGetEntities::signal:
+
+      json = processEntitySignal(get_params);
+
+      break;
+
+    case RestGetEntities::device:
+
+      break;
+
+    case RestGetEntities::storage:
+
+      break;
+
+    case RestGetEntities::analize:
+
+      break;
+
+    case RestGetEntities::configuration:
+
+      break;
+
+  }
+
+
+  for(QString query: get_params) {
 
     if(query.indexOf('=') < 1)
       continue;
@@ -434,6 +462,32 @@ QByteArray restapi::SvRestAPI::reply_http_get_params(const HttpRequest &request)
   emit message(QString(http), sv::log::llDebug2, sv::log::mtDebug);
 
   return http;
+
+}
+
+
+QString processEntitySignal(QStringList& get_params)
+{
+
+}
+
+QString processEntityDevice(QStringList& get_params)
+{
+
+}
+
+QString processEntityStorage(QStringList& get_params)
+{
+
+}
+
+QString processEntityAnalize(QStringList& get_params)
+{
+
+}
+
+QString processEntityConfiguration(QStringList& get_params)
+{
 
 }
 

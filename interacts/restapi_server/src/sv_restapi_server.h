@@ -138,14 +138,13 @@ namespace restapi {
 
   enum RestGetParams {
     byname,
-    byids
+    byid
   };
 
   const QMap<QString, RestGetFields> RestGetFieldsMap =     {{"entity",         RestGetFields::entity         },
                                                              {"action",         RestGetFields::action         },
                                                              {"param",          RestGetFields::param          }};
 
-                                                             }
   const QMap<QString, RestGetEntities> RestGetEntitiesMap = {{"signal",         RestGetEntities::signal        },
                                                              {"device",         RestGetEntities::device        },
                                                              {"storage",        RestGetEntities::storage       },
@@ -156,7 +155,7 @@ namespace restapi {
                                                              {"definition",     RestGetActions::definition     }};
 
   const QMap<QString, RestGetParams> RestGetParamsMap     = {{"byname",         RestGetParams::byname          },
-                                                             {"byids",          RestGetParams::byids           }};
+                                                             {"byid",           RestGetParams::byid            }};
 
   class SvRestAPI;
 
@@ -195,7 +194,11 @@ private:
   QByteArray reply_http_post(const HttpRequest &request);
   QByteArray reply_ws_get(const HttpRequest &request);
 
-//  void processRequests() override;
+  QString processEntitySignal(QStringList& get_params);
+  QString processEntityDevice(QStringList& get_params);
+  QString processEntityStorage(QStringList& get_params);
+  QString processEntityAnalize(QStringList& get_params);
+  QString processEntityConfiguration(QStringList& get_params);
 
 private slots:
   void newConnection();
