@@ -24,6 +24,8 @@
 
 #include "../../../../Modus/global/interact/sv_abstract_interact.h"
 #include "../../../../Modus/global/global_defs.h"
+#include "../../../../Modus/global/configuration.h"
+
 #include "params.h"
 
 extern "C" {
@@ -123,13 +125,6 @@ namespace restapi {
     param
   };
 
-  enum RestGetEntities {
-    signal,
-    device,
-    storage,
-    analize,
-    configuration
-  };
 
   enum RestGetActions {
     value,

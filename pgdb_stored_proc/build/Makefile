@@ -203,7 +203,7 @@ DIST          = /opt/Qt5.5.1/5.5/gcc_64/mkspecs/features/spec_pre.prf \
 		../../../svlib/sv_pgdb.cpp \
 		../../../Modus/global/signal/sv_signal.cpp
 QMAKE_TARGET  = pgdb_stored_proc_aggregate
-DESTDIR       = /home/developer/Modus/lib/storages/#avoid trailing-slash linebreak
+DESTDIR       = ../../../../Modus/lib/storages/#avoid trailing-slash linebreak
 TARGET        = libpgdb_stored_proc_aggregate.so
 TARGETD       = libpgdb_stored_proc_aggregate.so
 
@@ -230,11 +230,11 @@ first: all
 
 ####### Build rules
 
-/home/developer/Modus/lib/storages/$(TARGET):  $(OBJECTS) $(SUBLIBS) $(OBJCOMP)  
-	@test -d /home/developer/Modus/lib/storages/ || mkdir -p /home/developer/Modus/lib/storages/
+../../../../Modus/lib/storages/$(TARGET):  $(OBJECTS) $(SUBLIBS) $(OBJCOMP)  
+	@test -d ../../../../Modus/lib/storages/ || mkdir -p ../../../../Modus/lib/storages/
 	-$(DEL_FILE) $(TARGET)
 	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS) $(LIBS) $(OBJCOMP)
-	-$(MOVE) $(TARGET) /home/developer/Modus/lib/storages/ 
+	-$(MOVE) $(TARGET) ../../../../Modus/lib/storages/ 
 
 
 
@@ -519,7 +519,7 @@ qmake: FORCE
 qmake_all: FORCE
 
 
-all: Makefile /home/developer/Modus/lib/storages/$(TARGET)
+all: Makefile ../../../../Modus/lib/storages/$(TARGET)
 
 dist: distdir FORCE
 	(cd `dirname $(DISTDIR)` && $(TAR) $(DISTNAME).tar $(DISTNAME) && $(COMPRESS) $(DISTNAME).tar) && $(MOVE) `dirname $(DISTDIR)`/$(DISTNAME).tar.gz . && $(DEL_FILE) -r $(DISTDIR)
@@ -537,7 +537,7 @@ clean: compiler_clean
 
 
 distclean: clean 
-	-$(DEL_FILE) /home/developer/Modus/lib/storages/$(TARGET) 
+	-$(DEL_FILE) ../../../../Modus/lib/storages/$(TARGET) 
 	-$(DEL_FILE) Makefile
 
 
@@ -1218,7 +1218,7 @@ moc_sv_signal.o: moc_sv_signal.cpp
 
 install_target: first FORCE
 	@test -d $(INSTALL_ROOT)/usr/lib || mkdir -p $(INSTALL_ROOT)/usr/lib
-	-$(INSTALL_PROGRAM) /home/developer/Modus/lib/storages/$(TARGET) $(INSTALL_ROOT)/usr/lib/$(TARGET)
+	-$(INSTALL_PROGRAM) ../../../../Modus/lib/storages/$(TARGET) $(INSTALL_ROOT)/usr/lib/$(TARGET)
 	-$(STRIP) --strip-unneeded $(INSTALL_ROOT)/usr/lib/$(TARGET)
 
 uninstall_target: FORCE
