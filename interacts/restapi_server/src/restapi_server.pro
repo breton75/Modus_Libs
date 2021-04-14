@@ -20,10 +20,10 @@ SOURCES += sv_restapi_server.cpp \
 
 HEADERS += sv_restapi_server.h \
         restapi_server_global.h \
-    params.h \
     ../../../../Modus/global/interact/sv_abstract_interact.h \
     ../../../../Modus/global/signal/sv_signal.h \
-    http_get_with_params.h
+    http_get_with_params.h \
+    restapi_server_defs.h
 
 unix {
     target.path = /usr/lib

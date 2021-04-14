@@ -7,8 +7,8 @@
  *  автор Свиридов С.А. Авиационные и Морская Электроника
  * *********************************************************************/
 
-#ifndef RESTAPI_PARAMS
-#define RESTAPI_PARAMS
+#ifndef RESTAPI_DEFS
+#define RESTAPI_DEFS
 
 #include <QtGlobal>
 #include <QtCore/QCommandLineParser>
@@ -29,6 +29,45 @@
 
 /** структура для хранения параметров udp **/
 namespace restapi {
+
+  namespace ewo {
+
+    enum Entities {
+      unknown,
+      signal,
+      device,
+      storage,
+      interact,
+      analize,
+      configuration
+    };
+
+    enum Whats {
+      unknown,
+      value,
+      json
+    };
+
+    enum Options {
+      unknown,
+      byname,
+      byid
+    };
+
+    const QMap<QString, Entities> EntitiesTable = {{ "signal",         Entities::signal        },
+                                                   { "device",         Entities::device        },
+                                                   { "storage",        Entities::storage       },
+                                                   { "interact",       Entities::interact      },
+                                                   { "analize",        Entities::analize       },
+                                                   { "configuration",  Entities::configuration }};
+
+    const QMap<QString, Whats> WhatsTable       = {{ "value",          Whats::value            },
+                                                   { "json",           Whats::json             }};
+
+    const QMap<QString, Options> OptionsTable   = {{ "byname",         Options::byname         },
+                                                   { "byid",           Options::byid           }};
+
+  }
 
   struct Params {
 
@@ -107,5 +146,5 @@ namespace restapi {
 }
 
 
-#endif // RESTAPI_PARAMS
+#endif // RESTAPI_DEFS
 

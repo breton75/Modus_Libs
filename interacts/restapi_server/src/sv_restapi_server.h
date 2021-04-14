@@ -26,7 +26,7 @@
 #include "../../../../Modus/global/global_defs.h"
 #include "../../../../Modus/global/configuration.h"
 
-#include "params.h"
+#include "restapi_server_defs.h"
 
 extern "C" {
 
@@ -118,40 +118,6 @@ namespace restapi {
                                                       {"pdf",  "application/pdf"},
                                                       {"json", "application/json"}
                                                      };
-
-  enum RestGetFields {
-    entity,
-    action,
-    param
-  };
-
-
-  enum RestGetActions {
-    value,
-    definition
-  };
-
-  enum RestGetParams {
-    byname,
-    byid
-  };
-
-  const QMap<QString, RestGetFields> RestGetFieldsMap =     {{"entity",         RestGetFields::entity         },
-                                                             {"action",         RestGetFields::action         },
-                                                             {"param",          RestGetFields::param          }};
-
-  const QMap<QString, RestGetEntities> RestGetEntitiesMap = {{"signal",         RestGetEntities::signal        },
-                                                             {"device",         RestGetEntities::device        },
-                                                             {"storage",        RestGetEntities::storage       },
-                                                             {"analize",        RestGetEntities::analize       },
-                                                             {"configuration",  RestGetEntities::configuration }};
-
-  const QMap<QString, RestGetActions> RestGetActionsMap   = {{"value",          RestGetActions::value          },
-                                                             {"definition",     RestGetActions::definition     }};
-
-  const QMap<QString, RestGetParams> RestGetParamsMap     = {{"byname",         RestGetParams::byname          },
-                                                             {"byid",           RestGetParams::byid            }};
-
   class SvRestAPI;
 
 }
@@ -188,6 +154,9 @@ private:
   QByteArray reply_http_get_params(const HttpRequest &request);
   QByteArray reply_http_post(const HttpRequest &request);
   QByteArray reply_ws_get(const HttpRequest &request);
+
+  QByteArray getEntityData(const QString& entity, const QString& matter, const QString& option, const QString& list, const char separator = ',');
+
 
   QString processEntitySignal(QStringList& get_params);
   QString processEntityDevice(QStringList& get_params);

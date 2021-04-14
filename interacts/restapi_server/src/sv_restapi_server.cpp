@@ -329,18 +329,40 @@ QByteArray restapi::SvRestAPI::reply_http_get_params(const HttpRequest &request)
                                 .toUtf8());
   };
 
-  QStringList get_params = QString(request.params).split('&');
+  QStringList get_params = QString(request.params).split('&', QString::SplitBehavior::SkipEmptyParts);
 
   if(get_params.count() == 0)
     return getErr(404, QString("Неверный запрос"));
 
-  QString entity_param = QString(get_params.at(0));
+  QString entity = "";
+  QString what = "";
+  QString option = "";
+  QString list   = "";
 
-  if(entity_param.indexOf('=') < 1)
-    return getErr(404, QString("Неверный запрос"));
+  for(QString param: get_params) {
 
-  QString tag    = entity_param.left(entity_param.indexOf('='));
-  QString entity = entity_param.right(entity_param.length() - entity_param.indexOf('=') - 1);
+    if(entity_param.indexOf('=') < 1)
+      return getErr(404, QString("Неверный запрос"));
+
+    QString field = param.left(param.indexOf('='));
+    QString tag   = param.right(param.length() - param.indexOf('=') - 1);
+
+    if(field.toLower().trimmed() == "entity")
+      entity = tag;
+
+    else if(field.toLower().trimmed() == "what")
+      what = tag;
+
+    else if(field.toLower().trimmed() == "option")
+      option = tag;
+
+    else if(field.toLower().trimmed() == "list")
+      list = tag;
+
+  }
+
+/*  QString entity_param = QString(get_params.at(0));
+
 
   if(!RestGetFieldsMap.contains(tag))
     return getErr(404, QString("Неизвестный параметр запроса '%1'").arg(tag));
@@ -446,6 +468,7 @@ QByteArray restapi::SvRestAPI::reply_http_get_params(const HttpRequest &request)
 
     }
   }
+  */
 
   QByteArray http = QByteArray()
                     .append("HTTP/1.0 200 Ok\r\n")
@@ -454,7 +477,7 @@ QByteArray restapi::SvRestAPI::reply_http_get_params(const HttpRequest &request)
                     .append("Access-Control-Allow-Origin: *\r\n")
                     .append("Access-Control-Allow-Headers: *\r\n")
                     .append("Origin: file://\r\n\r\n")        //! обязательно два!
-                    .append("[").append(json).append("]\r\n");
+                    .append(getEntityData(entity, what, option, list)).append("\r\n");
 
 //  if(m_logger && m_logger->options().log_level >= sv::log::llDebug2)
 //    *m_logger << sv::log::llDebug2 << sv::log::mtDebug << QString(http) << sv::log::endl;
@@ -465,9 +488,160 @@ QByteArray restapi::SvRestAPI::reply_http_get_params(const HttpRequest &request)
 
 }
 
-
-QString processEntitySignal(QStringList& get_params)
+QByteArray restapi::SvRestAPI::getEntityData(const QString& entity, const QString& what, const QString& option, const QString& list, const char separator)
 {
+  QByteArray b;
+
+  switch (restapi::ewo::EntitiesTable.value(entity, restapi::ewo::Entities::unknown)) {
+
+    case restapi::ewo::Entities::signal:
+
+      b = getSignalsData(what, option, list, separator);
+
+      break;
+
+    case restapi::ewo::configuration:
+
+      b = getConfigurationData(what, option, list, separator);
+
+      break;
+
+    default:
+      break;
+
+  }
+
+}
+
+QByteArray getSignalsData(const QString& what, const QString& option, const QString& list, const char separator = ',')
+{
+  switch (restapi::ewo::WhatsTable.value(what, restapi::ewo::Whats::unknown)) {
+
+    case restapi::ewo::Whats::value:
+
+      return getSignalsValues(option, list, separator);
+
+      break;
+
+    case restapi::ewo::Whats::json:
+
+      break;
+
+    default:
+      break;
+
+  }
+
+  return b;
+
+}
+
+QByteArray getSignalsValues(const QString& option, const QString& list, const char separator = ',')
+{
+  auto var2str = [](QVariant value) -> QString {
+
+    QString result = "\"null\"";
+
+    if(value.isValid() && !value.isNull())
+    {
+      switch (value.type()) {
+
+        case QVariant::Int:
+
+          result = QString::number(value.toInt());
+          break;
+
+        case QVariant::Double:
+
+          result = QString::number(value.toDouble());
+          break;
+
+        default:
+          result = QString("\"Неизвестный тип сигнала: %1\"").arg(value.typeName());
+
+      }
+    }
+
+    return result;
+
+  };
+
+  QByteArray values;
+  QByteArray errors;
+
+  values.append('{')
+        .append("\"values\":[");
+  errors.append("\"errors\":[");
+
+  switch (restapi::ewo::OptionsTable.value(option, restapi::ewo::Options::unknown)) {
+
+    case restapi::ewo::Options::byid:
+    {
+      QList<QString> ids = list.split(QChar(separator), QString::SkipEmptyParts).;
+
+      if(ids.isEmpty())
+        errors.append("{\"value\": \"Неверный запрос значений сигналов. Список идентификаторов (list) пуст.\"},");
+
+      bool ok;
+      for(QString id: ids) {
+
+        int iid = id.toInt(&ok);
+
+        if(ok) {
+
+          modus::SvSignal* signal = m_signals.entity(iid);
+
+          if(signal)
+            values.append(QString("{\"id\":%1,\"value\":%2},").arg(id).arg(var2str(signal->value())));
+
+          else
+            errors.append(QString("{\"value\":\"Сигнал с id '%1' не найден\"},").arg(id));
+
+        }
+        else
+          errors.append(QString("{\"value\":\"Неверный id сигнала: '%1'\"},").arg(id));
+
+      }
+
+      break;
+    }
+
+    case emo::Options::byname:
+    {
+
+      QList<QString> names = list.split(QChar(separator), QString::SkipEmptyParts).;
+
+      if(names.isEmpty())
+        errors.append("{\"value\": \"Неверный запрос значений сигналов. Список имен сигналов (list) пуст.\"}");
+
+      for(QString name: names) {
+
+        modus::SvSignal* signal = m_signals.entity(name);
+
+        if(signal)
+          values.append(QString("{\"name\":%1,\"value\":%2},").arg(id).arg(var2str(signal->value())));
+
+        else
+          errors.append(QString("{\"value\":\"Сигнал с именем '%1' не найден\"},").arg(name));
+
+
+      }
+
+      break;
+    }
+
+    default:
+      errors.append(QString("{\"value\":\"Неверный запрос. Неизвестная опция '%1'\"},").arg(option));
+      break;
+    }
+
+  if(values.endsWith(',')) values.chop(1);
+  if(errors.endsWith(',')) errors.chop(1);
+
+  errors.append(']');
+  values.append(']').append(',').append(errors).append('}');
+
+  return values;
 
 }
 
