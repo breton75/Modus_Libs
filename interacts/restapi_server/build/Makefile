@@ -49,11 +49,13 @@ OBJECTS_DIR   = ./
 ####### Files
 
 SOURCES       = ../src/sv_restapi_server.cpp \
-		../../../../Modus/global/signal/sv_signal.cpp moc_sv_restapi_server.cpp \
+		../../../../Modus/global/signal/sv_signal.cpp \
+		../src/http_get_with_params.cpp moc_sv_restapi_server.cpp \
 		moc_sv_abstract_interact.cpp \
 		moc_sv_signal.cpp
 OBJECTS       = sv_restapi_server.o \
 		sv_signal.o \
+		http_get_with_params.o \
 		moc_sv_restapi_server.o \
 		moc_sv_abstract_interact.o \
 		moc_sv_signal.o
@@ -192,10 +194,12 @@ DIST          = /opt/Qt5.5.1/5.5/gcc_64/mkspecs/features/spec_pre.prf \
 		/opt/Qt5.5.1/5.5/gcc_64/mkspecs/features/lex.prf \
 		../src/restapi_server.pro ../src/sv_restapi_server.h \
 		../src/restapi_server_global.h \
-		../src/params.h \
 		../../../../Modus/global/interact/sv_abstract_interact.h \
-		../../../../Modus/global/signal/sv_signal.h ../src/sv_restapi_server.cpp \
-		../../../../Modus/global/signal/sv_signal.cpp
+		../../../../Modus/global/signal/sv_signal.h \
+		../src/http_get_with_params.h \
+		../src/restapi_server_defs.h ../src/sv_restapi_server.cpp \
+		../../../../Modus/global/signal/sv_signal.cpp \
+		../src/http_get_with_params.cpp
 QMAKE_TARGET  = restapi_server
 DESTDIR       = /home/user/Modus/lib/interacts/#avoid trailing-slash linebreak
 TARGET        = librestapi_server.so
@@ -519,8 +523,8 @@ dist: distdir FORCE
 distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
-	$(COPY_FILE) --parents ../src/sv_restapi_server.h ../src/restapi_server_global.h ../src/params.h ../../../../Modus/global/interact/sv_abstract_interact.h ../../../../Modus/global/signal/sv_signal.h $(DISTDIR)/
-	$(COPY_FILE) --parents ../src/sv_restapi_server.cpp ../../../../Modus/global/signal/sv_signal.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents ../src/sv_restapi_server.h ../src/restapi_server_global.h ../../../../Modus/global/interact/sv_abstract_interact.h ../../../../Modus/global/signal/sv_signal.h ../src/http_get_with_params.h ../src/restapi_server_defs.h $(DISTDIR)/
+	$(COPY_FILE) --parents ../src/sv_restapi_server.cpp ../../../../Modus/global/signal/sv_signal.cpp ../src/http_get_with_params.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -647,6 +651,8 @@ moc_sv_restapi_server.cpp: /opt/Qt5.5.1/5.5/gcc_64/include/QtNetwork/QTcpServer 
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qrunnable.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDataStream \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qdatastream.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QCryptographicHash \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qcryptographichash.h \
 		../src/restapi_server_global.h \
 		../../../../Modus/global/interact/sv_abstract_interact.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QtCore \
@@ -741,7 +747,6 @@ moc_sv_restapi_server.cpp: /opt/Qt5.5.1/5.5/gcc_64/include/QtNetwork/QTcpServer 
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qcollator.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qcommandlineoption.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qcommandlineparser.h \
-		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qcryptographichash.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qelapsedtimer.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qline.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qlinkedlist.h \
@@ -770,10 +775,11 @@ moc_sv_restapi_server.cpp: /opt/Qt5.5.1/5.5/gcc_64/include/QtNetwork/QTcpServer 
 		../../../../svlib/sv_abstract_logger.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDate \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QTime \
+		../../../../Modus/global/configuration.h \
 		../../../../Modus/global/signal/sv_signal.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QJsonArray \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QMutex \
-		../src/params.h \
+		../src/restapi_server_defs.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QtGlobal \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QCommandLineParser \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtNetwork/QUdpSocket \
@@ -981,10 +987,11 @@ moc_sv_abstract_interact.cpp: /opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QtCore \
 		../../../../svlib/sv_abstract_logger.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDate \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QTime \
+		../../../../Modus/global/configuration.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QFile \
 		../../../../Modus/global/signal/sv_signal.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDateTime \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QJsonArray \
-		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QFile \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QMutex \
 		../../../../Modus/global/interact/sv_abstract_interact.h
 	/opt/Qt5.5.1/5.5/gcc_64/bin/moc $(DEFINES) -I/opt/Qt5.5.1/5.5/gcc_64/mkspecs/linux-g++ -I/home/user/c++/Modus_Libs/interacts/restapi_server/src -I/opt/Qt5.5.1/5.5/gcc_64/include -I/opt/Qt5.5.1/5.5/gcc_64/include/QtNetwork -I/opt/Qt5.5.1/5.5/gcc_64/include/QtCore -I. ../../../../Modus/global/interact/sv_abstract_interact.h -o moc_sv_abstract_interact.cpp
@@ -1099,6 +1106,9 @@ sv_restapi_server.o: ../src/sv_restapi_server.cpp
 
 sv_signal.o: ../../../../Modus/global/signal/sv_signal.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o sv_signal.o ../../../../Modus/global/signal/sv_signal.cpp
+
+http_get_with_params.o: ../src/http_get_with_params.cpp ../src/http_get_with_params.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o http_get_with_params.o ../src/http_get_with_params.cpp
 
 moc_sv_restapi_server.o: moc_sv_restapi_server.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_sv_restapi_server.o moc_sv_restapi_server.cpp

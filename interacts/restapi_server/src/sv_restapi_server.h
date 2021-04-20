@@ -130,7 +130,7 @@ public:
   explicit SvRestAPI();
   ~SvRestAPI();
 
-  bool configure(modus::InteractConfig* config) override;
+  bool configure(modus::InteractConfig* config, modus::Configuration* configuration) override;
 
   void start() override;
   void stop() override;
@@ -157,12 +157,12 @@ private:
 
   QByteArray getEntityData(const QString& entity, const QString& matter, const QString& option, const QString& list, const char separator = ',');
 
+  QByteArray getSignalsData(const QString& what, const QString& option, const QString& list, const char separator = ',');
+  QByteArray getSignalsValues(const QString& option, const QString& list, const char separator);
 
-  QString processEntitySignal(QStringList& get_params);
-  QString processEntityDevice(QStringList& get_params);
-  QString processEntityStorage(QStringList& get_params);
-  QString processEntityAnalize(QStringList& get_params);
-  QString processEntityConfiguration(QStringList& get_params);
+  QByteArray getConfigurationData(const QString& what, const QString& option, const QString& list, const char separator = ',');
+
+  QByteArray getHttpError(int errorCode, QString errorString);
 
 private slots:
   void newConnection();

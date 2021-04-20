@@ -27,13 +27,13 @@
 #define P_HTML_PATH   "html_path"
 
 
-/** структура для хранения параметров udp **/
+/** структура для хранения параметров **/
 namespace restapi {
 
   namespace ewo {
 
     enum Entities {
-      unknown,
+      noentity = -1,
       signal,
       device,
       storage,
@@ -43,13 +43,13 @@ namespace restapi {
     };
 
     enum Whats {
-      unknown,
+      nowhat,
       value,
       json
     };
 
     enum Options {
-      unknown,
+      nooption,
       byname,
       byid
     };
