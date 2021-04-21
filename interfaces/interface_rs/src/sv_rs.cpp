@@ -85,8 +85,10 @@ void SvRS::write(modus::BUFF* buffer)
 
   if(written) {
     emit message(QString("<< %1").arg(QString(QByteArray((const char*)&buffer->data[0], buffer->offset).toHex())));
-    buffer->reset();
   }
+
+  buffer->reset();
+
 }
 
 /** ********** EXPORT ************ **/

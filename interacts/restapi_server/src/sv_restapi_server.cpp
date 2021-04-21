@@ -37,6 +37,9 @@ bool restapi::SvRestAPI::configure(modus::InteractConfig* config, modus::Configu
 
     };
 
+    // раскидываем сигналы
+    for()
+
 //    connect(m_web_server, &QTcpServer::newConnection, this, &restapi::SvRestAPI::newConnection);
 
     return true;
@@ -104,7 +107,8 @@ void restapi::SvRestAPI::processHttpRequest()
     return;
 
   for(QByteArray line: rawreq)
-    emit message(QString(line.trimmed()), sv::log::llDebug2, sv::log::mtDebug);
+    qDebug() << line;
+//    emit message(QString(line.trimmed()), sv::log::llDebug2, sv::log::mtDebug);
 
   HttpRequest request;
 
@@ -762,7 +766,7 @@ QByteArray restapi::SvRestAPI::reply_http_post(const HttpRequest &request)
                     .append("Access-Control-Allow-Origin: *\r\n")
                     .append("Access-Control-Allow-Headers: *\r\n")
                     .append("Origin: file://\r\n\r\n")        //! обязательно два!
-                    .append(json);
+                    .append(json).append("\r\n");
 
 //  if(m_logger && m_logger->options().log_level >= sv::log::llDebug2)
 //    *m_logger << sv::log::llDebug2 << sv::log::mtDebug << QString(http) << sv::log::endl;
