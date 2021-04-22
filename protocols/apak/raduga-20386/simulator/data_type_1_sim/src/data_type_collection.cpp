@@ -48,19 +48,21 @@ void raduga::DataTypeCollection::updateOutput(const modus::BUFF* data)
       case raduga::TIP::Discrete:
       case raduga::TIP::Ustavka:
       {
-        quint8 v = quint8(data->data[s.params.byte]) & ~(1 << s.params.offset);
+        quint8 v = quint8(data->data[data->offset + s.params.byte]) & ~(1 << s.params.offset);
   //      v &= ~(((1 << s.params.len) - 1) << s.params.offset); // если больше 1го бита
 
         if(s.signal->value().isValid() && !s.signal->value().isNull()) {
 
           quint8 signal_value = s.signal->value().toUInt(&ok);
 
-          if(ok && signal_value == 1)
-            v &= (signal_value << s.params.offset);
+          if(ok) // && signal_value == 1)
+            v |= (signal_value << s.params.offset);
 
         }
+        data->data[data->offset + s.params.byte] = v;
 
-        data->data[s.params.byte] = v;
+//        if(s.params.byte == 236)
+//          qDebug() << int(data->data[offset + s.params.byte]) << v << offset << s.params.byte;
 
         break;
       }
@@ -72,7 +74,7 @@ void raduga::DataTypeCollection::updateOutput(const modus::BUFF* data)
         if(s.signal->value().isValid() && !s.signal->value().isNull())
           signal_value = s.signal->value().toInt();
 
-        memcpy(&data->data[s.params.byte], &signal_value, sizeof(qint16));
+        memcpy(&data->data[data->offset + s.params.byte], &signal_value, sizeof(qint16));
 
         break;
       }
@@ -84,7 +86,7 @@ void raduga::DataTypeCollection::updateOutput(const modus::BUFF* data)
         if(s.signal->value().isValid() && !s.signal->value().isNull())
           signal_value = s.signal->value().toInt();
 
-        memcpy(&data->data[s.params.byte], &signal_value, sizeof(qint32));
+        memcpy(&data->data[data->offset + s.params.byte], &signal_value, sizeof(qint32));
 
         break;
       }
@@ -97,7 +99,7 @@ void raduga::DataTypeCollection::updateOutput(const modus::BUFF* data)
         if(s.signal->value().isValid() && !s.signal->value().isNull())
           signal_value = s.signal->value().toFloat();
 
-        memcpy(&data->data[s.params.byte], &signal_value, sizeof(float));
+        memcpy(&data->data[data->offset + s.params.byte], &signal_value, sizeof(float));
 
         break;
       }
@@ -105,5 +107,7 @@ void raduga::DataTypeCollection::updateOutput(const modus::BUFF* data)
       default:
         break;
     }
+
+
   }
 }

@@ -236,6 +236,7 @@ void raduga::SvRaduga::confirmation()
 
 void raduga::SvRaduga::putout()
 {
+//  qDebug() << "putout" << m_params.packid;
   p_io_buffer->output->offset = 0;
 
   memcpy(&p_io_buffer->output->data[p_io_buffer->output->offset], &SYSNAME, SYSNAME_LEN);
@@ -258,8 +259,8 @@ void raduga::SvRaduga::putout()
     case 110: {
 
       output_signal_collections.value(TYPE_1)->updateOutput(p_io_buffer->output);
+//      qDebug() << "putout" << p_io_buffer->output->offset << int(p_io_buffer->output->data[256]);
       p_io_buffer->output->offset += 1152;
-
       break;
     }
 

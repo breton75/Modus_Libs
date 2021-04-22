@@ -37,11 +37,6 @@ bool restapi::SvRestAPI::configure(modus::InteractConfig* config, modus::Configu
 
     };
 
-    // раскидываем сигналы
-    for()
-
-//    connect(m_web_server, &QTcpServer::newConnection, this, &restapi::SvRestAPI::newConnection);
-
     return true;
 
   }
@@ -51,6 +46,18 @@ bool restapi::SvRestAPI::configure(modus::InteractConfig* config, modus::Configu
 
     return false;
   }
+}
+
+bool restapi::SvRestAPI::bindSignal(modus::SvSignal* signal)
+{
+  if(!modus::SvAbstractInteract::bindSignal(signal))
+    return false;
+
+  if(!m_signals_by_id.contains(signal->config()->id)) m_signals_by_id.insert(signal->config()->id, signal);
+  if(!m_signals_by_name.contains(signal->config()->name)) m_signals_by_name.insert(signal->config()->name, signal);
+
+  return true;
+
 }
 
 void restapi::SvRestAPI::start()
@@ -655,12 +662,12 @@ QByteArray restapi::SvRestAPI::reply_http_post(const HttpRequest &request)
 
         if(!m_signals_by_id.contains(id)) {
 
-          errors.append(QString("{\"value\":\"Сигнал с id %1 в конфигурации не найден\"},").arg(id));
+          errors.append(QString("{\"value\":\"get Сигнал с id %1 в конфигурации не найден\"},").arg(id));
           continue;
         }
 
-        if(m_signals_by_id.value(id)->config()->usecase != modus::UseCase::OUT ||
-           m_signals_by_id.value(id)->config()->usecase != modus::UseCase::VAR) {
+        if(m_signals_by_id.value(id)->config()->usecase != modus::OUT &&
+           m_signals_by_id.value(id)->config()->usecase != modus::VAR) {
 
           errors.append(QString("{\"value\":\"Нельзя изменить значение сигнала с id %1. "
                                 "Могут быть изменены только сигналы с вариантом использования OUT и VAR\"},").arg(id));
@@ -668,6 +675,7 @@ QByteArray restapi::SvRestAPI::reply_http_post(const HttpRequest &request)
         }
 
         m_signals_by_id.value(id)->setValue(o.value("value").toVariant());
+        qDebug() << m_signals_by_id.value(id)->value().toInt() << o.value("value").toVariant();
 
       }
       else if(o.contains("name")) {

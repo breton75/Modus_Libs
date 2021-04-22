@@ -70,6 +70,7 @@ void SvUdp::run()
 
     // отправляем управляющие данные, если они есть
     p_io_buffer->output->mutex.lock();
+//    qDebug() << "write" << int(p_io_buffer->output->data[256]);
     write(p_io_buffer->output);
     p_io_buffer->output->mutex.unlock();
 

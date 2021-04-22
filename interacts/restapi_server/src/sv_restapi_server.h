@@ -135,6 +135,8 @@ public:
   void start() override;
   void stop() override;
 
+  bool bindSignal(modus::SvSignal* signal) override;
+
   const QMap<int, modus::SvSignal*>*      signalsById()   const { return &m_signals_by_id;   }
   const QHash<QString, modus::SvSignal*>* signalsByName() const { return &m_signals_by_name; }
 
