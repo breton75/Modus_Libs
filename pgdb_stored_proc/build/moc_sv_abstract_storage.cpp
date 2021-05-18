@@ -6,7 +6,7 @@
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
-#include "../../../Modus/global/storage/sv_abstract_storage.h"
+#include "../../../../share/given_src/Modus/global/sv_abstract_storage.h"
 #include <QtCore/qbytearray.h>
 #include <QtCore/qmetatype.h>
 #if !defined(Q_MOC_OUTPUT_REVISION)
@@ -18,127 +18,140 @@
 #endif
 
 QT_BEGIN_MOC_NAMESPACE
-struct qt_meta_stringdata_modus__SvAbstractStorage_t {
-    QByteArrayData data[7];
-    char stringdata0[54];
+struct qt_meta_stringdata_as__SvAbstractStorage_t {
+    QByteArrayData data[1];
+    char stringdata0[22];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
-    qptrdiff(offsetof(qt_meta_stringdata_modus__SvAbstractStorage_t, stringdata0) + ofs \
+    qptrdiff(offsetof(qt_meta_stringdata_as__SvAbstractStorage_t, stringdata0) + ofs \
         - idx * sizeof(QByteArrayData)) \
     )
-static const qt_meta_stringdata_modus__SvAbstractStorage_t qt_meta_stringdata_modus__SvAbstractStorage = {
+static const qt_meta_stringdata_as__SvAbstractStorage_t qt_meta_stringdata_as__SvAbstractStorage = {
     {
-QT_MOC_LITERAL(0, 0, 24), // "modus::SvAbstractStorage"
-QT_MOC_LITERAL(1, 25, 7), // "message"
-QT_MOC_LITERAL(2, 33, 0), // ""
-QT_MOC_LITERAL(3, 34, 3), // "msg"
-QT_MOC_LITERAL(4, 38, 5), // "level"
-QT_MOC_LITERAL(5, 44, 4), // "type"
-QT_MOC_LITERAL(6, 49, 4) // "stop"
+QT_MOC_LITERAL(0, 0, 21) // "as::SvAbstractStorage"
 
     },
-    "modus::SvAbstractStorage\0message\0\0msg\0"
-    "level\0type\0stop"
+    "as::SvAbstractStorage"
 };
 #undef QT_MOC_LITERAL
 
-static const uint qt_meta_data_modus__SvAbstractStorage[] = {
+static const uint qt_meta_data_as__SvAbstractStorage[] = {
 
  // content:
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-       4,   14, // methods
+       0,    0, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
        0,       // flags
-       3,       // signalCount
-
- // signals: name, argc, parameters, tag, flags
-       1,    3,   34,    2, 0x06 /* Public */,
-       1,    2,   41,    2, 0x26 /* Public | MethodCloned */,
-       1,    1,   46,    2, 0x26 /* Public | MethodCloned */,
-
- // slots: name, argc, parameters, tag, flags
-       6,    0,   49,    2, 0x0a /* Public */,
-
- // signals: parameters
-    QMetaType::Void, QMetaType::QString, QMetaType::Int, QMetaType::Int,    3,    4,    5,
-    QMetaType::Void, QMetaType::QString, QMetaType::Int,    3,    4,
-    QMetaType::Void, QMetaType::QString,    3,
-
- // slots: parameters
-    QMetaType::Void,
+       0,       // signalCount
 
        0        // eod
 };
 
-void modus::SvAbstractStorage::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+void as::SvAbstractStorage::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
-    if (_c == QMetaObject::InvokeMetaMethod) {
-        SvAbstractStorage *_t = static_cast<SvAbstractStorage *>(_o);
-        Q_UNUSED(_t)
-        switch (_id) {
-        case 0: _t->message((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2])),(*reinterpret_cast< int(*)>(_a[3]))); break;
-        case 1: _t->message((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
-        case 2: _t->message((*reinterpret_cast< const QString(*)>(_a[1]))); break;
-        case 3: _t->stop(); break;
-        default: ;
-        }
-    } else if (_c == QMetaObject::IndexOfMethod) {
-        int *result = reinterpret_cast<int *>(_a[0]);
-        void **func = reinterpret_cast<void **>(_a[1]);
-        {
-            typedef void (SvAbstractStorage::*_t)(const QString , int , int );
-            if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&SvAbstractStorage::message)) {
-                *result = 0;
-            }
-        }
-    }
+    Q_UNUSED(_o);
+    Q_UNUSED(_id);
+    Q_UNUSED(_c);
+    Q_UNUSED(_a);
 }
 
-const QMetaObject modus::SvAbstractStorage::staticMetaObject = {
-    { &QThread::staticMetaObject, qt_meta_stringdata_modus__SvAbstractStorage.data,
-      qt_meta_data_modus__SvAbstractStorage,  qt_static_metacall, Q_NULLPTR, Q_NULLPTR}
+const QMetaObject as::SvAbstractStorage::staticMetaObject = {
+    { &QObject::staticMetaObject, qt_meta_stringdata_as__SvAbstractStorage.data,
+      qt_meta_data_as__SvAbstractStorage,  qt_static_metacall, Q_NULLPTR, Q_NULLPTR}
 };
 
 
-const QMetaObject *modus::SvAbstractStorage::metaObject() const
+const QMetaObject *as::SvAbstractStorage::metaObject() const
 {
     return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
-void *modus::SvAbstractStorage::qt_metacast(const char *_clname)
+void *as::SvAbstractStorage::qt_metacast(const char *_clname)
 {
     if (!_clname) return Q_NULLPTR;
-    if (!strcmp(_clname, qt_meta_stringdata_modus__SvAbstractStorage.stringdata0))
+    if (!strcmp(_clname, qt_meta_stringdata_as__SvAbstractStorage.stringdata0))
         return static_cast<void*>(const_cast< SvAbstractStorage*>(this));
+    return QObject::qt_metacast(_clname);
+}
+
+int as::SvAbstractStorage::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QObject::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    return _id;
+}
+struct qt_meta_stringdata_as__SvAbstractStorageThread_t {
+    QByteArrayData data[1];
+    char stringdata0[28];
+};
+#define QT_MOC_LITERAL(idx, ofs, len) \
+    Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
+    qptrdiff(offsetof(qt_meta_stringdata_as__SvAbstractStorageThread_t, stringdata0) + ofs \
+        - idx * sizeof(QByteArrayData)) \
+    )
+static const qt_meta_stringdata_as__SvAbstractStorageThread_t qt_meta_stringdata_as__SvAbstractStorageThread = {
+    {
+QT_MOC_LITERAL(0, 0, 27) // "as::SvAbstractStorageThread"
+
+    },
+    "as::SvAbstractStorageThread"
+};
+#undef QT_MOC_LITERAL
+
+static const uint qt_meta_data_as__SvAbstractStorageThread[] = {
+
+ // content:
+       7,       // revision
+       0,       // classname
+       0,    0, // classinfo
+       0,    0, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+       0        // eod
+};
+
+void as::SvAbstractStorageThread::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+{
+    Q_UNUSED(_o);
+    Q_UNUSED(_id);
+    Q_UNUSED(_c);
+    Q_UNUSED(_a);
+}
+
+const QMetaObject as::SvAbstractStorageThread::staticMetaObject = {
+    { &QThread::staticMetaObject, qt_meta_stringdata_as__SvAbstractStorageThread.data,
+      qt_meta_data_as__SvAbstractStorageThread,  qt_static_metacall, Q_NULLPTR, Q_NULLPTR}
+};
+
+
+const QMetaObject *as::SvAbstractStorageThread::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
+}
+
+void *as::SvAbstractStorageThread::qt_metacast(const char *_clname)
+{
+    if (!_clname) return Q_NULLPTR;
+    if (!strcmp(_clname, qt_meta_stringdata_as__SvAbstractStorageThread.stringdata0))
+        return static_cast<void*>(const_cast< SvAbstractStorageThread*>(this));
     return QThread::qt_metacast(_clname);
 }
 
-int modus::SvAbstractStorage::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+int as::SvAbstractStorageThread::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = QThread::qt_metacall(_c, _id, _a);
     if (_id < 0)
         return _id;
-    if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 4)
-            qt_static_metacall(this, _c, _id, _a);
-        _id -= 4;
-    } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 4)
-            *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 4;
-    }
     return _id;
-}
-
-// SIGNAL 0
-void modus::SvAbstractStorage::message(const QString _t1, int _t2, int _t3)
-{
-    void *_a[] = { Q_NULLPTR, const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)), const_cast<void*>(reinterpret_cast<const void*>(&_t3)) };
-    QMetaObject::activate(this, &staticMetaObject, 0, _a);
 }
 QT_END_MOC_NAMESPACE
