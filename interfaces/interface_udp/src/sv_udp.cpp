@@ -49,9 +49,15 @@ void SvUdp::run()
 
         p_io_buffer->input->mutex.lock();
         /* ... the rest of the datagram will be lost ... */
-        p_io_buffer->input->offset += m_socket->readDatagram((char*)(&p_io_buffer->input->data[p_io_buffer->input->offset]), p_config->bufsize - p_io_buffer->input->offset);
+        qint64 readed = m_socket->readDatagram((char*)(&p_io_buffer->input->data[p_io_buffer->input->offset]), p_config->bufsize - p_io_buffer->input->offset);
+
+        emit message(QString(">> %1").arg(QString(QByteArray((const char*)&p_io_buffer->input->data[p_io_buffer->input->offset], readed).toHex())), sv::log::llDebug, sv::log::mtReceive);
+
+        p_io_buffer->input->offset += readed;
+
         p_io_buffer->input->mutex.unlock();
 
+        // переключаемся на другой поток
         QThread::yieldCurrentThread();
 
         p_io_buffer->confirm->mutex.lock();
@@ -87,7 +93,7 @@ void SvUdp::write(modus::BUFF* buffer)
   m_socket->flush();
 
   if(written)
-    emit message(QString("<< %1").arg(QString(QByteArray((const char*)&buffer->data[0], buffer->offset).toHex())), sv::log::llDebug, sv::log::mt);
+    emit message(QString("<< %1").arg(QString(QByteArray((const char*)&buffer->data[0], buffer->offset).toHex())), sv::log::llDebug, sv::log::mtSend);
 
   buffer->reset();
 

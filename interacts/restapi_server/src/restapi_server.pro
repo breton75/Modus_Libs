@@ -23,7 +23,8 @@ HEADERS += sv_restapi_server.h \
     ../../../../Modus/global/interact/sv_abstract_interact.h \
     ../../../../Modus/global/signal/sv_signal.h \
     http_get_with_params.h \
-    restapi_server_defs.h
+    restapi_server_defs.h \
+    ../../../../svlib/SvException/svexception.h
 
 unix {
     target.path = /usr/lib

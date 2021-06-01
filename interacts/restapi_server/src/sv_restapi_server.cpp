@@ -105,7 +105,11 @@ void restapi::SvRestAPI::processHttpRequest()
 //    QTextStream serialized(client);
 //    serialized.readAll();
 
-  QList<QByteArray> rawreq = client->readAll().split('\n');
+  QByteArray req = client->readAll();
+  emit message(QString(req), sv::log::llDebug, sv::log::mtRequest);
+
+
+  QList<QByteArray> rawreq = req.split('\n');
   if(!rawreq.count())
     return;
 
@@ -113,8 +117,9 @@ void restapi::SvRestAPI::processHttpRequest()
   if(rawheader.count() < 3)
     return;
 
-  for(QByteArray line: rawreq)
-    qDebug() << line;
+
+//  for(QByteArray line: rawreq)
+//    qDebug() << line;
 //    emit message(QString(line.trimmed()), sv::log::llDebug2, sv::log::mtDebug);
 
   HttpRequest request;
@@ -625,7 +630,7 @@ QByteArray restapi::SvRestAPI::getConfigurationData(const QString& what, const Q
 
 QByteArray restapi::SvRestAPI::reply_http_post(const HttpRequest &request)
 {
-  message(QString(request.data));
+//  message(QString(request.data));
 
   QByteArray json   = QByteArray();
   json.append('{');
@@ -642,9 +647,9 @@ QByteArray restapi::SvRestAPI::reply_http_post(const HttpRequest &request)
   }
 
   QJsonObject jo = jd.object();
-  if(jo.contains("signals") && jo.value("signals").isArray()) {
+  if(jo.contains(P_SIGNALS) && jo.value(P_SIGNALS).isArray()) {
 
-    QJsonArray ja = jo.value("signals").toArray();
+    QJsonArray ja = jo.value(P_SIGNALS).toArray();
 
     for(QJsonValue jv: ja) {
 
@@ -653,110 +658,67 @@ QByteArray restapi::SvRestAPI::reply_http_post(const HttpRequest &request)
 
       QJsonObject o = jv.toObject();
 
-      if(!o.contains("value"))
+      if(!o.contains(P_VALUE))
         continue;
 
-      if(o.contains("id")) {
+      if(o.contains(P_ID)) {
 
-        int id = o.value("id").toInt(-1);
+        int id = o.value(P_ID).toInt(-1);
 
         if(!m_signals_by_id.contains(id)) {
 
-          errors.append(QString("{\"value\":\"get Сигнал с id %1 в конфигурации не найден\"},").arg(id));
+          errors.append(QString(M_SIGNAL_ID_NOT_FOUND).arg(id));
+
+          emit message(QString(M_SIGNAL_ID_NOT_FOUND).arg(id), sv::log::llDebug, sv::log::mtError);
+
           continue;
         }
 
         if(m_signals_by_id.value(id)->config()->usecase != modus::OUT &&
            m_signals_by_id.value(id)->config()->usecase != modus::VAR) {
 
-          errors.append(QString("{\"value\":\"Нельзя изменить значение сигнала с id %1. "
-                                "Могут быть изменены только сигналы с вариантом использования OUT и VAR\"},").arg(id));
+          errors.append(QString(M_SIGNAL_NOT_SUITABLE_TYPE).arg(id));
+          emit message(QString(M_SIGNAL_NOT_SUITABLE_TYPE).arg(id), sv::log::llDebug, sv::log::mtError);
+
           continue;
         }
 
-        m_signals_by_id.value(id)->setValue(o.value("value").toVariant());
-        qDebug() << m_signals_by_id.value(id)->value().toInt() << o.value("value").toVariant();
+        emit message(jv.toString(), sv::log::llDebug, sv::log::mtParsed);
+
+        m_signals_by_id.value(id)->setValue(o.value(P_VALUE).toVariant());
+//        qDebug() << m_signals_by_id.value(id)->value().toInt() << o.value("value").toVariant();
 
       }
-      else if(o.contains("name")) {
+      else if(o.contains(P_NAME)) {
 
-          QString name = o.value("name").toString("");
+          QString name = o.value(P_NAME).toString("");
 
           if(!m_signals_by_name.contains(name)) {
 
-            errors.append(QString("{\"value\":\"Сигнал '%1' в конфигурации не найден\"},").arg(name));
+            errors.append(QString(M_SIGNAL_NAME_NOT_FOUND).arg(name));
+
+            emit message(QString(M_SIGNAL_NAME_NOT_FOUND).arg(name), sv::log::llDebug, sv::log::mtError);
+
             continue;
           }
 
           if(m_signals_by_name.value(name)->config()->usecase != modus::UseCase::OUT ||
              m_signals_by_name.value(name)->config()->usecase != modus::UseCase::VAR) {
 
-            errors.append(QString("{\"value\":\"Нельзя изменить значение сигнала '%1'. "
-                                  "Могут быть изменены только сигналы с вариантом использования OUT и VAR\"},").arg(name));
+            errors.append(QString(M_SIGNAL_NOT_SUITABLE_TYPE).arg(name));
+            emit message(QString(M_SIGNAL_NOT_SUITABLE_TYPE).arg(name), sv::log::llDebug, sv::log::mtError);
+
             continue;
           }
 
-          m_signals_by_name.value(name)->setValue(o.value("value").toVariant());
+          emit message(jv.toString(), sv::log::llDebug, sv::log::mtParsed);
+
+          m_signals_by_name.value(name)->setValue(o.value(P_VALUE).toVariant());
 
         }
     }
   }
 
-  /*for(QString query: queries) {
-
-    if(query.indexOf('=') < 1)
-      continue;
-
-    QString query_field = query.left(query.indexOf('='));
-    QString query_data  = query.right(query.length() - query.indexOf('=') - 1);
-
-    if(r1.at(0) == "names")
-    {
-
-      QStringList names = QString(r1.at(1)).split(',');
-
-      for(QString name: names)
-      {
-        if(name.trimmed().isEmpty())
-          continue;
-
-        if(signalsByName()->contains(name))
-          json.append(QString("{\"name\":\"%1\",\"value\":\"%2\"},")
-                        .arg(name).arg(Var2Str(signalsByName()->value(name)->value())));
-
-      }
-
-
-      if(!json.isEmpty()) json.chop(1);
-
-
-    }
-
-    else if(r1.at(0) == "ids")
-    {
-      QStringList ids = QString(r1.at(1)).split(',');
-
-      for(QString curid: ids)
-      {
-        if(curid.trimmed().isEmpty())
-          continue;
-
-        bool ok;
-        int id = curid.toInt(&ok);
-
-        if(ok && signalsById()->contains(id))
-          json.append(QString("{\"id\":\"%1\",\"value\":\"%2\"},")
-                        .arg(id).arg(Var2Str(signalsById()->value(id)->value())));
-
-      }
-
-      if(!json.isEmpty()) json.chop(1);
-
-    }
-
-
-  }
-  */
   if(!errors.isEmpty()) {
 
     if(errors.endsWith(',')) errors.chop(1);

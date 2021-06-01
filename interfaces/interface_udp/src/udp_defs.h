@@ -11,7 +11,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-#include "../../../../Modus/global/misc/sv_exception.h"
+#include "../../../../svlib/SvException/svexception.h"
 #include "../../../../Modus/global/global_defs.h"
 
 #define P_UDP_IFC                   "ifc"

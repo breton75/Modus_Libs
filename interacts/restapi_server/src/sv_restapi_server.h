@@ -28,6 +28,11 @@
 
 #include "restapi_server_defs.h"
 
+#define M_SIGNAL_ID_NOT_FOUND       "{\"value\":\"get Сигнал с id %1 в конфигурации не найден\"},"
+#define M_SIGNAL_NAME_NOT_FOUND     "{\"value\":\"get Сигнал '%1' в конфигурации не найден\"},"
+#define M_SIGNAL_NOT_SUITABLE_TYPE  "{\"value\":\"Нельзя изменить значение сигнала с id %1. " \
+                                    "Могут быть изменены только сигналы с вариантом использования OUT и VAR\"},"
+
 extern "C" {
 
     INTERACT_SHARED_EXPORT modus::SvAbstractInteract* create();

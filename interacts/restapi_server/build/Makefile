@@ -197,7 +197,8 @@ DIST          = /opt/Qt5.5.1/5.5/gcc_64/mkspecs/features/spec_pre.prf \
 		../../../../Modus/global/interact/sv_abstract_interact.h \
 		../../../../Modus/global/signal/sv_signal.h \
 		../src/http_get_with_params.h \
-		../src/restapi_server_defs.h ../src/sv_restapi_server.cpp \
+		../src/restapi_server_defs.h \
+		../../../../svlib/SvException/svexception.h ../src/sv_restapi_server.cpp \
 		../../../../Modus/global/signal/sv_signal.cpp \
 		../src/http_get_with_params.cpp
 QMAKE_TARGET  = restapi_server
@@ -523,7 +524,7 @@ dist: distdir FORCE
 distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
-	$(COPY_FILE) --parents ../src/sv_restapi_server.h ../src/restapi_server_global.h ../../../../Modus/global/interact/sv_abstract_interact.h ../../../../Modus/global/signal/sv_signal.h ../src/http_get_with_params.h ../src/restapi_server_defs.h $(DISTDIR)/
+	$(COPY_FILE) --parents ../src/sv_restapi_server.h ../src/restapi_server_global.h ../../../../Modus/global/interact/sv_abstract_interact.h ../../../../Modus/global/signal/sv_signal.h ../src/http_get_with_params.h ../src/restapi_server_defs.h ../../../../svlib/SvException/svexception.h $(DISTDIR)/
 	$(COPY_FILE) --parents ../src/sv_restapi_server.cpp ../../../../Modus/global/signal/sv_signal.cpp ../src/http_get_with_params.cpp $(DISTDIR)/
 
 
@@ -769,23 +770,25 @@ moc_sv_restapi_server.cpp: /opt/Qt5.5.1/5.5/gcc_64/include/QtNetwork/QTcpServer 
 		../../../../Modus/global/interact/interact_config.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QJsonDocument \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QJsonObject \
-		../../../../Modus/global/misc/sv_exception.h \
+		../../../../svlib/SvException/1.1/sv_exception.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QException \
 		../../../../Modus/global/global_defs.h \
-		../../../../svlib/sv_abstract_logger.h \
-		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDate \
-		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QTime \
 		../../../../Modus/global/configuration.h \
 		../../../../Modus/global/signal/sv_signal.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QJsonArray \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QMutex \
+		../../../../svlib/SvException/svexception.h \
+		../../../../svlib/SvAbstractLogger/svabstractlogger.h \
+		../../../../svlib/SvAbstractLogger/1.2/sv_abstract_logger.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDate \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QTime \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QJsonParseError \
 		../src/restapi_server_defs.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QtGlobal \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QCommandLineParser \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtNetwork/QUdpSocket \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtNetwork/qudpsocket.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtNetwork/QHostAddress \
-		../../../../svlib/sv_exception.h \
 		../src/sv_restapi_server.h
 	/opt/Qt5.5.1/5.5/gcc_64/bin/moc $(DEFINES) -I/opt/Qt5.5.1/5.5/gcc_64/mkspecs/linux-g++ -I/home/user/c++/Modus_Libs/interacts/restapi_server/src -I/opt/Qt5.5.1/5.5/gcc_64/include -I/opt/Qt5.5.1/5.5/gcc_64/include/QtNetwork -I/opt/Qt5.5.1/5.5/gcc_64/include/QtCore -I. ../src/sv_restapi_server.h -o moc_sv_restapi_server.cpp
 
@@ -980,19 +983,23 @@ moc_sv_abstract_interact.cpp: /opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QtCore \
 		../../../../Modus/global/interact/interact_config.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QJsonDocument \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QJsonObject \
-		../../../../Modus/global/misc/sv_exception.h \
+		../../../../svlib/SvException/1.1/sv_exception.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QString \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QException \
 		../../../../Modus/global/global_defs.h \
-		../../../../svlib/sv_abstract_logger.h \
-		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDate \
-		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QTime \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDateTime \
 		../../../../Modus/global/configuration.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QFile \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QFileInfo \
 		../../../../Modus/global/signal/sv_signal.h \
-		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDateTime \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QJsonArray \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QMutex \
+		../../../../svlib/SvException/svexception.h \
+		../../../../svlib/SvAbstractLogger/svabstractlogger.h \
+		../../../../svlib/SvAbstractLogger/1.2/sv_abstract_logger.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDate \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QTime \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QJsonParseError \
 		../../../../Modus/global/interact/sv_abstract_interact.h
 	/opt/Qt5.5.1/5.5/gcc_64/bin/moc $(DEFINES) -I/opt/Qt5.5.1/5.5/gcc_64/mkspecs/linux-g++ -I/home/user/c++/Modus_Libs/interacts/restapi_server/src -I/opt/Qt5.5.1/5.5/gcc_64/include -I/opt/Qt5.5.1/5.5/gcc_64/include/QtNetwork -I/opt/Qt5.5.1/5.5/gcc_64/include/QtCore -I. ../../../../Modus/global/interact/sv_abstract_interact.h -o moc_sv_abstract_interact.cpp
 
@@ -1078,14 +1085,17 @@ moc_sv_signal.cpp: /opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QObject \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qfiledevice.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QMutex \
 		../../../../Modus/global/global_defs.h \
-		../../../../svlib/sv_abstract_logger.h \
+		../../../../svlib/SvException/svexception.h \
+		../../../../svlib/SvException/1.1/sv_exception.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QString \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QException \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qexception.h \
+		../../../../svlib/SvAbstractLogger/svabstractlogger.h \
+		../../../../svlib/SvAbstractLogger/1.2/sv_abstract_logger.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QStringList \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDate \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QTime \
-		../../../../Modus/global/misc/sv_exception.h \
-		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QException \
-		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qexception.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QJsonParseError \
 		../../../../Modus/global/signal/sv_signal.h
 	/opt/Qt5.5.1/5.5/gcc_64/bin/moc $(DEFINES) -I/opt/Qt5.5.1/5.5/gcc_64/mkspecs/linux-g++ -I/home/user/c++/Modus_Libs/interacts/restapi_server/src -I/opt/Qt5.5.1/5.5/gcc_64/include -I/opt/Qt5.5.1/5.5/gcc_64/include/QtNetwork -I/opt/Qt5.5.1/5.5/gcc_64/include/QtCore -I. ../../../../Modus/global/signal/sv_signal.h -o moc_sv_signal.cpp
 
