@@ -93,7 +93,7 @@ void SvUdp::write(modus::BUFF* buffer)
   m_socket->flush();
 
   if(written)
-    emit message(QString("<< %1").arg(QString(QByteArray((const char*)&buffer->data[0], buffer->offset).toHex())), sv::log::llDebug, sv::log::mtSend);
+    emit message(QString("%1").arg(QString(QByteArray((const char*)&buffer->data[0], buffer->offset).toHex())), sv::log::llDebug, sv::log::mtSend);
 
   buffer->reset();
 

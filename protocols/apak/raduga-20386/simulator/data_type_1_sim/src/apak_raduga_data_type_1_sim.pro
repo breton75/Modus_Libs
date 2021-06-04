@@ -19,15 +19,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    ../../../../../Modus/global/signal/sv_signal.cpp \
+    ../../../../../../../Modus/global/signal/sv_signal.cpp \
     data_type_collection.cpp \
     apak_raduga_sim.cpp
 
 HEADERS += \
-    ../../../../../Modus/global/device/protocol/sv_abstract_protocol.h \
-    ../../../../../Modus/global/global_defs.h \
+    ../../../../../../../Modus/global/device/protocol/sv_abstract_protocol.h \
+    ../../../../../../../Modus/global/global_defs.h \
     apak_raduga_data_type_1_sim_global.h \
-    ../../../../../Modus/global/signal/sv_signal.h \
+    ../../../../../../../Modus/global/signal/sv_signal.h \
     raduga_defs.h \
     data_type_collection.h \
     apak_raduga_sim.h \

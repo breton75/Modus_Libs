@@ -95,19 +95,19 @@ void raduga::SvRaduga::run()
 
   while(p_is_active) {
 
-////    p_io_buffer->confirm->mutex.lock();     // если нужен ответ квитирование
-//    p_io_buffer->input->mutex.lock();
+//    p_io_buffer->confirm->mutex.lock();     // если нужен ответ квитирование
+    p_io_buffer->input->mutex.lock();
 
-//    raduga::TREATRESULT result = parse();
+    raduga::TREATRESULT result = parse();
 
-//    if(result.do_reset == DO_RESET)
-//      p_io_buffer->input->reset();
+    if(result.do_reset == DO_RESET)
+      p_io_buffer->input->reset();
 
-//    p_io_buffer->input->mutex.unlock();
-////    p_io_buffer->confirm->mutex.unlock();   // если нужен ответ квитирование
+    p_io_buffer->input->mutex.unlock();
+//    p_io_buffer->confirm->mutex.unlock();   // если нужен ответ квитирование
 
-//    if(result.parse_time.isValid())
-//      validateSignals(result.parse_time);
+    if(result.parse_time.isValid())
+      validateSignals(result.parse_time);
 
     p_io_buffer->output->mutex.lock();
 
@@ -130,6 +130,14 @@ raduga::TREATRESULT raduga::SvRaduga::parse()
 
   // разбираем заголовок. если адрес или код функции не тот, значит это чужой пакет
   memcpy(&m_header, &p_io_buffer->input->data[0], m_hsz);
+
+  emit message(QString("h.abonent: %1, p.abonent: %2, h.packid: %3, p.packid: %4")
+               .arg(m_header.abonent_id)
+               .arg(m_params.abonent)
+               .arg(m_header.pack_id)
+               .arg(m_params.packid),
+      lldbg, sv::log::mtDebug2);
+
   if((m_header.abonent_id != m_params.abonent) || (m_header.pack_id != m_params.packid))
     return raduga::TREATRESULT(DO_RESET);
 
@@ -138,7 +146,8 @@ raduga::TREATRESULT raduga::SvRaduga::parse()
   *  производим непосредственно разбор данных и назначаем значения сигналам
   **/
 //  qDebug() << QString(QByteArray((const char*)&p_io_buffer->input->data[0], p_io_buffer->input->offset).toHex());
-  message(QString(">> %1").arg(QString(QByteArray((const char*)&p_io_buffer->input->data[0], p_io_buffer->input->offset).toHex())));
+  emit message(QString("%1").arg(QString(QByteArray((const char*)&p_io_buffer->input->data[0], p_io_buffer->input->offset).toHex())),
+      lldbg, sv::log::mtParsed);
 
   // если хоть какие то пакеты сыпятся (для данного получателя), то
   // считаем, что линия передачи в порядке и задаем новую контрольную точку времени
@@ -242,11 +251,11 @@ void raduga::SvRaduga::putout()
   memcpy(&p_io_buffer->output->data[p_io_buffer->output->offset], &SYSNAME, SYSNAME_LEN);
   p_io_buffer->output->offset += SYSNAME_LEN;
 
-  memcpy(&p_io_buffer->output->data[p_io_buffer->output->offset], &m_params.abonent, sizeof(quint8));
-  p_io_buffer->output->offset += sizeof(quint8);
+  memcpy(&p_io_buffer->output->data[p_io_buffer->output->offset], &m_params.abonent, sizeof(quint16));
+  p_io_buffer->output->offset += sizeof(quint16);
 
-  memcpy(&p_io_buffer->output->data[p_io_buffer->output->offset], &m_params.activity, sizeof(quint8));
-  p_io_buffer->output->offset += sizeof(quint8);
+  memcpy(&p_io_buffer->output->data[p_io_buffer->output->offset], &m_params.activity, sizeof(quint16));
+  p_io_buffer->output->offset += sizeof(quint16);
 
   memcpy(&p_io_buffer->output->data[p_io_buffer->output->offset], &m_params.packid, sizeof(quint16));
   p_io_buffer->output->offset += sizeof(quint16);

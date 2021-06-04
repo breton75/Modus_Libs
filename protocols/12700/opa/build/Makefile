@@ -48,7 +48,7 @@ OBJECTS_DIR   = ./
 
 ####### Files
 
-SOURCES       = ../../../../../Modus/global/signal/sv_signal.cpp \
+SOURCES       = /home/user/c++/Modus/global/signal/sv_signal.cpp \
 		../../../apak/raduga-20386/simulator/data_type_1_sim/src/data_type_collection.cpp \
 		../../../apak/raduga-20386/simulator/data_type_1_sim/src/apak_raduga_sim.cpp moc_sv_abstract_protocol.cpp \
 		moc_sv_signal.cpp \
@@ -197,14 +197,14 @@ DIST          = /opt/Qt5.5.1/5.5/gcc_64/mkspecs/features/spec_pre.prf \
 		/opt/Qt5.5.1/5.5/gcc_64/mkspecs/features/exceptions.prf \
 		/opt/Qt5.5.1/5.5/gcc_64/mkspecs/features/yacc.prf \
 		/opt/Qt5.5.1/5.5/gcc_64/mkspecs/features/lex.prf \
-		../../../apak/raduga-20386/apak/raduga-20386/simulator/data_type_1_sim/src/apak_raduga_data_type_1_sim.pro ../../../../../Modus/global/device/protocol/sv_abstract_protocol.h \
-		../../../../../Modus/global/global_defs.h \
+		../../../apak/raduga-20386/apak/raduga-20386/simulator/data_type_1_sim/src/apak_raduga_data_type_1_sim.pro /home/user/c++/Modus/global/device/protocol/sv_abstract_protocol.h \
+		/home/user/c++/Modus/global/global_defs.h \
 		../../../apak/raduga-20386/simulator/data_type_1_sim/src/apak_raduga_data_type_1_sim_global.h \
-		../../../../../Modus/global/signal/sv_signal.h \
+		/home/user/c++/Modus/global/signal/sv_signal.h \
 		../../../apak/raduga-20386/simulator/data_type_1_sim/src/raduga_defs.h \
 		../../../apak/raduga-20386/simulator/data_type_1_sim/src/data_type_collection.h \
 		../../../apak/raduga-20386/simulator/data_type_1_sim/src/apak_raduga_sim.h \
-		../../../apak/raduga-20386/simulator/data_type_1_sim/src/protocol_params.h ../../../../../Modus/global/signal/sv_signal.cpp \
+		../../../apak/raduga-20386/simulator/data_type_1_sim/src/protocol_params.h /home/user/c++/Modus/global/signal/sv_signal.cpp \
 		../../../apak/raduga-20386/simulator/data_type_1_sim/src/data_type_collection.cpp \
 		../../../apak/raduga-20386/simulator/data_type_1_sim/src/apak_raduga_sim.cpp
 QMAKE_TARGET  = apak_raduga_data_type_1_sim
@@ -530,8 +530,8 @@ dist: distdir FORCE
 distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
-	$(COPY_FILE) --parents ../../../../../Modus/global/device/protocol/sv_abstract_protocol.h ../../../../../Modus/global/global_defs.h ../../../apak/raduga-20386/simulator/data_type_1_sim/src/apak_raduga_data_type_1_sim_global.h ../../../../../Modus/global/signal/sv_signal.h ../../../apak/raduga-20386/simulator/data_type_1_sim/src/raduga_defs.h ../../../apak/raduga-20386/simulator/data_type_1_sim/src/data_type_collection.h ../../../apak/raduga-20386/simulator/data_type_1_sim/src/apak_raduga_sim.h ../../../apak/raduga-20386/simulator/data_type_1_sim/src/protocol_params.h $(DISTDIR)/
-	$(COPY_FILE) --parents ../../../../../Modus/global/signal/sv_signal.cpp ../../../apak/raduga-20386/simulator/data_type_1_sim/src/data_type_collection.cpp ../../../apak/raduga-20386/simulator/data_type_1_sim/src/apak_raduga_sim.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents /home/user/c++/Modus/global/device/protocol/sv_abstract_protocol.h /home/user/c++/Modus/global/global_defs.h ../../../apak/raduga-20386/simulator/data_type_1_sim/src/apak_raduga_data_type_1_sim_global.h /home/user/c++/Modus/global/signal/sv_signal.h ../../../apak/raduga-20386/simulator/data_type_1_sim/src/raduga_defs.h ../../../apak/raduga-20386/simulator/data_type_1_sim/src/data_type_collection.h ../../../apak/raduga-20386/simulator/data_type_1_sim/src/apak_raduga_sim.h ../../../apak/raduga-20386/simulator/data_type_1_sim/src/protocol_params.h $(DISTDIR)/
+	$(COPY_FILE) --parents /home/user/c++/Modus/global/signal/sv_signal.cpp ../../../apak/raduga-20386/simulator/data_type_1_sim/src/data_type_collection.cpp ../../../apak/raduga-20386/simulator/data_type_1_sim/src/apak_raduga_sim.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -752,20 +752,23 @@ moc_sv_abstract_protocol.cpp: /opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QObject \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qtimezone.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qxmlstream.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qtcoreversion.h \
-		/home/user/c++/Modus/global/misc/sv_exception.h \
+		/home/user/c++/svlib/SvException/1.1/sv_exception.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QString \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QException \
 		/home/user/c++/Modus/global/global_defs.h \
-		/home/user/c++/svlib/sv_abstract_logger.h \
-		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDate \
-		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QTime \
-		/home/user/c++/Modus/global/signal/sv_signal.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDateTime \
+		/home/user/c++/Modus/global/signal/sv_signal.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QList \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QJsonArray \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QFile \
-		../../../../../Modus/global/device/protocol/sv_abstract_protocol.h
-	/opt/Qt5.5.1/5.5/gcc_64/bin/moc $(DEFINES) -I/opt/Qt5.5.1/5.5/gcc_64/mkspecs/linux-g++ -I/home/user/c++/Modus_Libs/protocols/apak/raduga-20386/simulator/data_type_1_sim/src -I/opt/Qt5.5.1/5.5/gcc_64/include -I/opt/Qt5.5.1/5.5/gcc_64/include/QtCore -I. ../../../../../Modus/global/device/protocol/sv_abstract_protocol.h -o moc_sv_abstract_protocol.cpp
+		/home/user/c++/svlib/SvException/svexception.h \
+		/home/user/c++/svlib/SvAbstractLogger/svabstractlogger.h \
+		/home/user/c++/svlib/SvAbstractLogger/1.2/sv_abstract_logger.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDate \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QTime \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QJsonParseError \
+		/home/user/c++/Modus/global/device/protocol/sv_abstract_protocol.h
+	/opt/Qt5.5.1/5.5/gcc_64/bin/moc $(DEFINES) -I/opt/Qt5.5.1/5.5/gcc_64/mkspecs/linux-g++ -I/home/user/c++/Modus_Libs/protocols/apak/raduga-20386/simulator/data_type_1_sim/src -I/opt/Qt5.5.1/5.5/gcc_64/include -I/opt/Qt5.5.1/5.5/gcc_64/include/QtCore -I. /home/user/c++/Modus/global/device/protocol/sv_abstract_protocol.h -o moc_sv_abstract_protocol.cpp
 
 moc_sv_signal.cpp: /opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QObject \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qobject.h \
@@ -849,16 +852,19 @@ moc_sv_signal.cpp: /opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QObject \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qfiledevice.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QMutex \
 		/home/user/c++/Modus/global/global_defs.h \
-		/home/user/c++/svlib/sv_abstract_logger.h \
+		/home/user/c++/svlib/SvException/svexception.h \
+		/home/user/c++/svlib/SvException/1.1/sv_exception.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QString \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QException \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qexception.h \
+		/home/user/c++/svlib/SvAbstractLogger/svabstractlogger.h \
+		/home/user/c++/svlib/SvAbstractLogger/1.2/sv_abstract_logger.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QStringList \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDate \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QTime \
-		/home/user/c++/Modus/global/misc/sv_exception.h \
-		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QException \
-		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qexception.h \
-		../../../../../Modus/global/signal/sv_signal.h
-	/opt/Qt5.5.1/5.5/gcc_64/bin/moc $(DEFINES) -I/opt/Qt5.5.1/5.5/gcc_64/mkspecs/linux-g++ -I/home/user/c++/Modus_Libs/protocols/apak/raduga-20386/simulator/data_type_1_sim/src -I/opt/Qt5.5.1/5.5/gcc_64/include -I/opt/Qt5.5.1/5.5/gcc_64/include/QtCore -I. ../../../../../Modus/global/signal/sv_signal.h -o moc_sv_signal.cpp
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QJsonParseError \
+		/home/user/c++/Modus/global/signal/sv_signal.h
+	/opt/Qt5.5.1/5.5/gcc_64/bin/moc $(DEFINES) -I/opt/Qt5.5.1/5.5/gcc_64/mkspecs/linux-g++ -I/home/user/c++/Modus_Libs/protocols/apak/raduga-20386/simulator/data_type_1_sim/src -I/opt/Qt5.5.1/5.5/gcc_64/include -I/opt/Qt5.5.1/5.5/gcc_64/include/QtCore -I. /home/user/c++/Modus/global/signal/sv_signal.h -o moc_sv_signal.cpp
 
 moc_raduga_defs.cpp: /opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QMap \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qmap.h \
@@ -944,14 +950,17 @@ moc_raduga_defs.cpp: /opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QMap \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qfiledevice.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QMutex \
 		/home/user/c++/Modus/global/global_defs.h \
-		/home/user/c++/svlib/sv_abstract_logger.h \
+		/home/user/c++/svlib/SvException/svexception.h \
+		/home/user/c++/svlib/SvException/1.1/sv_exception.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QString \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QException \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qexception.h \
+		/home/user/c++/svlib/SvAbstractLogger/svabstractlogger.h \
+		/home/user/c++/svlib/SvAbstractLogger/1.2/sv_abstract_logger.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QStringList \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDate \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QTime \
-		/home/user/c++/Modus/global/misc/sv_exception.h \
-		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QException \
-		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qexception.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QJsonParseError \
 		/home/user/c++/Modus/global/device/protocol/sv_abstract_protocol.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QThread \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qthread.h \
@@ -1156,14 +1165,17 @@ moc_data_type_collection.cpp: /opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QObject \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qfiledevice.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QMutex \
 		/home/user/c++/Modus/global/global_defs.h \
-		/home/user/c++/svlib/sv_abstract_logger.h \
+		/home/user/c++/svlib/SvException/svexception.h \
+		/home/user/c++/svlib/SvException/1.1/sv_exception.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QString \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QException \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qexception.h \
+		/home/user/c++/svlib/SvAbstractLogger/svabstractlogger.h \
+		/home/user/c++/svlib/SvAbstractLogger/1.2/sv_abstract_logger.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QStringList \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDate \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QTime \
-		/home/user/c++/Modus/global/misc/sv_exception.h \
-		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QException \
-		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qexception.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QJsonParseError \
 		/home/user/c++/Modus/global/device/protocol/sv_abstract_protocol.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QThread \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qthread.h \
@@ -1480,24 +1492,26 @@ moc_apak_raduga_sim.cpp: /opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QMutex \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qtimezone.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qxmlstream.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qtcoreversion.h \
-		/home/user/c++/Modus/global/misc/sv_exception.h \
+		/home/user/c++/svlib/SvException/1.1/sv_exception.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QString \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QException \
 		/home/user/c++/Modus/global/global_defs.h \
-		/home/user/c++/svlib/sv_abstract_logger.h \
-		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDate \
-		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QTime \
-		/home/user/c++/Modus/global/signal/sv_signal.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDateTime \
+		/home/user/c++/Modus/global/signal/sv_signal.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QList \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QJsonArray \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QFile \
+		/home/user/c++/svlib/SvException/svexception.h \
+		/home/user/c++/svlib/SvAbstractLogger/svabstractlogger.h \
+		/home/user/c++/svlib/SvAbstractLogger/1.2/sv_abstract_logger.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDate \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QTime \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QJsonParseError \
 		../../../apak/raduga-20386/simulator/data_type_1_sim/src/protocol_params.h \
-		/home/user/c++/svlib/sv_exception.h \
 		../../../apak/raduga-20386/simulator/data_type_1_sim/src/raduga_defs.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QMap \
 		../../../apak/raduga-20386/simulator/data_type_1_sim/src/data_type_collection.h \
-		/home/user/c++/svlib/sv_crc.h \
+		/home/user/c++/svlib/SvCRC/1.0/sv_crc.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QtGlobal \
 		../../../apak/raduga-20386/simulator/data_type_1_sim/src/apak_raduga_sim.h
 	/opt/Qt5.5.1/5.5/gcc_64/bin/moc $(DEFINES) -I/opt/Qt5.5.1/5.5/gcc_64/mkspecs/linux-g++ -I/home/user/c++/Modus_Libs/protocols/apak/raduga-20386/simulator/data_type_1_sim/src -I/opt/Qt5.5.1/5.5/gcc_64/include -I/opt/Qt5.5.1/5.5/gcc_64/include/QtCore -I. ../../../apak/raduga-20386/simulator/data_type_1_sim/src/apak_raduga_sim.h -o moc_apak_raduga_sim.cpp
@@ -1514,8 +1528,8 @@ compiler_clean: compiler_moc_header_clean
 
 ####### Compile
 
-sv_signal.o: ../../../../../Modus/global/signal/sv_signal.cpp 
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o sv_signal.o ../../../../../Modus/global/signal/sv_signal.cpp
+sv_signal.o: /home/user/c++/Modus/global/signal/sv_signal.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o sv_signal.o /home/user/c++/Modus/global/signal/sv_signal.cpp
 
 data_type_collection.o: ../../../apak/raduga-20386/simulator/data_type_1_sim/src/data_type_collection.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o data_type_collection.o ../../../apak/raduga-20386/simulator/data_type_1_sim/src/data_type_collection.cpp

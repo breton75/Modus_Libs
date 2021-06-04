@@ -7,7 +7,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-#include "../../../../../svlib/sv_exception.h"
+#include "../../../../../svlib/SvException/svexception.h"
 #include "../../../../../Modus/global/global_defs.h"
 //#include "../../../../../Modus/global/device/device_defs.h"
 
@@ -19,8 +19,8 @@ namespace raduga {
   struct ProtocolParams {
 
     quint16   packid   = 0;
-    quint8    abonent  = 0;
-    quint8    activity = 0;
+    quint16   abonent  = 0;
+    quint16   activity = 0;
     quint16   interval = 1000;
 
     static ProtocolParams fromJson(const QString& json_string) //throw (SvException)
@@ -68,7 +68,7 @@ namespace raduga {
           throw SvException(QString(IMPERMISSIBLE_VALUE)
                                  .arg(P)
                                  .arg(object.value(P).toVariant().toString())
-                                 .arg("Идентификатор абонента должен быть задан однобайтным целым числом"));
+                                 .arg("Идентификатор абонента должен быть задан двухбайтным целым числом"));
 
         p.abonent = object.value(P).toInt();
 
@@ -83,7 +83,7 @@ namespace raduga {
           throw SvException(QString(IMPERMISSIBLE_VALUE)
                                  .arg(P)
                                  .arg(object.value(P).toVariant().toString())
-                                 .arg("Индикатор активности прибора должен быть задан однобайтным целым числом"));
+                                 .arg("Индикатор активности прибора должен быть задан двухбайтным целым числом"));
 
         p.activity = object.value(P).toInt();
 

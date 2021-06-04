@@ -14,9 +14,9 @@
 
 #include "data_type_collection.h"
 
-#include "../../../../../svlib/sv_abstract_logger.h"
-#include "../../../../../svlib/sv_exception.h"
-#include "../../../../../svlib/sv_crc.h"
+#include "../../../../../svlib/SvAbstractLogger/svabstractlogger.h"
+#include "../../../../../svlib/SvException/svexception.h"
+#include "../../../../../svlib/SvCRC/1.0/sv_crc.h"
 
 extern "C" {
 
