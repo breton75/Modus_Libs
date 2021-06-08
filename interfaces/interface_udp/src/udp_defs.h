@@ -56,6 +56,11 @@ struct UdpParams {
     UdpParams p;
     QString P;
 
+
+    /* host */
+    P = P_UDP_IFC;
+    p.ifc = object.contains(P) ? object.value(P).toString("") : "";
+
     /* host */
     P = P_UDP_HOST;
     if(object.contains(P)) {
@@ -137,9 +142,10 @@ struct UdpParams {
   {
     QJsonObject j;
 
-    j.insert(P_UDP_HOST, QJsonValue(host.toString()).toString());
-    j.insert(P_UDP_RECV_PORT, QJsonValue(static_cast<int>(recv_port)).toInt());
-    j.insert(P_UDP_SEND_PORT, QJsonValue(static_cast<int>(send_port)).toInt());
+    j.insert(P_UDP_IFC,               QJsonValue(ifc).toString());
+    j.insert(P_UDP_HOST,              QJsonValue(host.toString()).toString());
+    j.insert(P_UDP_RECV_PORT,         QJsonValue(static_cast<int>(recv_port)).toInt());
+    j.insert(P_UDP_SEND_PORT,         QJsonValue(static_cast<int>(send_port)).toInt());
     j.insert(P_BUFFER_RESET_INTERVAL, QJsonValue(static_cast<int>(buffer_reset_interval)).toInt());
 
     return j;

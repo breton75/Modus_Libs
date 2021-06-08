@@ -28,8 +28,8 @@ bool raduga::SvRaduga::configure(modus::DeviceConfig *config, modus::IOBuffer *i
 
     m_params = raduga::ProtocolParams::fromJson(p_config->protocol.params);
 
-    if(!m_data.resize(p_config->bufsize))
-      throw SvException(QString("Не удалось выделить %1 байт памяти для буфера").arg(p_config->bufsize));
+//    if(!m_data.resize(p_config->bufsize))
+//      throw SvException(QString("Не удалось выделить %1 байт памяти для буфера").arg(p_config->bufsize));
 
     return true;
 
@@ -43,27 +43,27 @@ bool raduga::SvRaduga::configure(modus::DeviceConfig *config, modus::IOBuffer *i
 
 void raduga::SvRaduga::disposeInputSignal (modus::SvSignal* signal)
 {
-  try {
+//  try {
 
-    QString type = signal->config()->packid;
+//    QString type = signal->config()->packid;
 
-    bool ok;
-    quint16 itype = type.toUInt(&ok, 0);
+//    bool ok;
+//    quint16 itype = type.toUInt(&ok, 0);
 
-    if(ok && input_signal_collections.contains(itype))
-      input_signal_collections.value(itype)->addSignal(signal, p_config->bufsize);
+//    if(ok && input_signal_collections.contains(itype))
+//      input_signal_collections.value(itype)->addSignal(signal, p_config->bufsize);
 
-    else {
+//    else {
 
-      emit message(QString("Сигнал %1: Неопознанный тип \"%2\"").arg(signal->config()->name).arg(signal->config()->type),
-                   sv::log::llError, sv::log::mtError);
+//      emit message(QString("Сигнал %1: Неопознанный тип \"%2\"").arg(signal->config()->name).arg(signal->config()->type),
+//                   sv::log::llError, sv::log::mtError);
 
-    }
-  }
+//    }
+//  }
 
-  catch(SvException& e) {
-    throw e;
-  }
+//  catch(SvException& e) {
+//    throw e;
+//  }
 }
 
 void raduga::SvRaduga::disposeOutputSignal (modus::SvSignal* signal)
@@ -95,19 +95,19 @@ void raduga::SvRaduga::run()
 
   while(p_is_active) {
 
-//    p_io_buffer->confirm->mutex.lock();     // если нужен ответ квитирование
-    p_io_buffer->input->mutex.lock();
+////    p_io_buffer->confirm->mutex.lock();     // если нужен ответ квитирование
+//    p_io_buffer->input->mutex.lock();
 
-    raduga::TREATRESULT result = parse();
+//    raduga::TREATRESULT result = parse();
 
-    if(result.do_reset == DO_RESET)
-      p_io_buffer->input->reset();
+//    if(result.do_reset == DO_RESET)
+//      p_io_buffer->input->reset();
 
-    p_io_buffer->input->mutex.unlock();
-//    p_io_buffer->confirm->mutex.unlock();   // если нужен ответ квитирование
+//    p_io_buffer->input->mutex.unlock();
+////    p_io_buffer->confirm->mutex.unlock();   // если нужен ответ квитирование
 
-    if(result.parse_time.isValid())
-      validateSignals(result.parse_time);
+//    if(result.parse_time.isValid())
+//      validateSignals(result.parse_time);
 
     p_io_buffer->output->mutex.lock();
 
@@ -124,30 +124,30 @@ void raduga::SvRaduga::run()
 
 raduga::TREATRESULT raduga::SvRaduga::parse()
 {
-  // проверяем, что длина данных в буфере не меньше длины заголовка
-  if(p_io_buffer->input->offset < m_hsz)
-    return raduga::TREATRESULT(DO_NOT_RESET);
+//  // проверяем, что длина данных в буфере не меньше длины заголовка
+//  if(p_io_buffer->input->offset < m_hsz)
+//    return raduga::TREATRESULT(DO_NOT_RESET);
 
-  // разбираем заголовок. если адрес или код функции не тот, значит это чужой пакет
-  memcpy(&m_header, &p_io_buffer->input->data[0], m_hsz);
+//  // разбираем заголовок. если адрес или код функции не тот, значит это чужой пакет
+//  memcpy(&m_header, &p_io_buffer->input->data[0], m_hsz);
 
-  emit message(QString("h.abonent: %1, p.abonent: %2, h.packid: %3, p.packid: %4")
-               .arg(m_header.abonent_id)
-               .arg(m_params.abonent)
-               .arg(m_header.pack_id)
-               .arg(m_params.packid),
-      lldbg, sv::log::mtDebug2);
+//  emit message(QString("h.abonent: %1, p.abonent: %2, h.packid: %3, p.packid: %4")
+//               .arg(m_header.abonent_id)
+//               .arg(m_params.abonent)
+//               .arg(m_header.pack_id)
+//               .arg(m_params.packid),
+//      lldbg, sv::log::mtDebug2);
 
-  if((m_header.abonent_id != m_params.abonent) || (m_header.pack_id != m_params.packid))
-    return raduga::TREATRESULT(DO_RESET);
+//  if((m_header.abonent_id != m_params.abonent) || (m_header.pack_id != m_params.packid))
+//    return raduga::TREATRESULT(DO_RESET);
 
-  /**
-  *  в этой точке в буфере должны находиться правильные данные
-  *  производим непосредственно разбор данных и назначаем значения сигналам
-  **/
-//  qDebug() << QString(QByteArray((const char*)&p_io_buffer->input->data[0], p_io_buffer->input->offset).toHex());
-  emit message(QString("%1").arg(QString(QByteArray((const char*)&p_io_buffer->input->data[0], p_io_buffer->input->offset).toHex())),
-      lldbg, sv::log::mtParsed);
+//  /**
+//  *  в этой точке в буфере должны находиться правильные данные
+//  *  производим непосредственно разбор данных и назначаем значения сигналам
+//  **/
+////  qDebug() << QString(QByteArray((const char*)&p_io_buffer->input->data[0], p_io_buffer->input->offset).toHex());
+//  emit message(QString("%1").arg(QString(QByteArray((const char*)&p_io_buffer->input->data[0], p_io_buffer->input->offset).toHex())),
+//      lldbg, sv::log::mtParsed);
 
   // если хоть какие то пакеты сыпятся (для данного получателя), то
   // считаем, что линия передачи в порядке и задаем новую контрольную точку времени
@@ -225,21 +225,21 @@ raduga::TREATRESULT raduga::SvRaduga::parse()
 //  }
 
 
-  return raduga::TREATRESULT(DO_RESET, QDateTime::currentDateTime());
+//  return raduga::TREATRESULT(DO_RESET, QDateTime::currentDateTime());
 }
 
 void raduga::SvRaduga::confirmation()
 {
-  QByteArray confirm;
-  confirm.append((const char*)(&m_header), 6);
+//  QByteArray confirm;
+//  confirm.append((const char*)(&m_header), 6);
 
-  // вычисляем crc ответа
-  quint16 crc = CRC::MODBUS_CRC16((uchar*)(&m_header), 6);
-  confirm.append(quint8(crc & 0xFF));
-  confirm.append(quint8(crc >> 8));
+//  // вычисляем crc ответа
+//  quint16 crc = CRC::MODBUS_CRC16((uchar*)(&m_header), 6);
+//  confirm.append(quint8(crc & 0xFF));
+//  confirm.append(quint8(crc >> 8));
 
-  memcpy(&p_io_buffer->confirm->data[0], confirm.data(), confirm.length());
-  p_io_buffer->confirm->offset = confirm.length();
+//  memcpy(&p_io_buffer->confirm->data[0], confirm.data(), confirm.length());
+//  p_io_buffer->confirm->offset = confirm.length();
 
 }
 
@@ -248,8 +248,8 @@ void raduga::SvRaduga::putout()
 //  qDebug() << "putout" << m_params.packid;
   p_io_buffer->output->offset = 0;
 
-  memcpy(&p_io_buffer->output->data[p_io_buffer->output->offset], &SYSNAME, SYSNAME_LEN);
-  p_io_buffer->output->offset += SYSNAME_LEN;
+  memcpy(&p_io_buffer->output->data[p_io_buffer->output->offset], &RDGA_NAME[0], SYSTEM_NAME_LEN);
+  p_io_buffer->output->offset += SYSTEM_NAME_LEN;
 
   memcpy(&p_io_buffer->output->data[p_io_buffer->output->offset], &m_params.abonent, sizeof(quint16));
   p_io_buffer->output->offset += sizeof(quint16);
@@ -302,6 +302,11 @@ void raduga::SvRaduga::putout()
       break;
 
   }
+
+  quint16 crc = CRC::MODBUS_CRC16((quint8*)&p_io_buffer->output->data[m_hsz], p_io_buffer->output->offset - m_hsz);
+  memcpy(&p_io_buffer->output->data[p_io_buffer->output->offset], &crc, sizeof(qint16));
+  p_io_buffer->output->offset += 2;
+
 }
 
 /** ********** EXPORT ************ **/

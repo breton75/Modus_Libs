@@ -12,7 +12,6 @@
 //#include "../../../../../Modus/global/device/device_defs.h"
 
 #define P_ABONENT  "abonent"
-#define P_ACTIVITY "activity"
 
 namespace raduga {
 
@@ -20,7 +19,6 @@ namespace raduga {
 
     quint16   packid   = 0;
     quint16   abonent  = 0;
-    quint16   activity = 0;
     quint16   interval = 1000;
 
     static ProtocolParams fromJson(const QString& json_string) //throw (SvException)
@@ -76,21 +74,6 @@ namespace raduga {
       else
         throw SvException(QString(MISSING_PARAM).arg(P));
 
-      P = P_ACTIVITY;
-      if(object.contains(P)) {
-
-        if(object.value(P).toInt(-1) < 0)
-          throw SvException(QString(IMPERMISSIBLE_VALUE)
-                                 .arg(P)
-                                 .arg(object.value(P).toVariant().toString())
-                                 .arg("Индикатор активности прибора должен быть задан двухбайтным целым числом"));
-
-        p.activity = object.value(P).toInt();
-
-      }
-      else
-        throw SvException(QString(MISSING_PARAM).arg(P));
-
       P = P_INTERVAL;
       if(object.contains(P)) {
 
@@ -124,7 +107,6 @@ namespace raduga {
 
       j.insert(P_PACKID,   QJsonValue(packid).toString());
       j.insert(P_ABONENT,  QJsonValue(abonent).toInt());
-      j.insert(P_ACTIVITY, QJsonValue(activity).toInt());
       j.insert(P_INTERVAL, QJsonValue(interval).toInt());
 
       return j;

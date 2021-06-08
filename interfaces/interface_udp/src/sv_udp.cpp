@@ -15,8 +15,26 @@ bool SvUdp::configure(modus::DeviceConfig* config, modus::IOBuffer*iobuffer)
 
     m_socket = new QUdpSocket();
 
-    if(!m_socket->bind(QHostAddress::Any, m_params.recv_port, QAbstractSocket::DontShareAddress))
-      throw SvException(m_socket->errorString());
+    if(!m_params.ifc.isEmpty()) {
+
+      QNetworkInterface ifc = QNetworkInterface::interfaceFromName(m_params.ifc);
+      if(!ifc.isValid())
+        throw SvException(QString("Wrong ifc name: %1").arg(m_params.ifc));
+
+      if(ifc.addressEntries().count() == 0)
+        throw SvException(QString("Wrong ifc name: %1").arg(m_params.ifc));
+
+      /* For TCP sockets, this function may be used to specify
+       * which interface to use for an outgoing connection,
+       * which is useful in case of multiple network interfaces */
+    //  socket->bind(ifc.addressEntries().at(0).ip());
+
+      if(!m_socket->bind(ifc.addressEntries().at(0).ip(), m_params.recv_port, QAbstractSocket::DontShareAddress))
+        throw SvException(m_socket->errorString());
+    }
+    else
+      if(!m_socket->bind(QHostAddress::Any, m_params.recv_port, QAbstractSocket::DontShareAddress))
+        throw SvException(m_socket->errorString());
 
     // именно после всего!
     m_socket->moveToThread(this);

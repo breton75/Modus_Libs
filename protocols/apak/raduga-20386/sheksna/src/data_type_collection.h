@@ -27,7 +27,7 @@ namespace raduga {
 
     void addSignal(modus::SvSignal* signal, quint16 bufsize); // throw (SvException);
 
-    void updateSignals(const raduga::DATA* data = nullptr);
+    void updateSignals(const char* data, quint16 len);
 
     void updateOutput(const modus::BUFF* data = nullptr);
 

@@ -28,8 +28,14 @@ extern "C" {
 
 }
 
-const int  SYSNAME_LEN = 16;
-const char SYSNAME[SYSNAME_LEN] = {'R','a','d','u','g','a','-','2','0','3','8','6',' ',' ',' ',' ' };
+const int  SYSTEM_NAME_LEN = 16;
+
+const int  RDGA_NAME_LEN = 12;
+const int  APAK_NAME_LEN = 8;
+
+const char RDGA_NAME[SYSTEM_NAME_LEN] = {'R','a','d','u','g','a','-','2','0','3','8','6','\0','\0','\0','\0' };
+const char APAK_NAME[SYSTEM_NAME_LEN] = {'A','P','A','K',' ','R','K','I','\0','\0','\0','\0','\0','\0','\0','\0' };
+
 
 #define GOOD_PARSED   0
 #define DO_RESET      1
@@ -40,7 +46,7 @@ namespace raduga {
   #pragma pack(push,1)
   struct Header
   {
-    char    system_name[SYSNAME_LEN];
+    char    system_name[SYSTEM_NAME_LEN];
     quint16 abonent_id;
     quint16 activity_id;
     quint16 pack_id;
@@ -86,7 +92,7 @@ private:
 
   raduga::ProtocolParams     m_params;
 
-  raduga::DATA               m_data;
+//  raduga::DATA               m_data;
 
   raduga::Header             m_header;
   size_t                     m_hsz = sizeof(raduga::Header);
@@ -116,6 +122,8 @@ private:
   QMap<quint16, raduga::SvAbstractSignalCollection*> output_signal_collections;
 
   void putout();
+
+  QByteArray m_raduga20386 = QByteArray(&RDGA_NAME[0], RDGA_NAME_LEN);
 
 
 };

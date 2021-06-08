@@ -1,6 +1,7 @@
 ﻿#ifndef SV_UDP_H
 #define SV_UDP_H
 
+#include <QNetworkInterface>
 #include <QUdpSocket>
 
 #include "ifc_udp_global.h"

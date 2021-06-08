@@ -15,6 +15,19 @@
 #define TYPE_9  9
 #define TYPE_53 53
 
+
+#define PACK_ID_101  101
+#define PACK_ID_102  102
+#define PACK_ID_103  103
+#define PACK_ID_104  104
+#define PACK_ID_105  105
+#define PACK_ID_106  106
+#define PACK_ID_107  107
+#define PACK_ID_108  108
+#define PACK_ID_109  109
+#define PACK_ID_110  110
+
+
 #define PACK_SZ_1  1152
 #define PACK_SZ_2  384
 #define PACK_SZ_3  384
@@ -63,47 +76,47 @@ namespace raduga {
                                     {107, PACK_SZ_107}, {108, PACK_SZ_108}, {109, PACK_SZ_109},
                                     {110, PACK_SZ_110}};
 
-  struct DATA
-  {
-    DATA():
-      data(nullptr),
-      bufsize(0)
-    {  }
+//  struct DATA
+//  {
+//    DATA():
+//      data(nullptr),
+//      bufsize(0)
+//    {  }
 
-    DATA(quint16 size):
-      data(nullptr),
-      bufsize(size)
-    {
-      data = (quint8*)malloc(size);
-    }
+//    DATA(quint16 size):
+//      data(nullptr),
+//      bufsize(size)
+//    {
+//      data = (quint8*)malloc(size);
+//    }
 
-    ~DATA()
-    {
-      if(data)
-        free(data);
-    }
+//    ~DATA()
+//    {
+//      if(data)
+//        free(data);
+//    }
 
-    bool resize(quint16 size)
-    {
-      if(data)
-        free(data);
+//    bool resize(quint16 size)
+//    {
+//      if(data)
+//        free(data);
 
-      data = nullptr;
+//      data = nullptr;
 
-      bufsize = size;
-      data = (quint8*)malloc(size);
+//      bufsize = size;
+//      data = (quint8*)malloc(size);
 
-      return bool(data);
-    }
+//      return bool(data);
+//    }
 
-    quint8* data = nullptr;
-    quint8  type;
-    quint8  len;
-    quint16 crc;
+//    quint8* data = nullptr;
+//    quint8  type;
+//    quint8  len;
+//    quint16 crc;
 
-    quint16 bufsize;
+//    quint16 bufsize;
 
-  };
+//  };
 
   struct SignalParams
   {
@@ -244,7 +257,7 @@ namespace raduga {
 
     virtual void addSignal(modus::SvSignal* signal, quint16 bufsize) = 0;
 
-    virtual void updateSignals(const raduga::DATA* data = nullptr) = 0;
+    virtual void updateSignals(const char* data, quint16 len) = 0;
 
     virtual void updateOutput(const modus::BUFF* data = nullptr) = 0;
 

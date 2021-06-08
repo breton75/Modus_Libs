@@ -24,14 +24,58 @@ void raduga::DataTypeCollection::addSignal(modus::SvSignal* signal, quint16 bufs
   }
 }
 
-void raduga::DataTypeCollection::updateSignals(const raduga::DATA* data)
+void raduga::DataTypeCollection::updateSignals(const char* data, quint16 len)
 {
-    foreach (raduga::SignalStruct st, m_signals) {
+  foreach (raduga::SignalStruct s, m_signals) {
 
-      if(st.params.byte < data->len)
-        st.signal->setValue(int((data->data[st.params.byte] >> st.params.offset) & 1));
+    if(s.params.byte + quint8(s.params.len / 8) < len) {
 
+      switch (s.params.tip) {
+
+        case raduga::TIP::Discrete:
+        case raduga::TIP::Ustavka:
+        {
+          s.signal->setValue(int((data[s.params.byte] >> s.params.offset) & 1));
+
+          break;
+        }
+
+        case raduga::TIP::Short:
+        {
+          qint16 signal_value = 0;
+          memcpy(&signal_value, &data[s.params.byte], sizeof(qint16));
+
+          s.signal->setValue(signal_value);
+
+          break;
+        }
+
+        case raduga::TIP::Long:
+        {
+          qint32 signal_value = 0;
+          memcpy(&signal_value, &data[s.params.byte], sizeof(qint32));
+
+          s.signal->setValue(signal_value);
+
+          break;
+        }
+
+        case raduga::TIP::Analog:
+        case raduga::TIP::Float:
+        {
+          float signal_value = 0;
+          memcpy(&signal_value, &data[s.params.byte], sizeof(float));
+
+          s.signal->setValue(signal_value);
+
+          break;
+        }
+
+        default:
+          break;
+      }
     }
+  }
 }
 
 void raduga::DataTypeCollection::updateOutput(const modus::BUFF* data)
