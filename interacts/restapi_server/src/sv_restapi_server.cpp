@@ -683,7 +683,7 @@ QByteArray restapi::SvRestAPI::reply_http_post(const HttpRequest &request)
           continue;
         }
 
-        emit message(jv.toString(), sv::log::llDebug, sv::log::mtParsed);
+        emit message(jv.toString(), sv::log::llDebug, sv::log::mtParse);
 
         m_signals_by_id.value(id)->setValue(o.value(P_VALUE).toVariant());
 //        qDebug() << m_signals_by_id.value(id)->value().toInt() << o.value("value").toVariant();
@@ -711,7 +711,7 @@ QByteArray restapi::SvRestAPI::reply_http_post(const HttpRequest &request)
             continue;
           }
 
-          emit message(jv.toString(), sv::log::llDebug, sv::log::mtParsed);
+          emit message(jv.toString(), sv::log::llDebug, sv::log::mtParse);
 
           m_signals_by_name.value(name)->setValue(o.value(P_VALUE).toVariant());
 

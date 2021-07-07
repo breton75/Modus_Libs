@@ -101,24 +101,27 @@ void raduga::SvRaduga::run()
 
 //    p_io_buffer->confirm->mutex.lock();     // если нужен ответ квитирование
     p_io_buffer->input->mutex.lock();
-
+    emit message("protocol after lock()", sv::log::llDebug, sv::log::mtReceive);
     raduga::TREATRESULT result = parse();
 
     if(result.do_reset == DO_RESET)
       p_io_buffer->input->reset();
 
     p_io_buffer->input->mutex.unlock();
+    emit message("protocol after unlock()", sv::log::llDebug, sv::log::mtReceive);
+
 //    p_io_buffer->confirm->mutex.unlock();   // если нужен ответ квитирование
 
     if(result.parse_time.isValid())
       validateSignals(result.parse_time);
 
-    p_io_buffer->output->mutex.lock();
+//    p_io_buffer->output->mutex.lock();
 
-    putout();
+//    putout();
 
-    p_io_buffer->output->mutex.unlock();
+//    p_io_buffer->output->mutex.unlock();
 
+    emit message("protocol before yield", sv::log::llDebug, sv::log::mtReceive);
     QThread::yieldCurrentThread();
 
     msleep(m_params.interval);
@@ -244,26 +247,26 @@ void raduga::SvRaduga::confirmation()
 
 void raduga::SvRaduga::putout()
 {
-//  qDebug() << "putout" << m_params.packid;
-  p_io_buffer->output->offset = 0;
+////  qDebug() << "putout" << m_params.packid;
+//  p_io_buffer->output->offset = 0;
 
-  memcpy(&p_io_buffer->output->data[p_io_buffer->output->offset], &APAK_NAME[0], SYSTEM_NAME_LEN);
-  p_io_buffer->output->offset += SYSTEM_NAME_LEN;
+//  memcpy(&p_io_buffer->output->data[p_io_buffer->output->offset], &APAK_NAME[0], SYSTEM_NAME_LEN);
+//  p_io_buffer->output->offset += SYSTEM_NAME_LEN;
 
-  memcpy(&p_io_buffer->output->data[p_io_buffer->output->offset], &m_params.abonent, sizeof(quint16));
-  p_io_buffer->output->offset += sizeof(quint16);
+//  memcpy(&p_io_buffer->output->data[p_io_buffer->output->offset], &m_params.abonent, sizeof(quint16));
+//  p_io_buffer->output->offset += sizeof(quint16);
 
-  p_io_buffer->output->offset += 14;  // резерв
+//  p_io_buffer->output->offset += 14;  // резерв
 
-  quint16 control = 777;
-  memcpy(&p_io_buffer->output->data[p_io_buffer->output->offset], &control, sizeof(quint16));
+//  quint16 control = 777;
+//  memcpy(&p_io_buffer->output->data[p_io_buffer->output->offset], &control, sizeof(quint16));
 
-  quint16 crc = CRC::MODBUS_CRC16((quint8*)&p_io_buffer->output->data[p_io_buffer->output->offset], sizeof(quint16));
+//  quint16 crc = CRC::MODBUS_CRC16((quint8*)&p_io_buffer->output->data[p_io_buffer->output->offset], sizeof(quint16));
 
-  p_io_buffer->output->offset += sizeof(quint16);
-  memcpy(&p_io_buffer->output->data[p_io_buffer->output->offset], &crc, sizeof(quint16));
+//  p_io_buffer->output->offset += sizeof(quint16);
+//  memcpy(&p_io_buffer->output->data[p_io_buffer->output->offset], &crc, sizeof(quint16));
 
-  p_io_buffer->output->offset += sizeof(quint16);
+//  p_io_buffer->output->offset += sizeof(quint16);
 
 }
 
