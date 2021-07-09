@@ -33,7 +33,7 @@ struct UdpParams {
   QHostAddress host             = QHostAddress::Any;
   quint16      recv_port        = DEFAULT_RECV_PORT;
   quint16      send_port        = DEFAULT_SEND_PORT;
-  quint16 buffer_reset_interval = DEFAULT_BUFFER_RESET_INTERVAL;
+  quint16      grain_gap        = DEFAULT_GRAIN_GAP;
 
   static UdpParams fromJsonString(const QString& json_string) //throw (SvException)
   {
@@ -110,20 +110,20 @@ struct UdpParams {
     else
       p.send_port = DEFAULT_SEND_PORT;
 
-    /* buffer reset interval */
-    P = P_BUFFER_RESET_INTERVAL;
+    /* grain gap*/
+    P = P_GRAIN_GAP;
     if(object.contains(P)) {
 
       if(object.value(P).toInt(-1) < 1)
         throw SvException(QString(IMPERMISSIBLE_VALUE)
                           .arg(P)
                           .arg(object.value(P).toVariant().toString())
-                          .arg("Период сброса не может быть меньше 1 мсек."));
+                          .arg("Интервал ожидания частей пакета не может быть меньше 1 мсек."));
 
-      p.buffer_reset_interval = object.value(P).toInt(DEFAULT_BUFFER_RESET_INTERVAL);
+      p.grain_gap = object.value(P).toInt(DEFAULT_GRAIN_GAP);
 
     }
-    else p.buffer_reset_interval = quint16(DEFAULT_BUFFER_RESET_INTERVAL);
+    else p.grain_gap = quint16(DEFAULT_GRAIN_GAP);
 
 
     return p;
@@ -146,7 +146,6 @@ struct UdpParams {
     j.insert(P_UDP_HOST,              QJsonValue(host.toString()).toString());
     j.insert(P_UDP_RECV_PORT,         QJsonValue(static_cast<int>(recv_port)).toInt());
     j.insert(P_UDP_SEND_PORT,         QJsonValue(static_cast<int>(send_port)).toInt());
-    j.insert(P_BUFFER_RESET_INTERVAL, QJsonValue(static_cast<int>(buffer_reset_interval)).toInt());
 
     return j;
 

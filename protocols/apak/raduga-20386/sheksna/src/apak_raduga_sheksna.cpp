@@ -99,18 +99,22 @@ void raduga::SvRaduga::run()
 
   while(p_is_active) {
 
-//    p_io_buffer->confirm->mutex.lock();     // если нужен ответ квитирование
+    p_io_buffer->confirm->mutex.lock();     // если нужен ответ квитирование
+    emit message("protocol confirm after lock()", sv::log::llDebug, sv::log::mtReceive);
+
     p_io_buffer->input->mutex.lock();
-    emit message("protocol after lock()", sv::log::llDebug, sv::log::mtReceive);
-    raduga::TREATRESULT result = parse();
+    emit message("protocol input after lock()", sv::log::llDebug, sv::log::mtReceive);
+
+    raduga::PARSERESULT result = parse();
 
     if(result.do_reset == DO_RESET)
       p_io_buffer->input->reset();
 
     p_io_buffer->input->mutex.unlock();
-    emit message("protocol after unlock()", sv::log::llDebug, sv::log::mtReceive);
+    emit message("protocol input after unlock()", sv::log::llDebug, sv::log::mtReceive);
 
-//    p_io_buffer->confirm->mutex.unlock();   // если нужен ответ квитирование
+    p_io_buffer->confirm->mutex.unlock();   // если нужен ответ квитирование
+    emit message("protocol confirm after unlock()", sv::log::llDebug, sv::log::mtReceive);
 
     if(result.parse_time.isValid())
       validateSignals(result.parse_time);
@@ -121,20 +125,20 @@ void raduga::SvRaduga::run()
 
 //    p_io_buffer->output->mutex.unlock();
 
-    emit message("protocol before yield", sv::log::llDebug, sv::log::mtReceive);
-    QThread::yieldCurrentThread();
+//    emit message("protocol before yield", sv::log::llDebug, sv::log::mtReceive);
+//    QThread::yieldCurrentThread();
 
-    msleep(m_params.interval);
+    msleep(m_params.parse_interval);
 
   }
 }
 
-raduga::TREATRESULT raduga::SvRaduga::parse()
+raduga::PARSERESULT raduga::SvRaduga::parse()
 {
 //    emit message(QString(QByteArray((const char*)&p_io_buffer->input->data[m_hsz], p_io_buffer->input->offset).toHex()).append(QString::number(p_io_buffer->input->offset)), lldbg, sv::log::mtDebug3);
   // проверяем, что длина данных в буфере не меньше длины заголовка
   if(p_io_buffer->input->offset < m_hsz)
-    return raduga::TREATRESULT(DO_NOT_RESET);
+    return raduga::PARSERESULT(DO_NOT_RESET);
 
   // разбираем заголовок. если адрес или код функции не тот, значит это чужой пакет
   memcpy(&m_header, &p_io_buffer->input->data[0], m_hsz);
@@ -149,13 +153,13 @@ raduga::TREATRESULT raduga::SvRaduga::parse()
 
   if((QByteArray(&(m_header.system_name[0]), RDGA_NAME_LEN) != m_raduga20386) ||
                                      (m_header.pack_id != m_params.packid))
-    return raduga::TREATRESULT(DO_RESET);
+    return raduga::PARSERESULT(DO_RESET);
 
   quint16 packsz = pack_size.value(m_header.pack_id);
 
   // проверяем размер пакета, согласно полученному идентификатору пакета (pack id)
   if(p_io_buffer->input->offset < packsz)
-    return raduga::TREATRESULT(DO_NOT_RESET);
+    return raduga::PARSERESULT(DO_NOT_RESET);
 
   /**
    *  в этой точке в буфере должны находиться правильные данные
@@ -180,7 +184,7 @@ emit message(QString::number(calc_crc).append(QString::number(got_crc)), lldbg, 
                  .arg(quint8(got_crc  >> 8), 2, 16, QChar('0')),
                  sv::log::llError, sv::log::mtError);
 
-    return raduga::TREATRESULT(DO_RESET);
+    return raduga::PARSERESULT(DO_RESET);
   }
 
   // если все корректно, то разбираем данные в зависимости от типа
@@ -226,7 +230,7 @@ emit message(QString::number(calc_crc).append(QString::number(got_crc)), lldbg, 
   //  qDebug() << QString(QByteArray((const char*)&p_io_buffer->input->data[0], p_io_buffer->input->offset).toHex());
   emit message(QString(QByteArray((const char*)&p_io_buffer->input->data[m_hsz], packsz).toHex()), lldbg, sv::log::mtParse);
 
-  return raduga::TREATRESULT(DO_RESET, QDateTime::currentDateTime());
+  return raduga::PARSERESULT(DO_RESET, QDateTime::currentDateTime());
 
 }
 

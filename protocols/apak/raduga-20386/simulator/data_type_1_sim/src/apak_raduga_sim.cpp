@@ -115,7 +115,7 @@ void raduga::SvRaduga::run()
 
     p_io_buffer->output->mutex.unlock();
 
-    QThread::yieldCurrentThread();
+//    QThread::yieldCurrentThread();
 
     msleep(m_params.interval);
 

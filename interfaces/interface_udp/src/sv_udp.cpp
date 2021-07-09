@@ -55,18 +55,20 @@ void SvUdp::run()
 
   while(p_is_active) {
 
-    while(m_socket->waitForReadyRead(m_params.buffer_reset_interval) && p_is_active) {
+    p_io_buffer->input->mutex.lock();
+    emit message("udp after lock()", sv::log::llDebug, sv::log::mtReceive);
+
+//    p_io_buffer->input->reset();
+
+    while(m_socket->waitForReadyRead(m_params.grain_gap) && p_is_active) {
 
       while(m_socket->hasPendingDatagrams() && p_is_active) {
 
         if(m_socket->pendingDatagramSize() <= 0)
           continue;
 
-        if(p_io_buffer->input->offset > p_config->bufsize)
+        if(p_io_buffer->input->offset + m_socket->bytesAvailable() > p_config->bufsize)
           p_io_buffer->input->reset();
-
-        p_io_buffer->input->mutex.lock();
-        emit message("udp after lock()", sv::log::llDebug, sv::log::mtReceive);
 
         /* ... the rest of the datagram will be lost ... */
         qint64 readed = m_socket->readDatagram(&p_io_buffer->input->data[p_io_buffer->input->offset], p_config->bufsize - p_io_buffer->input->offset);
@@ -75,11 +77,12 @@ void SvUdp::run()
 
         p_io_buffer->input->offset += readed;
 
-        p_io_buffer->input->mutex.unlock();
-        emit message("udp after unlock()", sv::log::llDebug, sv::log::mtReceive);
 
       }
     }
+
+    p_io_buffer->input->mutex.unlock();
+    emit message("udp after unlock()", sv::log::llDebug, sv::log::mtReceive);
 
     // переключаемся на другой поток
 //    emit message("udp before yield", sv::log::llDebug, sv::log::mtReceive);
@@ -87,23 +90,24 @@ void SvUdp::run()
 
     p_io_buffer->confirm->mutex.lock();
     emit message("confirm after lock()", sv::log::llDebug, sv::log::mtReceive);
-    if(p_io_buffer->confirm->ready()) {
-
+    if(p_io_buffer->confirm->ready())
       write(p_io_buffer->confirm);
-    }
+
     p_io_buffer->confirm->mutex.unlock();
     emit message("confirm after unlock()", sv::log::llDebug, sv::log::mtReceive);
 
-    p_io_buffer->input->mutex.lock();
-    emit message("reset after lock()", sv::log::llDebug, sv::log::mtReceive);
-    p_io_buffer->input->reset();
-    p_io_buffer->input->mutex.unlock();
-    emit message("reset after unlock()", sv::log::llDebug, sv::log::mtReceive);
+//    p_io_buffer->input->mutex.lock();
+//    emit message("reset after lock()", sv::log::llDebug, sv::log::mtReceive);
+//    p_io_buffer->input->reset();
+//    p_io_buffer->input->mutex.unlock();
+//    emit message("reset after unlock()", sv::log::llDebug, sv::log::mtReceive);
 
     // отправляем управляющие данные, если они есть
     p_io_buffer->output->mutex.lock();
 //    qDebug() << "write" << int(p_io_buffer->output->data[256]);
-    write(p_io_buffer->output);
+    if(p_io_buffer->output->ready())
+      write(p_io_buffer->output);
+
     p_io_buffer->output->mutex.unlock();
 
   }

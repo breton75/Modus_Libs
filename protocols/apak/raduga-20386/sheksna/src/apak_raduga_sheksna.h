@@ -54,10 +54,10 @@ namespace raduga {
   };
   #pragma pack(pop)
 
-  struct TREATRESULT {
+  struct PARSERESULT {
 
-    TREATRESULT();
-    TREATRESULT(bool reset, QDateTime dt = QDateTime())
+    PARSERESULT();
+    PARSERESULT(bool reset, QDateTime dt = QDateTime())
     { do_reset = reset; parse_time = dt; }
 
     bool do_reset;
@@ -107,7 +107,7 @@ private:
 
   QMap<quint16, raduga::SvAbstractSignalCollection*> input_signal_collections;
 
-  raduga::TREATRESULT parse();
+  raduga::PARSERESULT parse();
 
   void confirmation();
 
