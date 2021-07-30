@@ -26,12 +26,13 @@ void raduga::DataTypeCollection::addSignal(modus::SvSignal* signal, quint16 bufs
 
 void raduga::DataTypeCollection::updateSignals(const raduga::DATA* data)
 {
-    foreach (raduga::SignalStruct st, m_signals) {
+  Q_UNUSED(data);
+//    foreach (raduga::SignalStruct st, m_signals) {
 
-      if(st.params.byte < data->len)
-        st.signal->setValue(int((data->data[st.params.byte] >> st.params.offset) & 1));
+//      if(st.params.byte < data->len)
+//        st.signal->setValue(int((data->data[st.params.byte] >> st.params.offset) & 1));
 
-    }
+//    }
 }
 
 void raduga::DataTypeCollection::updateOutput(const modus::BUFF* data)
@@ -107,7 +108,5 @@ void raduga::DataTypeCollection::updateOutput(const modus::BUFF* data)
       default:
         break;
     }
-
-
   }
 }

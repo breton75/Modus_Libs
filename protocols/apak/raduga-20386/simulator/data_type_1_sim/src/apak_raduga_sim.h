@@ -78,7 +78,7 @@ public:
 protected:
   void run() override;
 
-  void disposeInputSignal (modus::SvSignal* signal)  override;
+  void disposeInputSignal  (modus::SvSignal* signal) override;
   void disposeOutputSignal (modus::SvSignal* signal) override;
 
 //  void validateSignals(QDateTime& lastParsedTime) override;
@@ -88,8 +88,6 @@ private:
   QList<modus::SvSignal*>    p_output_signals;
 
   raduga::ProtocolParams     m_params;
-
-//  raduga::DATA               m_data;
 
   raduga::Header             m_header;
   size_t                     m_hsz = sizeof(raduga::Header);
@@ -104,10 +102,6 @@ private:
 
   QMap<quint16, raduga::SvAbstractSignalCollection*> input_signal_collections;
 
-  raduga::TREATRESULT parse();
-
-  void confirmation();
-
   /* output signals */
   raduga::DataTypeCollection type1_output_signals;
   raduga::DataTypeCollection type2_output_signals;
@@ -119,7 +113,6 @@ private:
   QMap<quint16, raduga::SvAbstractSignalCollection*> output_signal_collections;
 
   void putout();
-
 
 };
 
