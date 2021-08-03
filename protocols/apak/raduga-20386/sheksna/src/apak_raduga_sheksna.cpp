@@ -148,7 +148,7 @@ raduga::PARSERESULT raduga::SvRaduga::parse()
                .arg(m_header.abonent_id)
                .arg(m_header.activity_id)
                .arg(m_header.pack_id),
-      lldbg, sv::log::mtDebug1);
+      lldbg, sv::log::mtDebug2);
 
 
   if((QByteArray(&(m_header.system_name[0]), RDGA_NAME_LEN) != m_raduga20386) ||
