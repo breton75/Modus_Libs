@@ -43,11 +43,11 @@ namespace raduga {
   #pragma pack(push,1)
   struct Header
   {
-    char    system_name[SYSTEM_NAME_LEN];
+    char    system_name[SYSTEM_NAME_LEN] = {'R','a','d','u','g','a','-','2','0','3','8','6','\0','\0','\0','\0' };
     quint16 abonent_id;
     quint16 activity_id;
     quint16 pack_id;
-    char    reserv[10];
+    char    reserv[10] = { '\0','\0','\0','\0','\0','\0','\0','\0','\0','\0' };
   };
   #pragma pack(pop)
 

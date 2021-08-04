@@ -78,17 +78,14 @@ void raduga::SvRaduga::putout()
 //  qDebug() << "putout" << m_params.packid;
   p_io_buffer->output->offset = 0;
 
-  memcpy(&p_io_buffer->output->data[p_io_buffer->output->offset], &RDGA_NAME[0], SYSTEM_NAME_LEN);
-  p_io_buffer->output->offset += SYSTEM_NAME_LEN;
+  raduga::Header header;
+//  memcpy(&header.system_name[0], &RDGA_NAME[0], SYSTEM_NAME_LEN);
+  header.abonent_id = m_params.abonent;
+  header.activity_id = m_params.activity;
+  header.pack_id = m_params.packid;
 
-  memcpy(&p_io_buffer->output->data[p_io_buffer->output->offset], &m_params.abonent, sizeof(quint16));
-  p_io_buffer->output->offset += sizeof(quint16);
-
-  memcpy(&p_io_buffer->output->data[p_io_buffer->output->offset], &m_params.activity, sizeof(quint16));
-  p_io_buffer->output->offset += sizeof(quint16);
-
-  memcpy(&p_io_buffer->output->data[p_io_buffer->output->offset], &m_params.packid, sizeof(quint16));
-  p_io_buffer->output->offset += sizeof(quint16);
+  memcpy(&p_io_buffer->output->data[0], &header, sizeof(raduga::Header));
+  p_io_buffer->output->offset = sizeof(raduga::Header);
 
   switch (m_params.packid) {
 

@@ -135,7 +135,6 @@ void raduga::SvRaduga::run()
 
 raduga::PARSERESULT raduga::SvRaduga::parse()
 {
-//    emit message(QString(QByteArray((const char*)&p_io_buffer->input->data[m_hsz], p_io_buffer->input->offset).toHex()).append(QString::number(p_io_buffer->input->offset)), lldbg, sv::log::mtDebug3);
   // проверяем, что длина данных в буфере не меньше длины заголовка
   if(p_io_buffer->input->offset < m_hsz)
     return raduga::PARSERESULT(DO_NOT_RESET);
@@ -173,7 +172,7 @@ raduga::PARSERESULT raduga::SvRaduga::parse()
   memcpy(&got_crc,  &p_io_buffer->input->data[m_hsz + packsz], 2); // crc полученная
 
   quint16 calc_crc = CRC::MODBUS_CRC16((const quint8*)&p_io_buffer->input->data[m_hsz], packsz); // вычисляем crc из данных
-emit message(QString::number(calc_crc).append(QString::number(got_crc)), lldbg, sv::log::mtDebug3);
+
   if(calc_crc != got_crc) {
 
     // если crc не совпадает, то выходим без обработки и ответа
