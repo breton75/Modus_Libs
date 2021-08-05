@@ -523,14 +523,29 @@ QByteArray restapi::SvRestAPI::getSignalsValues(const QString& option, const QSt
     if(value.isValid() && !value.isNull())
     {
       switch (value.type()) {
-
-        case QVariant::Int:
-
+/* Although this function is declared as returning QVariant::Type,
+ * the return value should be interpreted as QMetaType::Type */
+        case QMetaType::Int:
           result = QString::number(value.toInt());
           break;
 
-        case QVariant::Double:
+        case QMetaType::UInt:
+          result = QString::number(value.toUInt());
+          break;
 
+        case QMetaType::LongLong:
+          result = QString::number(value.toLongLong());
+          break;
+
+        case QMetaType::ULongLong:
+          result = QString::number(value.toULongLong());
+          break;
+
+        case QMetaType::Float:
+          result = QString::number(value.toFloat());
+          break;
+
+        case QMetaType::Double:
           result = QString::number(value.toDouble());
           break;
 

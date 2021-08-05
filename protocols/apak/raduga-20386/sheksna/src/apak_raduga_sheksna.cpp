@@ -100,10 +100,7 @@ void raduga::SvRaduga::run()
   while(p_is_active) {
 
     p_io_buffer->confirm->mutex.lock();     // если нужен ответ квитирование
-    emit message("protocol confirm after lock()", sv::log::llDebug, sv::log::mtReceive);
-
     p_io_buffer->input->mutex.lock();
-    emit message("protocol input after lock()", sv::log::llDebug, sv::log::mtReceive);
 
     raduga::PARSERESULT result = parse();
 
@@ -111,10 +108,7 @@ void raduga::SvRaduga::run()
       p_io_buffer->input->reset();
 
     p_io_buffer->input->mutex.unlock();
-    emit message("protocol input after unlock()", sv::log::llDebug, sv::log::mtReceive);
-
     p_io_buffer->confirm->mutex.unlock();   // если нужен ответ квитирование
-    emit message("protocol confirm after unlock()", sv::log::llDebug, sv::log::mtReceive);
 
     if(result.parse_time.isValid())
       validateSignals(result.parse_time);
@@ -227,7 +221,7 @@ raduga::PARSERESULT raduga::SvRaduga::parse()
   }
 
   //  qDebug() << QString(QByteArray((const char*)&p_io_buffer->input->data[0], p_io_buffer->input->offset).toHex());
-  emit message(QString(QByteArray((const char*)&p_io_buffer->input->data[m_hsz], packsz).toHex()), lldbg, sv::log::mtParse);
+  emit message(QString(QByteArray((const char*)&(p_io_buffer->input->data[m_hsz]), packsz).toHex()), lldbg, sv::log::mtParse);
 
   return raduga::PARSERESULT(DO_RESET, QDateTime::currentDateTime());
 
