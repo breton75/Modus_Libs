@@ -25,6 +25,8 @@
 #include "../../../../Modus/global/interact/sv_abstract_interact.h"
 #include "../../../../Modus/global/global_defs.h"
 #include "../../../../Modus/global/configuration.h"
+#include "../../../../Modus/global/restapi/http_global.h"
+#include "../../../../Modus/global/restapi/entity_task_option.h"
 
 #include "restapi_server_defs.h"
 
@@ -43,86 +45,8 @@ extern "C" {
 
 }
 
-const QList<QString> Http_Field_List = QList<QString>() << "date"
-                                                        << "content-type"
-                                                        << "content-length"
-                                                        << "last-modified"
-                                                        << "connection"
-                                                        << "upgrade"
-                                                        << "origin"
-                                                        << "host"
-                                                        << "sec-websocket-key"
-                                                        << "sec-websocket-version"
-                                                        << "sec-websocket-accept"
-                                                        << "sec-websocket-protocol";
-
 namespace restapi {
 
-  typedef QMap<QString, QString> HttpFields;
-
-  struct HttpFld {
-
-  };
-
-  struct HttpRequest {
-
-    QString     method;
-    QString     resourse;
-    QString     params;
-    HttpFields  fields;
-    QString     protocol;
-    QString     version;
-    QByteArray  data;
-
-  };
-
-  struct HttpReply {
-
-    explicit HttpReply()
-    {
-      this->data      = QByteArray();
-      this->protocol  = "HTTP";
-      this->version   = "1.0";
-      this->code      = 200;
-      this->status    = "Ok";
-    }
-
-    explicit HttpReply(const QByteArray data, const QString protocol = "HTTP", const QString version = "1.0",
-                       const int code = 200, const QString status = "Ok")
-    {
-      this->data      = data;
-      this->protocol  = protocol;
-      this->version   = version;
-      this->code      = code;
-      this->status    = status;
-    }
-
-    QString protocol;
-    QString version;
-    int     code;
-    QString status;
-    QByteArray data;
-
-  };
-
-  const QMap<QString, QString> ContentTypeBySuffix = {{"html", "text/html"},
-                                                      {"cmd",  "text/cmd"},
-                                                      {"css",  "text/css"},
-                                                      {"csv",  "text/csv"},
-                                                      {"txt",  "text/plain"},
-                                                      {"php",  "text/php"},
-                                                      {"ico",  "image/vnd.microsoft.icon"},
-                                                      {"gif",  "image/gif"},
-                                                      {"jpeg", "image/jpeg"},
-                                                      {"png",  "image/png"},
-                                                      {"svg",  "image/svg+xml"},
-                                                      {"js",   "application/javascript"},
-                                                      {"xml",  "application/xml"},
-                                                      {"zip",  "application/zip"},
-                                                      {"gzip", "application/gzip"},
-                                                      {"pdf",  "application/pdf"},
-                                                      {"json", "application/json"}
-                                                     };
   class SvRestAPI;
 
 }
@@ -157,19 +81,22 @@ private:
   bool m_is_active;
   bool m_is_websocket = false;
 
-  QByteArray reply_http_get(const HttpRequest &request);
-  QByteArray reply_http_get_params(const HttpRequest &request);
-  QByteArray reply_http_post(const HttpRequest &request);
-  QByteArray reply_ws_get(const HttpRequest &request);
+  QByteArray reply_http_get(const http::HttpRequest &request);
+  QByteArray reply_http_get_params(const http::HttpRequest &request);
+  QByteArray reply_http_post(const http::HttpRequest &request);
+  QByteArray reply_ws_get(const http::HttpRequest &request);
 
-  QByteArray getEntityData(const QString& entity, const QString& matter, const QString& option, const QString& list, const char separator = ',');
+  QByteArray getEntityData(const QString& entity, const QString& task, const QString& option, const QString& data, const char separator = ',');
 
-  QByteArray getSignalsData(const QString& what, const QString& option, const QString& list, const char separator = ',');
-  QByteArray getSignalsValues(const QString& option, const QString& list, const char separator);
+  QByteArray getSignalsData(const QString& task, const QString& option, const QString& data, const char separator = ',');
+  QByteArray getSignalsValues(const QString& option, const QString& data, const char separator = ',');
 
-  QByteArray getConfigurationData(const QString& what, const QString& option, const QString& list, const char separator = ',');
+  QByteArray getConfigurationData(const QString& task, const QString& option, const QString& data, const char separator = ',');
 
   QByteArray getHttpError(int errorCode, QString errorString);
+
+  QByteArray setSignalValues(const QJsonObject& jo);
+//  QByteArray setEventlog(const QJsonObject& jo);
 
 private slots:
   void newConnection();

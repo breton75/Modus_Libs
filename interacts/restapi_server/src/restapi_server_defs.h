@@ -30,45 +30,6 @@
 /** структура для хранения параметров **/
 namespace restapi {
 
-  namespace ewo {
-
-    enum Entities {
-      noentity = -1,
-      signal,
-      device,
-      storage,
-      interact,
-      analize,
-      configuration
-    };
-
-    enum Whats {
-      nowhat,
-      value,
-      json
-    };
-
-    enum Options {
-      nooption,
-      byname,
-      byid
-    };
-
-    const QMap<QString, Entities> EntitiesTable = {{ "signal",         Entities::signal        },
-                                                   { "device",         Entities::device        },
-                                                   { "storage",        Entities::storage       },
-                                                   { "interact",       Entities::interact      },
-                                                   { "analize",        Entities::analize       },
-                                                   { "configuration",  Entities::configuration }};
-
-    const QMap<QString, Whats> WhatsTable       = {{ "value",          Whats::value            },
-                                                   { "json",           Whats::json             }};
-
-    const QMap<QString, Options> OptionsTable   = {{ "byname",         Options::byname         },
-                                                   { "byid",           Options::byid           }};
-
-  }
-
   struct Params {
 
     quint16 port       = 80;

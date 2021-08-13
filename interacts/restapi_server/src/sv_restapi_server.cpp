@@ -108,56 +108,7 @@ void restapi::SvRestAPI::processHttpRequest()
   QByteArray req = client->readAll();
   emit message(QString(req), sv::log::llDebug, sv::log::mtRequest);
 
-
-  QList<QByteArray> rawreq = req.split('\n');
-  if(!rawreq.count())
-    return;
-
-  QList<QByteArray> rawheader = rawreq.at(0).split(' ');
-  if(rawheader.count() < 3)
-    return;
-
-
-//  for(QByteArray line: rawreq)
-//    qDebug() << line;
-//    emit message(QString(line.trimmed()), sv::log::llDebug2, sv::log::mtDebug);
-
-  HttpRequest request;
-
-  // разбираем заголовок запроса
-  request.method   = QString(rawheader.at(0).trimmed());
-  request.resourse = QString(rawheader.at(1).split('?').count() > 0 ? rawheader.at(1).split('?').at(0).trimmed() : rawheader.at(1));
-  request.params   = QString(rawheader.at(1).split('?').count() > 1 ? rawheader.at(1).split('?').at(1).trimmed() : "");
-  request.protocol = QString(rawheader.at(2).split('/').count() > 0 ? rawheader.at(2).split('/').at(0).trimmed() : rawheader.at(2));
-  request.version  = QString(rawheader.at(2).split('/').count() > 1 ? rawheader.at(2).split('/').at(1).trimmed() : "");
-
-  // разбираем поля запроса
-  int i = 1;
-  while(i < rawreq.count() && !rawreq.at(i).trimmed().isEmpty())
-  {
-    QString r = QString(rawreq.at(i));
-
-    int p = r.indexOf(QChar(':'));
-
-    if(p >= 0) {
-
-      QString field = r.left(p).toLower().trimmed();
-      QString token = r.right(r.length() - p - 1).trimmed();
-
-      if(Http_Field_List.contains(field))
-        request.fields.insert(field, token);
-
-    }
-
-    i++;
-  }
-
-  // выбираем данные запроса
-  i++;
-  if(i < rawreq.count() && !rawreq.at(i).trimmed().isEmpty())
-  {
-    request.data = rawreq.at(i).trimmed();
-  }
+  http::HttpRequest request = http::HttpRequest::parse(req);
 
   // если клиент запрашивает изменение протокола на WebSocket, то отвечаем на запрос http, меняем обработчик и НЕ закрываем сокет
   if(request.fields.contains("upgrade") && request.fields.value("upgrade") == "websocket")
@@ -219,7 +170,7 @@ void restapi::SvRestAPI::processWebSocketRequest()
   for(QByteArray line: rawreq)
     emit message(QString(line), sv::log::llDebug2, sv::log::mtDebug);
 
-  HttpRequest request;
+  http::HttpRequest request;
 
   // разбираем заголовок запроса
   request.method   = QString(rawheader.at(0).trimmed());
@@ -229,51 +180,12 @@ void restapi::SvRestAPI::processWebSocketRequest()
   request.version  = QString(rawheader.at(2).split('/').count() > 1 ? rawheader.at(2).split('/').at(1).trimmed() : "");
 }
 
-QByteArray restapi::SvRestAPI::reply_http_get(const HttpRequest &request)
+QByteArray restapi::SvRestAPI::reply_http_get(const http::HttpRequest &request)
 {
-  QDir dir(m_params.html_path);
-
-  QString file = QString(request.resourse);
-
-  if(file.startsWith('/'))
-    file.remove(0, 1);
-
-  if(QFileInfo(dir, file).isDir())
-    file = m_params.index_file;
-
-
-  QByteArray replay = QByteArray();
-
-  QFile f(dir.absoluteFilePath(file));
-
-  if(!f.exists())
-    replay = getHttpError(404, QString("Файл отсутствует: %1").arg(file));
-
-  else if(!f.open(QIODevice::ReadOnly))
-    replay = getHttpError(500, f.errorString());
-
-  else
-  {
-    QString content_type = ContentTypeBySuffix.contains(QFileInfo(file).suffix())
-                                   ? ContentTypeBySuffix.value(QFileInfo(file).suffix())
-                                   : "application/octet-stream"; //двоичный файл без указания формата (RFC 2046)
-
-
-    replay.append("HTTP/1.1 200 Ok\r\n")
-          .append(QString("Content-Type: %1; charset=\"utf-8\"\r\n\r\n").arg(content_type).toUtf8())
-          .append(f.readAll())
-          .append("\r\n");
-
-  }
-
-  if(f.isOpen())
-    f.close();
-
-  return replay;
-
+  return http::replyHttpGet(request, m_params.html_path, m_params.index_file);
 }
 
-QByteArray restapi::SvRestAPI::reply_http_get_params(const HttpRequest &request)
+QByteArray restapi::SvRestAPI::reply_http_get_params(const http::HttpRequest &request)
 {
   auto getErr = [=](int errorCode, QString errorString) -> QByteArray {
 
@@ -303,10 +215,10 @@ QByteArray restapi::SvRestAPI::reply_http_get_params(const HttpRequest &request)
   if(get_params.count() == 0)
     return getErr(404, QString("Неверный запрос"));
 
-  QString entity = "";
-  QString what = "";
-  QString option = "";
-  QString list   = "";
+  QString entity  = "";
+  QString task    = "";
+  QString option  = "";
+  QString data    = "";
 
   for(QString param: get_params) {
 
@@ -319,18 +231,18 @@ QByteArray restapi::SvRestAPI::reply_http_get_params(const HttpRequest &request)
     if(field.toLower().trimmed() == "entity")
       entity = tag;
 
-    else if(field.toLower().trimmed() == "what")
-      what = tag;
+    else if(field.toLower().trimmed() == "task")
+      task = tag;
 
     else if(field.toLower().trimmed() == "option")
       option = tag;
 
-    else if(field.toLower().trimmed() == "list")
-      list = tag;
+    else if(field.toLower().trimmed() == "data")
+      data = tag;
 
   }
 
-  QByteArray json = getEntityData(entity, what, option, list);
+  QByteArray json = getEntityData(entity, task, option, data);
 
 /*  QString entity_param = QString(get_params.at(0));
 
@@ -453,27 +365,27 @@ QByteArray restapi::SvRestAPI::reply_http_get_params(const HttpRequest &request)
 //  if(m_logger && m_logger->options().log_level >= sv::log::llDebug2)
 //    *m_logger << sv::log::llDebug2 << sv::log::mtDebug << QString(http) << sv::log::endl;
 
-  emit message(QString(http), sv::log::llDebug2, sv::log::mtDebug);
+  emit message(QString(http), sv::log::llDebug, sv::log::mtReply);
 
   return http;
 
 }
 
-QByteArray restapi::SvRestAPI::getEntityData(const QString& entity, const QString& what, const QString& option, const QString& list, const char separator)
+QByteArray restapi::SvRestAPI::getEntityData(const QString& entity, const QString& task, const QString& option, const QString& data, const char separator)
 {
   QByteArray result;
 
-  switch (restapi::ewo::EntitiesTable.value(entity, restapi::ewo::noentity)) {
+  switch (restapi::eto::EntitiesTable.value(entity, restapi::eto::noentity)) {
 
-    case restapi::ewo::signal:
+    case restapi::eto::signal:
 
-      result = getSignalsData(what, option, list, separator);
+      result = getSignalsData(task, option, data, separator);
 
       break;
 
-    case restapi::ewo::configuration:
+    case restapi::eto::configuration:
 
-      result = getConfigurationData(what, option, list, separator);
+      result = getConfigurationData(task, option, data, separator);
 
       break;
 
@@ -487,19 +399,19 @@ QByteArray restapi::SvRestAPI::getEntityData(const QString& entity, const QStrin
 
 }
 
-QByteArray restapi::SvRestAPI::getSignalsData(const QString& what, const QString& option, const QString& list, const char separator)
+QByteArray restapi::SvRestAPI::getSignalsData(const QString& task, const QString& option, const QString& data, const char separator)
 {
   QByteArray result;
 
-  switch (restapi::ewo::WhatsTable.value(what, restapi::ewo::nowhat)) {
+  switch (restapi::eto::TasksTable.value(task, restapi::eto::notask)) {
 
-    case restapi::ewo::value:
+    case restapi::eto::value:
 
-      result = getSignalsValues(option, list, separator);
+      result = getSignalsValues(option, data, separator);
 
       break;
 
-    case restapi::ewo::json:
+    case restapi::eto::json:
 
       result = "Не доступно в данной версии";
       break;
@@ -514,7 +426,7 @@ QByteArray restapi::SvRestAPI::getSignalsData(const QString& what, const QString
 
 }
 
-QByteArray restapi::SvRestAPI::getSignalsValues(const QString& option, const QString& list, const char separator = ',')
+QByteArray restapi::SvRestAPI::getSignalsValues(const QString& option, const QString& data, const char separator)
 {
   auto var2str = [](QVariant value) -> QString {
 
@@ -566,14 +478,14 @@ QByteArray restapi::SvRestAPI::getSignalsValues(const QString& option, const QSt
         .append("\"values\":[");
   errors.append("\"errors\":[");
 
-  switch (restapi::ewo::OptionsTable.value(option, restapi::ewo::nooption)) {
+  switch (restapi::eto::OptionsTable.value(option, restapi::eto::nooption)) {
 
-    case restapi::ewo::Options::byid:
+    case restapi::eto::Options::byid:
     {
-      QList<QString> ids = list.split(QChar(separator), QString::SkipEmptyParts);
+      QList<QString> ids = data.split(QChar(separator), QString::SkipEmptyParts);
 
       if(ids.isEmpty())
-        errors.append("{\"value\": \"Неверный запрос значений сигналов. Список идентификаторов (list) пуст.\"},");
+        errors.append("{\"value\": \"Неверный запрос значений сигналов. Список идентификаторов (data) пуст.\"},");
 
       bool ok;
       for(QString id: ids) {
@@ -599,13 +511,13 @@ QByteArray restapi::SvRestAPI::getSignalsValues(const QString& option, const QSt
       break;
     }
 
-    case ewo::Options::byname:
+    case eto::Options::byname:
     {
 
-      QList<QString> names = list.split(QChar(separator), QString::SkipEmptyParts);
+      QList<QString> names = data.split(QChar(separator), QString::SkipEmptyParts);
 
       if(names.isEmpty())
-        errors.append("{\"value\": \"Неверный запрос значений сигналов. Список имен сигналов (list) пуст.\"}");
+        errors.append("{\"value\": \"Неверный запрос значений сигналов. Список имен сигналов (data) пуст.\"}");
 
       for(QString name: names) {
 
@@ -638,19 +550,14 @@ QByteArray restapi::SvRestAPI::getSignalsValues(const QString& option, const QSt
 
 }
 
-QByteArray restapi::SvRestAPI::getConfigurationData(const QString& what, const QString& option, const QString& list, const char separator)
+QByteArray restapi::SvRestAPI::getConfigurationData(const QString& task, const QString& option, const QString& data, const char separator)
 {
-  return QByteArray(QString("Not avalable yet. %1 %2 %3 %4").arg(what,option,list).arg(separator).toUtf8());
+  return QByteArray(QString("Not avalable yet. %1 %2 %3 %4").arg(task,option,data).arg(separator).toUtf8());
 }
 
-QByteArray restapi::SvRestAPI::reply_http_post(const HttpRequest &request)
+QByteArray restapi::SvRestAPI::reply_http_post(const http::HttpRequest &request)
 {
-//  message(QString(request.data));
-
   QByteArray json   = QByteArray();
-  json.append('{');
-
-  QByteArray errors = QByteArray();
 
   QJsonParseError per;
   QJsonDocument jd = QJsonDocument::fromJson(request.data, &per); // запрос должен быть в формате JSON
@@ -662,87 +569,24 @@ QByteArray restapi::SvRestAPI::reply_http_post(const HttpRequest &request)
   }
 
   QJsonObject jo = jd.object();
-  if(jo.contains(P_SIGNALS) && jo.value(P_SIGNALS).isArray()) {
+  if(!jo.contains(P_ENTITY) || !jo.value(P_ENTITY).isString() || !jo.contains(P_DATA) || !jo.value(P_DATA).isObject()) {
 
-    QJsonArray ja = jo.value(P_SIGNALS).toArray();
-
-    for(QJsonValue jv: ja) {
-
-      if(!jv.isObject())
-        continue;
-
-      QJsonObject o = jv.toObject();
-
-      if(!o.contains(P_VALUE))
-        continue;
-
-      if(o.contains(P_ID)) {
-
-        int id = o.value(P_ID).toInt(-1);
-
-        if(!m_signals_by_id.contains(id)) {
-
-          errors.append(QString(M_SIGNAL_ID_NOT_FOUND).arg(id));
-
-          emit message(QString(M_SIGNAL_ID_NOT_FOUND).arg(id), sv::log::llDebug, sv::log::mtError);
-
-          continue;
-        }
-
-        if(m_signals_by_id.value(id)->config()->usecase != modus::OUT &&
-           m_signals_by_id.value(id)->config()->usecase != modus::VAR) {
-
-          errors.append(QString(M_SIGNAL_NOT_SUITABLE_TYPE).arg(id));
-          emit message(QString(M_SIGNAL_NOT_SUITABLE_TYPE).arg(id), sv::log::llDebug, sv::log::mtError);
-
-          continue;
-        }
-
-        emit message(jv.toString(), sv::log::llDebug, sv::log::mtParse);
-
-        m_signals_by_id.value(id)->setValue(o.value(P_VALUE).toVariant());
-//        qDebug() << m_signals_by_id.value(id)->value().toInt() << o.value("value").toVariant();
-
-      }
-      else if(o.contains(P_NAME)) {
-
-          QString name = o.value(P_NAME).toString("");
-
-          if(!m_signals_by_name.contains(name)) {
-
-            errors.append(QString(M_SIGNAL_NAME_NOT_FOUND).arg(name));
-
-            emit message(QString(M_SIGNAL_NAME_NOT_FOUND).arg(name), sv::log::llDebug, sv::log::mtError);
-
-            continue;
-          }
-
-          if(m_signals_by_name.value(name)->config()->usecase != modus::UseCase::OUT ||
-             m_signals_by_name.value(name)->config()->usecase != modus::UseCase::VAR) {
-
-            errors.append(QString(M_SIGNAL_NOT_SUITABLE_TYPE).arg(name));
-            emit message(QString(M_SIGNAL_NOT_SUITABLE_TYPE).arg(name), sv::log::llDebug, sv::log::mtError);
-
-            continue;
-          }
-
-          emit message(jv.toString(), sv::log::llDebug, sv::log::mtParse);
-
-          m_signals_by_name.value(name)->setValue(o.value(P_VALUE).toVariant());
-
-        }
-    }
-  }
-
-  if(!errors.isEmpty()) {
-
-    if(errors.endsWith(',')) errors.chop(1);
-
-    json.append(QString("\"errors\":[").toUtf8()).append(errors).append(']');
+     return getHttpError(400, QString("Некорректный запрос на обновление данных.\n%1\n%2")
+                         .arg(QString(request.data)).arg(per.errorString()));
 
   }
 
-  json.append('}').append("\r\n");
+  if((jo.value(P_ENTITY).toString() == P_SIGNAL) || (jo.value(P_ENTITY).toString() == P_SIGNALS)) {
+
+    json = setSignalValues(jo.value(P_DATA).toObject());
+
+  }
+  else if(jo.value(P_ENTITY).toString() == P_EVENTLOG) {
+
+//    json = setEventlog(jo.value(P_DATA).toObject());
+
+  }
+
 
   QByteArray http = QByteArray()
                     .append("HTTP/1.0 200 Ok\r\n")
@@ -756,13 +600,125 @@ QByteArray restapi::SvRestAPI::reply_http_post(const HttpRequest &request)
 //  if(m_logger && m_logger->options().log_level >= sv::log::llDebug2)
 //    *m_logger << sv::log::llDebug2 << sv::log::mtDebug << QString(http) << sv::log::endl;
 
-  emit message(QString(http), sv::log::llDebug2, sv::log::mtDebug);
+  emit message(QString(http), sv::log::llDebug, sv::log::mtReply);
 
   return http;
 
 }
 
-QByteArray restapi::SvRestAPI::reply_ws_get(const HttpRequest &request)
+QByteArray restapi::SvRestAPI::setSignalValues(const QJsonObject& jo)
+{
+  QByteArray result   = QByteArray();
+  result.append('{');
+
+  QByteArray errors = QByteArray();
+
+  QJsonArray ja = jo.value(P_SIGNALS).toArray();
+
+  for(QJsonValue jv: ja) {
+
+    if(!jv.isObject())
+      continue;
+
+    QJsonObject o = jv.toObject();
+
+    if(!o.contains(P_VALUE))
+      continue;
+
+    if(o.contains(P_ID)) {
+
+      int id = o.value(P_ID).toInt(-1);
+
+      if(!m_signals_by_id.contains(id)) {
+
+        errors.append(QString(M_SIGNAL_ID_NOT_FOUND).arg(id));
+
+        emit message(QString(M_SIGNAL_ID_NOT_FOUND).arg(id), sv::log::llDebug, sv::log::mtError);
+
+        continue;
+      }
+
+      if(m_signals_by_id.value(id)->config()->usecase != modus::OUT &&
+         m_signals_by_id.value(id)->config()->usecase != modus::VAR) {
+
+        errors.append(QString(M_SIGNAL_NOT_SUITABLE_TYPE).arg(id));
+        emit message(QString(M_SIGNAL_NOT_SUITABLE_TYPE).arg(id), sv::log::llDebug, sv::log::mtError);
+
+        continue;
+      }
+
+      emit message(jv.toString(), sv::log::llDebug, sv::log::mtParse);
+
+      m_signals_by_id.value(id)->setValue(o.value(P_VALUE).toVariant());
+//        qDebug() << m_signals_by_id.value(id)->value().toInt() << o.value("value").toVariant();
+
+    }
+    else if(o.contains(P_NAME)) {
+
+        QString name = o.value(P_NAME).toString("");
+
+        if(!m_signals_by_name.contains(name)) {
+
+          errors.append(QString(M_SIGNAL_NAME_NOT_FOUND).arg(name));
+
+          emit message(QString(M_SIGNAL_NAME_NOT_FOUND).arg(name), sv::log::llDebug, sv::log::mtError);
+
+          continue;
+        }
+
+        if(m_signals_by_name.value(name)->config()->usecase != modus::UseCase::OUT ||
+           m_signals_by_name.value(name)->config()->usecase != modus::UseCase::VAR) {
+
+          errors.append(QString(M_SIGNAL_NOT_SUITABLE_TYPE).arg(name));
+          emit message(QString(M_SIGNAL_NOT_SUITABLE_TYPE).arg(name), sv::log::llDebug, sv::log::mtError);
+
+          continue;
+        }
+
+        emit message(jv.toString(), sv::log::llDebug, sv::log::mtParse);
+
+        m_signals_by_name.value(name)->setValue(o.value(P_VALUE).toVariant());
+
+      }
+  }
+
+
+  if(!errors.isEmpty()) {
+
+    if(errors.endsWith(',')) errors.chop(1);
+
+    result.append(QString("\"errors\":[").toUtf8()).append(errors).append(']');
+
+  }
+
+  result.append('}').append("\r\n");
+
+  return result;
+
+}
+
+/*QByteArray restapi::SvRestAPI::setEventlog(const QJsonObject& jo)
+{
+  QByteArray result   = QByteArray();
+  result.append('{');
+
+  QByteArray errors = QByteArray();
+
+  if(jo.contains(P_LOGGERS) && jo.value(P_SIGNALS).toArray())
+  QJsonArray ja = jo.value(P_SIGNALS).toArray();
+
+  for(QJsonValue jv: ja) {
+
+    if(!jv.isObject())
+      continue;
+
+    QJsonObject o = jv.toObject();
+
+  }
+}
+*/
+
+QByteArray restapi::SvRestAPI::reply_ws_get(const http::HttpRequest &request)
 {
   auto getErr = [=](int errorCode, QString errorString) -> QByteArray {
 
@@ -810,25 +766,6 @@ QByteArray restapi::SvRestAPI::reply_ws_get(const HttpRequest &request)
 
 }
 
-QByteArray restapi::SvRestAPI::getHttpError(int errorCode, QString errorString)
-{
-  emit message(errorString, sv::log::llError, sv::log::mtError);
-
-  return QByteArray()
-                    .append(QString("HTTP/1.1 %1 Error" \
-                                    "Content-Type: text/html; charset=\"utf-8\"\r\n\r\n"
-                                    "<html>"
-                                    "<head><meta charset=\"UTF-8\"><title>Ошибка</title><head>"
-                                    "<body>"
-                                    "<p style=\"font-size: 16\">%2</p>"
-                                    "<a href=\"index.html\" style=\"font-size: 14\">На главную</a>"
-                                    "<p>%3</p>"
-                                    "</body></html>\n")
-                                        .arg(errorCode)
-                                        .arg(errorString)
-                                        .arg(QDateTime::currentDateTime().toString())
-                                  .toUtf8());
-}
 
 /** ********** EXPORT ************ **/
 modus::SvAbstractInteract* create()
