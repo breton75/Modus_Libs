@@ -56,7 +56,7 @@ void SvUdp::run()
   while(p_is_active) {
 
     p_io_buffer->input->mutex.lock();
-    emit message("udp after lock()", sv::log::llDebug, sv::log::mtReceive);
+//    emit message("udp after lock()", sv::log::llDebug, sv::log::mtReceive);
 
 //    p_io_buffer->input->reset();
 
@@ -73,7 +73,7 @@ void SvUdp::run()
         /* ... the rest of the datagram will be lost ... */
         qint64 readed = m_socket->readDatagram(&p_io_buffer->input->data[p_io_buffer->input->offset], p_config->bufsize - p_io_buffer->input->offset);
 
-        emit message(QString(QByteArray((const char*)&p_io_buffer->input->data[p_io_buffer->input->offset], 10/*readed*/).toHex()), sv::log::llDebug, sv::log::mtReceive);
+        emit message(QString(QByteArray((const char*)&p_io_buffer->input->data[p_io_buffer->input->offset], readed).toHex()), sv::log::llDebug, sv::log::mtReceive);
 
         p_io_buffer->input->offset += readed;
 
@@ -82,19 +82,19 @@ void SvUdp::run()
     }
 
     p_io_buffer->input->mutex.unlock();
-    emit message("udp after unlock()", sv::log::llDebug, sv::log::mtReceive);
+//    emit message("udp after unlock()", sv::log::llDebug, sv::log::mtReceive);
 
     // переключаемся на другой поток
 //    emit message("udp before yield", sv::log::llDebug, sv::log::mtReceive);
 //    QThread::yieldCurrentThread();
 
     p_io_buffer->confirm->mutex.lock();
-    emit message("confirm after lock()", sv::log::llDebug, sv::log::mtReceive);
+//    emit message("confirm after lock()", sv::log::llDebug, sv::log::mtReceive);
     if(p_io_buffer->confirm->ready())
       write(p_io_buffer->confirm);
 
     p_io_buffer->confirm->mutex.unlock();
-    emit message("confirm after unlock()", sv::log::llDebug, sv::log::mtReceive);
+//    emit message("confirm after unlock()", sv::log::llDebug, sv::log::mtReceive);
 
 //    p_io_buffer->input->mutex.lock();
 //    emit message("reset after lock()", sv::log::llDebug, sv::log::mtReceive);
