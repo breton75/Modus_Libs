@@ -75,6 +75,7 @@ class raduga::SvRaduga: public modus::SvAbstractProtocol
 
 public:
   SvRaduga();
+  ~SvRaduga();
 
   bool configure(modus::DeviceConfig* config, modus::IOBuffer *iobuffer) override;
 

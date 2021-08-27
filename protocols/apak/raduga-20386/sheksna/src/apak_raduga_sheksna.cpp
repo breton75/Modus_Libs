@@ -19,6 +19,11 @@ raduga::SvRaduga::SvRaduga():
 
 }
 
+raduga::SvRaduga::~SvRaduga()
+{
+  deleteLater();
+}
+
 bool raduga::SvRaduga::configure(modus::DeviceConfig *config, modus::IOBuffer *iobuffer)
 {
   try {
@@ -121,8 +126,8 @@ void raduga::SvRaduga::run()
 
 //    emit message("protocol before yield", sv::log::llDebug, sv::log::mtReceive);
 //    QThread::yieldCurrentThread();
-
-    msleep(m_params.parse_interval);
+    if(p_is_active)
+      msleep(m_params.parse_interval);
 
   }
 }
