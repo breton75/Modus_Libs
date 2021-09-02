@@ -5,36 +5,49 @@
 
 /** ********** SvWebServer ************ **/
 
-logapi::SvLogAPI::SvLogAPI():
-  modus::SvAbstractInteract(),
-  m_web_server(new QTcpServer(this)),
+httplog::SvHttpEventlog::SvHttpEventlog():
+  modus::SvAbstractProvider(),
+  m_server(new QTcpServer(this)),
   m_is_active(false)
 {
-
+  QDBusConnection::sessionBus().connect(QString(), QString("/%1").arg(P_INTERFACE), DBUS_SERVER_NAME, "message", this, SLOT(messageSlot(const QString&,int,const QString&,const QString&,const QString&)));
+  QDBusConnection::sessionBus().connect(QString(), QString("/%1").arg(P_PROTOCOL),  DBUS_SERVER_NAME, "message", this, SLOT(messageSlot(const QString&,int,const QString&,const QString&,const QString&)));
+  QDBusConnection::sessionBus().connect(QString(), QString("/%1").arg(P_SIGNAL),    DBUS_SERVER_NAME, "message", this, SLOT(messageSlot(const QString&,int,const QString&,const QString&,const QString&)));
+  QDBusConnection::sessionBus().connect(QString(), QString("/%1").arg(P_STORAGE),   DBUS_SERVER_NAME, "message", this, SLOT(messageSlot(const QString&,int,const QString&,const QString&,const QString&)));
+  QDBusConnection::sessionBus().connect(QString(), QString("/%1").arg(P_PROVIDER),  DBUS_SERVER_NAME, "message", this, SLOT(messageSlot(const QString&,int,const QString&,const QString&,const QString&)));
 }
 
-logapi::SvLogAPI::~SvLogAPI()
+httplog::SvHttpEventlog::~SvHttpEventlog()
 {
 
 }
 
-bool logapi::SvLogAPI::init(modus::InteractConfig* config)
+void httplog::SvHttpEventlog::messageSlot(const QString& entity, int id, const QString& type, const QString& time, const QString& message)
+{
+  for(QTcpSocket* client: m_clients) {
+
+    client->write(QString("%1%2:%3:%4\n%5").arg(entity).arg(id).arg(time).arg(type).arg(message).toUtf8());
+
+  }
+}
+
+bool httplog::SvHttpEventlog::configure(modus::ProviderConfig* config)
 {
   p_config = config;
 
   try {
 
-    m_params = logapi::Params::fromJsonString(p_config->params);
+    m_params = httplog::Params::fromJsonString(p_config->params);
 
-    if (!m_web_server->listen(QHostAddress::Any, m_params.port))
+    if (!m_server->listen(QHostAddress::Any, m_params.port))
     {
-      p_last_error = QString("Ошибка запуска сервера %1: %2").arg(p_config->name).arg(m_web_server->errorString());
+      p_last_error = QString("Ошибка запуска сервера %1: %2").arg(p_config->name).arg(m_server->errorString());
 
       return false;
 
     };
 
-//    connect(m_web_server, &QTcpServer::newConnection, this, &logapi::SvLogAPI::newConnection);
+    connect(m_server, &QTcpServer::newConnection, this, &httplog::SvHttpEventlog::newConnection);
 
     return true;
 
@@ -47,26 +60,29 @@ bool logapi::SvLogAPI::init(modus::InteractConfig* config)
   }
 }
 
-void logapi::SvLogAPI::stop()
+void httplog::SvHttpEventlog::stop()
 {
   m_is_active = false;
-  m_web_server->close();
+  m_server->close();
   qDeleteAll(m_clients.begin(), m_clients.end());
 
 }
 
-//void logapi::SvLogAPI::newConnection()
-//{
-//  QTcpSocket *client = m_web_server->nextPendingConnection();
+void httplog::SvHttpEventlog::newConnection()
+{
+  QTcpSocket *client = m_server->nextPendingConnection();
 
-//  connect(client, &QTcpSocket::readyRead, this, &logapi::SvLogAPI::processRequest);
-//  connect(client, &QTcpSocket::disconnected, this, &logapi::SvLogAPI::socketDisconnected);
+  if(!client)
+    return;
 
-//  m_clients << client;
+  connect(client, &QTcpSocket::readyRead, this, &httplog::SvHttpEventlog::processRequest);
+  connect(client, &QTcpSocket::disconnected, this, &httplog::SvHttpEventlog::socketDisconnected);
 
-//}
+  m_clients << client;
 
-void logapi::SvLogAPI::socketDisconnected()
+}
+
+void httplog::SvHttpEventlog::socketDisconnected()
 {
     QTcpSocket *client = qobject_cast<QTcpSocket *>(sender());
 
@@ -76,260 +92,86 @@ void logapi::SvLogAPI::socketDisconnected()
     }
 }
 
-void logapi::SvLogAPI::processRequest()
+void httplog::SvHttpEventlog::processRequest()
 {
-    QTcpSocket *m_client = qobject_cast<QTcpSocket *>(sender());
+    QTcpSocket *client = qobject_cast<QTcpSocket *>(sender());
 
-    QByteArray request = m_client->readAll();
+    QByteArray req = client->readAll();
 
-    QList<QByteArray> parts = request.split('\n');
+    restapi::HttpRequest request = restapi::HttpRequest::parse(req);
 
-    if((parts.count() < 2))
-      return;
+    emit message(QString(req), sv::log::llDebug, sv::log::mtRequest);
 
-    QTextStream serialized(m_client);
-    serialized.readAll();
 
-    bool is_GET  = parts.at(0).toUpper().startsWith("GET");
-    bool is_POST = parts.at(0).toUpper().startsWith("POST");
+    if((request.method == "GET"))
+      client->write(reply_get());
 
-    if(!(is_GET || is_POST))
-      return;
+//    else if (is_POST)
+//      client->write(reply_POST(parts));
 
-    emit message(QString(request), sv::log::llDebug2, sv::log::mtDebug);
-
-//    if(m_logger && m_logger->options().log_level >= sv::log::llDebug2)
-//    {
-//      QStringList sd = QString(request).split("\r\n");
-//      for(QString d: sd)
-//        *m_logger << sv::log::llDebug2 << sv::log::mtDebug << d << sv::log::endl;
-//    }
-
-    if(is_GET)
-      m_client->write(reply_GET(parts));
-
-    else if (is_POST)
-      m_client->write(reply_POST(parts));
-
-    m_client->flush(); // waitForBytesWritten(); //
+    client->flush(); // waitForBytesWritten(); //
 
 
   // нужно закрыть сокет
-  m_client->close();
+//  client->close();
 
 }
 
-void logapi::SvLogAPI::run()
-{
-  while(true)
-  {
-    if(m_web_server->waitForNewConnection(100))
-    {
-      QTcpSocket *client = m_web_server->nextPendingConnection();
-
-      connect(client, &QTcpSocket::readyRead, this, &logapi::SvLogAPI::processRequest);
-      connect(client, &QTcpSocket::disconnected, this, &logapi::SvLogAPI::socketDisconnected);
-
-      m_clients << client;
-
-    }
-  }
-}
-
-QByteArray logapi::SvLogAPI::reply_GET(QList<QByteArray> &parts)
-{
-  auto getErr = [=](int errorCode, QString errorString) -> QByteArray {
-
-    emit message(errorString, sv::log::llError, sv::log::mtError);
-
-//      if(m_logger)
-//        *m_logger <<llError << mtError << errorString << sv::log::endl;
-
-      return QByteArray()
-                        .append(QString("HTTP/1.1 %1 Error" \
-                                "Content-Type: text/html; charset=\"utf-8\"\r\n\r\n"
-                                "<html>"
-                                "<head><meta charset=\"UTF-8\"><title>Ошибка</title><head>"
-                                "<body>"
-                                "<p style=\"font-size: 16\">%2</p>"
-                                "<a href=\"index.html\" style=\"font-size: 14\">На главную</a>"
-                                "<p>%3</p>"
-                                "</body></html>\n")
-                                    .arg(errorCode)
-                                    .arg(errorString)
-                                    .arg(QDateTime::currentDateTime().toString())
-                                .toUtf8());
-  };
-
-  QDir dir(m_params.html_path);
-
-  QString file = QString(parts.at(0).split(' ').at(1));
-
-  if(file.startsWith('/'))
-    file.remove(0, 1);
-
-  if(QFileInfo(dir, file).isDir())
-    file = m_params.index_file;
-
-
-  QByteArray replay = QByteArray();
-
-  QFile f(dir.absoluteFilePath(file));
-
-  if(!f.exists())
-    replay = getErr(404, QString("Файл отсутствует: %1").arg(file));
-
-  else if(!f.open(QIODevice::ReadOnly))
-    replay = getErr(500, f.errorString());
-
-  else
-  {
-    QString content_type = ContentTypeBySuffix.contains(QFileInfo(file).suffix())
-                                   ? ContentTypeBySuffix.value(QFileInfo(file).suffix())
-                                   : "application/octet-stream"; //двоичный файл без указания формата (RFC 2046)
-
-
-    replay.append("HTTP/1.1 200 Ok\r\n")
-          .append(QString("Content-Type: %1; charset=\"utf-8\"\r\n\r\n").arg(content_type).toUtf8())
-          .append(f.readAll())
-          .append("\r\n");
-
-  }
-
-  if(f.isOpen())
-    f.close();
-
-  return replay;
-
-}
-
-QByteArray logapi::SvLogAPI::reply_POST(QList<QByteArray> &parts)
-{
-  auto Var2Str = [](QVariant value) -> QString {
-
-      if(value.isValid())
-      {
-        switch (value.type()) {
-          case QVariant::Int:
-
-            return QString::number(value.toInt());
-            break;
-
-          case QVariant::Double:
-
-            return QString::number(value.toDouble());
-            break;
-
-          default:
-            return "";
-
-        }
-      }
-
-      return "";
-
-  };
-
-  QStringList r1 = QString(parts.last()).split('?');
-
-  if(r1.count() < 2)
-    return QByteArray();
-
-  QString json = ""; // формируем ответ в формате JSON
-
-  if(r1.at(0) == "names")
-  {
-
-    QStringList names = QString(r1.at(1)).split(',');
-
-    for(QString name: names)
-    {
-      if(name.trimmed().isEmpty())
-        continue;
-
-      if(signalsByName()->contains(name))
-        json.append(QString("{\"name\":\"%1\",\"value\":\"%2\"},")
-                      .arg(name).arg(Var2Str(signalsByName()->value(name)->value())));
-
-    }
-
-
-    if(!json.isEmpty()) json.chop(1);
-
-
-  }
-
-  else if(r1.at(0) == "ids")
-  {
-    QStringList ids = QString(r1.at(1)).split(',');
-
-    for(QString curid: ids)
-    {
-      if(curid.trimmed().isEmpty())
-        continue;
-
-      bool ok;
-      int id = curid.toInt(&ok);
-
-      if(ok && signalsById()->contains(id))
-        json.append(QString("{\"id\":\"%1\",\"value\":\"%2\"},")
-                      .arg(id).arg(Var2Str(signalsById()->value(id)->value())));
-
-    }
-
-    if(!json.isEmpty()) json.chop(1);
-
-  }
-
-  QByteArray http = QByteArray()
-                    .append("HTTP/1.0 200 Ok\r\n")
-                    .append("Content-Type: text/json; charset=\"utf-8\"\r\n")
-                    .append(QString("Content-Length: %1\r\n").arg(json.length() + 2))
-                    .append("Access-Control-Allow-Origin: *\r\n")
-                    .append("Access-Control-Allow-Headers: *\r\n")
-                    .append("Origin: file://\r\n\r\n")        //! обязательно два!
-                    .append("[").append(json).append("]\r\n");
-
-//  if(m_logger && m_logger->options().log_level >= sv::log::llDebug2)
-//    *m_logger << sv::log::llDebug2 << sv::log::mtDebug << QString(http) << sv::log::endl;
-
-  emit message(QString(http), sv::log::llDebug2, sv::log::mtDebug);
-
-  return http;
-
-}
-
-//void websrv::SvWebServerThread::reply_GET_error(QTcpSocket& m_client, int errorCode, QString errorString)
+//void httplog::SvHttpEventlog::run()
 //{
-//  if(m_logger)
-//    *m_logger <<llError << mtError << errorString << sv::log::endl;
+//  while(true)
+//  {
+//    if(m_server->waitForNewConnection(100))
+//    {
+//      QTcpSocket *client = m_server->nextPendingConnection();
 
-//  QTextStream replay(&m_client);
-//  replay.setAutoDetectUnicode(true);
+//      connect(client, &QTcpSocket::readyRead, this, &httplog::SvHttpEventlog::processRequest);
+//      connect(client, &QTcpSocket::disconnected, this, &httplog::SvHttpEventlog::socketDisconnected);
 
-//  replay << "HTTP/1.1 %1 Error"
-//         << "Content-Type: text/html; charset=\"utf-8\"\r\n\r\n"
-//         << QString("<html>"
-//                        "<head><meta charset=\"UTF-8\"><title>Ошибка</title><head>"
-//                        "<body>"
-//                        "<p style=\"font-size: 16\">%2</p>"
-//                        "<a href=\"index.html\" style=\"font-size: 14\">На главную</a>"
-//                        "<p>%3</p>"
-//                        "</body></html>\n")
-//            .arg(errorCode)
-//            .arg(errorString)
-//            .arg(QDateTime::currentDateTime().toString());
+//      m_clients << client;
+
+//    }
+//  }
 //}
 
-//void websrv::SvWebServerThread::stop()
-//{
-//  m_started = false;
-//}
+QByteArray httplog::SvHttpEventlog::reply_get()
+{
+  return QByteArray()
+                      .append(QString("HTTP/1.1 200 OK\r\n\
+                              Content-Type: text/html; charset=\"utf-8\"\r\n\r\n\
+                              <html>\
+                              <head><meta charset=\"UTF-8\"><title>Журнал событий</title>\n\
+                                <script>\n\
+                                  var get_log = function() {\
+                                    const webSocket = new WebSocket('ws://' + location.origin);\n\
+                                    \
+                                    webSocket.onopen = event => {\n\
+                                      alert('onopen');\n\
+                                      webSocket.send(\"Hello Web Socket!\");\n\
+                                    };\n\n\
+                                    \
+                                    webSocket.onmessage = event => {\
+                                      alert('onmessage, ' + event.data);\
+                                    };\
+                                    \
+                                    webSocket.onclose = event => {\n\
+                                      alert('onclose');\n\
+                                    };\n\
+                                  }\
+                                </script>\n\
+                              <head>\
+                              <body>\
+                              <button id=\"bnGetLog\" onclick=\"get_log()\" >GET</button>\
+                              <p style=\"text-align:center\"><textarea cols=\"150\" name=\"text\" rows=\"50\"></p>\
+                              </body></html>\n")
+                              .toUtf8());
+//  <p><input name=\"bnGetLog\" type=\"button\" value=\"get\" /></p>
 
+}
 
 /** ********** EXPORT ************ **/
-modus::SvAbstractInteract* create()
+modus::SvAbstractProvider* create()
 {
 //  wd::SvAbstractServer* server = ;
-  return new logapi::SvLogAPI();
+  return new httplog::SvHttpEventlog();
 }

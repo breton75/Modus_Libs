@@ -4,12 +4,12 @@
 #
 #-------------------------------------------------
 
-QT       += network
+QT       += network dbus
 QT       -= gui
 
 CONFIG += c++11 plugin
 
-TARGET = /home/user/Modus/lib/interacts/log_server
+TARGET = /home/user/Modus/lib/interacts/http_eventlog
 TEMPLATE = lib
 
 DEFINES += INTERACT_LOG_LIBRARY

@@ -37,7 +37,7 @@
 
 extern "C" {
 
-    INTERACT_SHARED_EXPORT modus::SvAbstractInteract* create();
+    INTERACT_SHARED_EXPORT modus::SvAbstractProvider* create();
 
 //    VIRTUAL_DEVICESHARED_EXPORT QString defaultDeviceParams();
 //    VIRTUAL_DEVICESHARED_EXPORT QString defaultIfcParams(const QString& ifc);
@@ -51,7 +51,7 @@ namespace restapi {
 
 }
 
-class restapi::SvRestAPI: public modus::SvAbstractInteract
+class restapi::SvRestAPI: public modus::SvAbstractProvider
 {
   Q_OBJECT
 
@@ -59,7 +59,7 @@ public:
   explicit SvRestAPI();
   ~SvRestAPI();
 
-  bool configure(modus::InteractConfig* config, modus::Configuration* configuration) override;
+  bool configure(modus::ProviderConfig* config, modus::Configuration* configuration) override;
 
   void start() override;
   void stop() override;

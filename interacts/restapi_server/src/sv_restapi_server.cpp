@@ -6,7 +6,7 @@
 /** ********** SvWebServer ************ **/
 
 restapi::SvRestAPI::SvRestAPI():
-  modus::SvAbstractInteract(),
+  modus::SvAbstractProvider(),
   m_server(new QTcpServer()),
   m_is_active(false)
 {
@@ -18,7 +18,7 @@ restapi::SvRestAPI::~SvRestAPI()
 
 }
 
-bool restapi::SvRestAPI::configure(modus::InteractConfig* config, modus::Configuration* configuration)
+bool restapi::SvRestAPI::configure(modus::ProviderConfig* config, modus::Configuration* configuration)
 {
   p_config = config;
   p_modus_configiration = configuration;
@@ -50,7 +50,7 @@ bool restapi::SvRestAPI::configure(modus::InteractConfig* config, modus::Configu
 
 bool restapi::SvRestAPI::bindSignal(modus::SvSignal* signal)
 {
-  if(!modus::SvAbstractInteract::bindSignal(signal))
+  if(!modus::SvAbstractProvider::bindSignal(signal))
     return false;
 
   if(!m_signals_by_id.contains(signal->config()->id)) m_signals_by_id.insert(signal->config()->id, signal);
@@ -768,8 +768,8 @@ QByteArray restapi::SvRestAPI::reply_ws_get(const http::HttpRequest &request)
 
 
 /** ********** EXPORT ************ **/
-modus::SvAbstractInteract* create()
+modus::SvAbstractProvider* create()
 {
-  modus::SvAbstractInteract* server = new restapi::SvRestAPI();
+  modus::SvAbstractProvider* server = new restapi::SvRestAPI();
   return server;
 }

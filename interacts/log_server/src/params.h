@@ -18,7 +18,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-#include "../../../../svlib/sv_exception.h"
+#include "../../../../svlib/SvException/svexception.h"
 #include "../../../../Modus/global/global_defs.h"
 
 // имена параметров
@@ -26,12 +26,12 @@
 #define P_INDEX_FILE_NAME       "index_file_name"
 #define P_PATH                  "path"
 
-#define DEFAULT_PORT            80
+#define DEFAULT_PORT            8001
 #define DEFAULT_INDEX_FILE_NAME "index.html"
 #define DEFAULT_PATH            "html/log"
 
 /** структура для хранения параметров **/
-namespace logapi {
+namespace httplog {
 
   struct Params {
 
