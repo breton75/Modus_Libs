@@ -183,7 +183,10 @@ namespace zn1 {
     virtual void processSignals() override;
 
   private:
-    QQueue<modus::SvSignal*> m_queue;
+//    QQueue<QByteArray> m_queue;
+    QByteArray  m_buffer;
+
+    QMutex m_mutex;
 
     sv::tcp::Client* m_socket;
 

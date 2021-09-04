@@ -35,22 +35,11 @@ bool zn1::ZNWriter::bindSignal(modus::SvSignal* signal)
 void zn1::ZNWriter::run() override
 {
   p_is_active = true;
+  qint64 estimate;
 
   while (p_is_active) {
 
-
-    QByteArray packet = QByteArray();
-
-    while(!m_queue.isEmpty()) {
-
-      modus::SvSignal* signal = m_queue.takeFirst();
-
-      packet.append(signal->lastUpdate().toMSecsSinceEpoch())
-            .append(signal->config()->tag.length())
-            .append(signal->config()->tag.toUtf8())
-            .append(signal->value().toByteArray().length())
-            .append(signal->value().toByteArray());
-    }
+    estimate = QDateTime::currentMSecsSinceEpoch() + m_params.interval;
 
     if(m_socket->state() != QAbstractSocket::ConnectedState) {
 
@@ -116,12 +105,16 @@ void zn1::ZNWriter::run() override
       }
     }
 
-
     if(m_socket->state() == QAbstractSocket::ConnectedState) {
 
       // если попали сюда, значит подключение есть и можно писать данные
-      m_socket->write(packet);
+      m_mutex.lock();
+      quint64 sz = m_socket->write(m_buffer);
       m_socket->flush();
+
+      m_buffer.clear(); // ?? здесь ли чистить или после получения ответа подтверждения
+
+      m_mutex.unlock();
 
       if(!m_socket->waitForReadyRead(m_params.interval))
         emit message(QString("Ошибка записи данных в  защищенный накопитель. Нет ответа."), sv::log::llDebug, sv::log::mtFail);
@@ -134,12 +127,15 @@ void zn1::ZNWriter::run() override
                         .arg(reply.length).arg(reply.reply_code).arg(reply.request_code).arg(reply.result).arg(reply.additional.length()),
                      sv::log::llDebug2, sv::log::mtReply);
 
-        emit message(QString("%1 байт данных успешно записаны в хранилище").arg(packet.size()), sv::log::llDebug, sv::log::mtReply);
+        emit message(QString("%1 байт данных успешно записаны в защищенный накопитель").arg(sz), sv::log::llDebug, sv::log::mtReply);
 
       }
     }
 
-    msleep(m_params.interval);
+    while(QDateTime::currentMSecsSinceEpoch() < estimate)
+      qApp->processEvents();
+
+//    msleep(m_params.interval);
 
   }
 }
@@ -147,5 +143,22 @@ void zn1::ZNWriter::run() override
 
 void zn1::ZNWriter::signalUpdated(modus::SvSignal* signal)
 {
-  m_queue.append(signal);
+  m_mutex.lock();
+
+  QDataStream stream(m_buffer);
+
+  stream << signal->lastUpdate().toMSecsSinceEpoch()
+         << static_cast<quint16>(signal->config()->tag.length())
+         << signal->config()->tag.toStdString().c_str()
+         << static_cast<quint16>(signal->value().toByteArray().length());
+
+  m_buffer.append(signal->value().toByteArray());
+
+  m_mutex.unlock();;
+
+//  m_queue.append(QByteArray().append(signal->lastUpdate().toMSecsSinceEpoch())
+//                             .append(static_cast<quint16>(signal->config()->tag.length()))
+//                             .append(signal->config()->tag.toUtf8())
+//                             .append(static_cast<quint16>(signal->value().toByteArray().length()))
+//                             .append(signal->value().toByteArray()));
 }
