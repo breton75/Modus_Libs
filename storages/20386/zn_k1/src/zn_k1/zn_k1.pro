@@ -10,18 +10,21 @@ QT       -= gui
 
 CONFIG += c++11 plugin
 
-TARGET = /home/user/Modus/lib/zn_writer
+TARGET = /home/user/Modus/lib/storages/zn_writer
 TEMPLATE = lib
 
 DEFINES += ZN_K1_LIBRARY
 
 SOURCES += \
-    zn_writer.cpp
+    zn_writer.cpp \
+    ../../../../../../svlib/Network/Tcp/Client/1.0/sv_tcp_client.cpp
 
 HEADERS +=\
     zn_writer.h \
     zn_writer_defs.h \
-    zn_writer_global.h
+    zn_writer_global.h \
+    ../../../../../../Modus/global/storage/sv_abstract_storage.h \
+    ../../../../../../svlib/Network/Tcp/Client/1.0/sv_tcp_client.h
 
 unix {
     target.path = /usr/lib

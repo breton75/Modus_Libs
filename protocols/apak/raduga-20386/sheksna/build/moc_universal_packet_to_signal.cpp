@@ -1,16 +1,16 @@
 /****************************************************************************
-** Meta object code from reading C++ file 'apak_raduga_sheksna.h'
+** Meta object code from reading C++ file 'universal_packet_to_signal.h'
 **
 ** Created by: The Qt Meta Object Compiler version 67 (Qt 5.5.1)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
-#include "../src/apak_raduga_sheksna.h"
+#include "../../../universal_packet_to_signal/src/universal_packet_to_signal.h"
 #include <QtCore/qbytearray.h>
 #include <QtCore/qmetatype.h>
 #if !defined(Q_MOC_OUTPUT_REVISION)
-#error "The header file 'apak_raduga_sheksna.h' doesn't include <QObject>."
+#error "The header file 'universal_packet_to_signal.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 67
 #error "This file was generated using the moc from 5.5.1. It"
 #error "cannot be used with the include files from this version of Qt."
@@ -18,25 +18,25 @@
 #endif
 
 QT_BEGIN_MOC_NAMESPACE
-struct qt_meta_stringdata_raduga__SvRaduga_t {
+struct qt_meta_stringdata_apak__SvUniversalPack_t {
     QByteArrayData data[1];
-    char stringdata0[17];
+    char stringdata0[22];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
-    qptrdiff(offsetof(qt_meta_stringdata_raduga__SvRaduga_t, stringdata0) + ofs \
+    qptrdiff(offsetof(qt_meta_stringdata_apak__SvUniversalPack_t, stringdata0) + ofs \
         - idx * sizeof(QByteArrayData)) \
     )
-static const qt_meta_stringdata_raduga__SvRaduga_t qt_meta_stringdata_raduga__SvRaduga = {
+static const qt_meta_stringdata_apak__SvUniversalPack_t qt_meta_stringdata_apak__SvUniversalPack = {
     {
-QT_MOC_LITERAL(0, 0, 16) // "raduga::SvRaduga"
+QT_MOC_LITERAL(0, 0, 21) // "apak::SvUniversalPack"
 
     },
-    "raduga::SvRaduga"
+    "apak::SvUniversalPack"
 };
 #undef QT_MOC_LITERAL
 
-static const uint qt_meta_data_raduga__SvRaduga[] = {
+static const uint qt_meta_data_apak__SvUniversalPack[] = {
 
  // content:
        7,       // revision
@@ -52,7 +52,7 @@ static const uint qt_meta_data_raduga__SvRaduga[] = {
        0        // eod
 };
 
-void raduga::SvRaduga::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+void apak::SvUniversalPack::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     Q_UNUSED(_o);
     Q_UNUSED(_id);
@@ -60,26 +60,26 @@ void raduga::SvRaduga::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int
     Q_UNUSED(_a);
 }
 
-const QMetaObject raduga::SvRaduga::staticMetaObject = {
-    { &modus::SvAbstractProtocol::staticMetaObject, qt_meta_stringdata_raduga__SvRaduga.data,
-      qt_meta_data_raduga__SvRaduga,  qt_static_metacall, Q_NULLPTR, Q_NULLPTR}
+const QMetaObject apak::SvUniversalPack::staticMetaObject = {
+    { &modus::SvAbstractProtocol::staticMetaObject, qt_meta_stringdata_apak__SvUniversalPack.data,
+      qt_meta_data_apak__SvUniversalPack,  qt_static_metacall, Q_NULLPTR, Q_NULLPTR}
 };
 
 
-const QMetaObject *raduga::SvRaduga::metaObject() const
+const QMetaObject *apak::SvUniversalPack::metaObject() const
 {
     return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
-void *raduga::SvRaduga::qt_metacast(const char *_clname)
+void *apak::SvUniversalPack::qt_metacast(const char *_clname)
 {
     if (!_clname) return Q_NULLPTR;
-    if (!strcmp(_clname, qt_meta_stringdata_raduga__SvRaduga.stringdata0))
-        return static_cast<void*>(const_cast< SvRaduga*>(this));
+    if (!strcmp(_clname, qt_meta_stringdata_apak__SvUniversalPack.stringdata0))
+        return static_cast<void*>(const_cast< SvUniversalPack*>(this));
     return modus::SvAbstractProtocol::qt_metacast(_clname);
 }
 
-int raduga::SvRaduga::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+int apak::SvUniversalPack::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = modus::SvAbstractProtocol::qt_metacall(_c, _id, _a);
     if (_id < 0)

@@ -11,6 +11,16 @@
 
 #include "zn_writer_defs.h"
 
+extern "C" {
+
+    ZN_K1SHARED_EXPORT modus::SvAbstractStorage* create();
+
+//    VIRTUAL_DEVICESHARED_EXPORT QString defaultDeviceParams();
+//    VIRTUAL_DEVICESHARED_EXPORT QString defaultIfcParams(const QString& ifc);
+//    VIRTUAL_DEVICESHARED_EXPORT QList<QString> availableInterfaces();
+
+}
+
 namespace zn1 {
 
   enum ReplyCode {
@@ -180,7 +190,6 @@ namespace zn1 {
 
     virtual bool bindSignal(modus::SvSignal* signal) override;
 
-    virtual void processSignals() override;
 
   private:
 //    QQueue<QByteArray> m_queue;

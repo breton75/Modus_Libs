@@ -14,7 +14,6 @@ bool zn1::ZNWriter::configure(modus::StorageConfig* config)
 
     m_params = zn1::Params::fromJsonString(p_config->params);
 
-    m_socket = new sv::tcp::Client();
 
 
   }
@@ -23,19 +22,24 @@ bool zn1::ZNWriter::configure(modus::StorageConfig* config)
     p_last_error = e.error;
     return false;
   }
+
+  return true;
 }
 
 bool zn1::ZNWriter::bindSignal(modus::SvSignal* signal)
 {
-  modus::SvAbstractStorage::bindSignal(signal);
-
   connect(signal, &modus::SvSignal::updated, this, &ZNWriter::signalUpdated);
+
+  return modus::SvAbstractStorage::bindSignal(signal);
 }
 
-void zn1::ZNWriter::run() override
+void zn1::ZNWriter::run()
 {
   p_is_active = true;
   qint64 estimate;
+
+  m_socket = new sv::tcp::Client(); // обязательно создаем здесь, чтобы объект принадлежал этому потоку
+//  m_socket->moveToThread(this); - так не работает
 
   while (p_is_active) {
 
@@ -47,7 +51,7 @@ void zn1::ZNWriter::run() override
 
         if(!m_socket->connectTo(m_params.host, m_params.port))
           throw SvException(QString("Не удалось подключиться к защищенному накопителю по адресу %1:%2.\n%3")
-                            .arg(m_params.host).arg(m_params.port).arg(m_socket->lastError()));
+                            .arg(m_params.host.toString()).arg(m_params.port).arg(m_socket->lastError()));
 
         else {
 
@@ -88,7 +92,8 @@ void zn1::ZNWriter::run() override
               case ReplyCode::WrongPassword:
               case ReplyCode::AlreadyInUse:
 
-                throw SvException(QString("Ошибка подключения: %1").arg(ReplyCodeMap.value(reply.result, "Ух ты! Как ты это сделал?")));
+                throw SvException(QString("Ошибка подключения: %1")
+                                  .arg(ReplyCodeMap.value(static_cast<zn1::ReplyCode>(reply.result), "Ух ты! Как ты это сделал?")));
                 break;
 
               default:
@@ -154,11 +159,18 @@ void zn1::ZNWriter::signalUpdated(modus::SvSignal* signal)
 
   m_buffer.append(signal->value().toByteArray());
 
-  m_mutex.unlock();;
+  m_mutex.unlock();
 
 //  m_queue.append(QByteArray().append(signal->lastUpdate().toMSecsSinceEpoch())
 //                             .append(static_cast<quint16>(signal->config()->tag.length()))
 //                             .append(signal->config()->tag.toUtf8())
 //                             .append(static_cast<quint16>(signal->value().toByteArray().length()))
 //                             .append(signal->value().toByteArray()));
+}
+
+/** ********** EXPORT ************ **/
+modus::SvAbstractStorage* create()
+{
+  modus::SvAbstractStorage* storage = new zn1::ZNWriter();
+  return storage;
 }
