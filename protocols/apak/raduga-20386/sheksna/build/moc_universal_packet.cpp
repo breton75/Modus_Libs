@@ -1,16 +1,16 @@
 /****************************************************************************
-** Meta object code from reading C++ file 'universal_packet_to_signal.h'
+** Meta object code from reading C++ file 'universal_packet.h'
 **
 ** Created by: The Qt Meta Object Compiler version 67 (Qt 5.5.1)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
-#include "../../../universal_packet_to_signal/src/universal_packet_to_signal.h"
+#include "../../../universal_packet/src/universal_packet.h"
 #include <QtCore/qbytearray.h>
 #include <QtCore/qmetatype.h>
 #if !defined(Q_MOC_OUTPUT_REVISION)
-#error "The header file 'universal_packet_to_signal.h' doesn't include <QObject>."
+#error "The header file 'universal_packet.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 67
 #error "This file was generated using the moc from 5.5.1. It"
 #error "cannot be used with the include files from this version of Qt."

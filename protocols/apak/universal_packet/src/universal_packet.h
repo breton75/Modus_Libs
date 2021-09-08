@@ -4,7 +4,7 @@
 #include <QMutex>
 #include <QMutexLocker>
 
-#include "universal_packet_to_signal_global.h"
+#include "universal_packet_global.h"
 
 #include "../../../../../../Modus/global/device/protocol/sv_abstract_protocol.h"
 #include "../../../../../../Modus/global/signal/sv_signal.h"
@@ -17,7 +17,7 @@
 
 extern "C" {
 
-    UNIVERSAL_PACKET_TO_SIGNAL_EXPORT modus::SvAbstractProtocol* create();
+    UNIVERSAL_PACKET_EXPORT modus::SvAbstractProtocol* create();
 
 //    VIRTUAL_DEVICESHARED_EXPORT QString defaultDeviceParams();
 //    VIRTUAL_DEVICESHARED_EXPORT QString defaultIfcParams(const QString& ifc);

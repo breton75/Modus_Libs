@@ -1,10 +1,10 @@
 QT -= gui
 
-DEFINES += UNIVERSAL_PACKET_TO_SIGNAL_LIBRARY
+DEFINES += UNIVERSAL_PACKET_LIBRARY
 
 CONFIG += c++11 plugin
 
-TARGET = /home/user/Modus/lib/protocols/apak_universal_packet_to_signal
+TARGET = /home/user/Modus/lib/protocols/apak_universal_packet
 TEMPLATE = lib
 
 # The following define makes your compiler emit warnings if you use
@@ -20,14 +20,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     ../../../../../Modus/global/signal/sv_signal.cpp \
-    universal_packet_to_signal.cpp
+    universal_packet.cpp
 
 HEADERS += \
     ../../../../../Modus/global/device/protocol/sv_abstract_protocol.h \
     ../../../../../Modus/global/global_defs.h \
-    universal_packet_to_signal_global.h \
+    universal_packet_global.h \
     ../../../../../Modus/global/signal/sv_signal.h \
-    universal_packet_to_signal.h \
+    universal_packet.h \
     protocol_params.h
 
 # Default rules for deployment.
