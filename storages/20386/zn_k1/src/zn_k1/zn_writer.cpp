@@ -1,5 +1,6 @@
 ﻿#include "zn_writer.h"
 
+#include <QDataStream>
 
 zn1::ZNWriter::ZNWriter()
 {
@@ -13,8 +14,6 @@ bool zn1::ZNWriter::configure(modus::StorageConfig* config)
     p_config = config;
 
     m_params = zn1::Params::fromJsonString(p_config->params);
-
-
 
   }
   catch(SvException& e) {
@@ -40,82 +39,91 @@ void zn1::ZNWriter::run()
 
   m_socket = new sv::tcp::Client(); // обязательно создаем здесь, чтобы объект принадлежал этому потоку
 //  m_socket->moveToThread(this); - так не работает
+  m_socket->setFlags(0);
 
+  m_authorized = false;
   while (p_is_active) {
 
     estimate = QDateTime::currentMSecsSinceEpoch() + m_params.interval;
 
-    if(m_socket->state() != QAbstractSocket::ConnectedState) {
+    try {
 
-      try {
+      // осуществляем физическое подключение к хосту
+      if(m_socket->state() != QAbstractSocket::ConnectedState) {
+
+        m_authorized = false;
 
         if(!m_socket->connectTo(m_params.host, m_params.port))
           throw SvException(QString("Не удалось подключиться к защищенному накопителю по адресу %1:%2.\n%3")
                             .arg(m_params.host.toString()).arg(m_params.port).arg(m_socket->lastError()));
 
+      }
+
+      // теперь авторизуемся на устройстве
+      if((m_socket->state() == QAbstractSocket::ConnectedState) && !m_authorized) {
+
+        zn1::AuthorizeRequest connreq(m_params.zone, m_params.pass);
+
+        QByteArray r = connreq.toByteArray();
+
+        emit message(QString(r.toHex()), sv::log::llDebug, sv::log::mtRequest);
+
+        m_socket->write(r);
+
+        if(!m_socket->waitForReadyRead(m_params.interval))
+          throw SvException(QString("Ошибка авторизации на защищенном накопителе. Нет ответа. %1").arg(m_params.interval));
+
         else {
 
-          zn1::ConnectRequest connreq(m_params.zone, m_params.pass);
+          // анализируем полученный ответ
+          QByteArray r = m_socket->readAll();
 
-          QByteArray r = connreq.toByteArray();
+          emit message(QString(r.toHex()), sv::log::llDebug, sv::log::mtReply);
 
-          emit message(QString(r.toHex()), sv::log::llDebug, sv::log::mtRequest);
+          zn1::AuthorizeReply reply = zn1::AuthorizeReply::parse(r);
 
-          m_socket->write(r);
-          m_socket->flush();
+          emit message(QString("len: %1, reply code: %2, request code: %3, result: %4, addition len: %5 bytes")
+                          .arg(reply.length).arg(reply.reply_code).arg(reply.request_code).arg(reply.result).arg(reply.additional.length()),
+                       sv::log::llDebug2, sv::log::mtParse);
 
-          if(!m_socket->waitForReadyRead(m_params.interval))
-            throw SvException(QString("Ошибка подключения к защищенному накопителю. Нет ответа."));
+          switch (static_cast<ReplyCode>(reply.result)) {
 
-          else {
+            case ReplyCode::Success:
 
-            // анализируем полученный ответ
-            QByteArray r = m_socket->readAll();
+              m_authorized = true;
+              emit message(QString("Успешная авторизация"), sv::log::llDebug, sv::log::mtLogin);
+              break;
 
-            emit message(QString(r.toHex()), sv::log::llDebug, sv::log::mtReply);
+            case ReplyCode::Failure:
+            case ReplyCode::NotSupportedCmd:
+            case ReplyCode::WrongZoneName:
+            case ReplyCode::WrongPassword:
+            case ReplyCode::AlreadyInUse:
 
-            zn1::ConnectReply reply = zn1::ConnectReply::parse(r);
+              throw SvException(QString("Ошибка авторизации: %1")
+                                .arg(ReplyCodeMap.value(static_cast<zn1::ReplyCode>(reply.result), "Ух ты! Как ты это сделал?")));
+              break;
 
-            emit message(QString("len: %1, reply code: %2, request code: %3, result: %4, addition len: %5 bytes")
-                            .arg(reply.length).arg(reply.reply_code).arg(reply.request_code).arg(reply.result).arg(reply.additional.length()),
-                         sv::log::llDebug2, sv::log::mtParse);
-
-            switch (static_cast<ReplyCode>(reply.result)) {
-
-              case ReplyCode::Success:
-
-                break;
-
-              case ReplyCode::Failure:
-              case ReplyCode::NotSupportedCmd:
-              case ReplyCode::WrongZoneName:
-              case ReplyCode::WrongPassword:
-              case ReplyCode::AlreadyInUse:
-
-                throw SvException(QString("Ошибка подключения: %1")
-                                  .arg(ReplyCodeMap.value(static_cast<zn1::ReplyCode>(reply.result), "Ух ты! Как ты это сделал?")));
-                break;
-
-              default:
-                break;
-            }
+            default:
+              break;
           }
         }
       }
-      catch(SvException& e) {
+    }
+    catch(SvException& e) {
 
-        emit message(e.error, sv::log::llDebug, sv::log::mtError);
-        m_socket->disconnectFromHost();
-
-      }
+      emit message(e.error, sv::log::llDebug, sv::log::mtError);
+      m_socket->disconnectFromHost();
+      m_authorized = false;
     }
 
-    if(m_socket->state() == QAbstractSocket::ConnectedState) {
+    if(m_authorized && (m_socket->state() == QAbstractSocket::ConnectedState)) {
 
-      // если попали сюда, значит подключение есть и можно писать данные
+      // если попали сюда, значит есть подключение и авторизация. можно писать данные
       m_mutex.lock();
       quint64 sz = m_socket->write(m_buffer);
-      m_socket->flush();
+
+      emit message(QString("Записано %1 байт в зону %2").arg(sz).arg(m_params.zone), sv::log::llDebug, sv::log::mtSuccess);
 
       m_buffer.clear(); // ?? здесь ли чистить или после получения ответа подтверждения
 
@@ -126,7 +134,7 @@ void zn1::ZNWriter::run()
 
       else {
 
-        zn1::ConnectReply reply = zn1::ConnectReply::parse(m_socket->readAll());
+        zn1::AuthorizeReply reply = zn1::AuthorizeReply::parse(m_socket->readAll());
 
         emit message(QString("len: %1, reply code: %2, request code: %3, result: %4, addition len: %5 bytes")
                         .arg(reply.length).arg(reply.reply_code).arg(reply.request_code).arg(reply.result).arg(reply.additional.length()),
@@ -140,9 +148,9 @@ void zn1::ZNWriter::run()
     while(QDateTime::currentMSecsSinceEpoch() < estimate)
       qApp->processEvents();
 
-//    msleep(m_params.interval);
-
+  //    msleep(m_params.interval);
   }
+
 }
 
 

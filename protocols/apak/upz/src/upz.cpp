@@ -109,10 +109,8 @@ void apak::SvUPZ::run()
 
 //    emit message("protocol before yield", sv::log::llDebug, sv::log::mtReceive);
 //    QThread::yieldCurrentThread();
-    if(p_is_active) {
-      while (QDateTime::currentMSecsSinceEpoch() < estimate)
-        qApp->processEvents();
-    }
+    while (p_is_active && (QDateTime::currentMSecsSinceEpoch() < estimate))
+      qApp->processEvents();
 
   }
 }

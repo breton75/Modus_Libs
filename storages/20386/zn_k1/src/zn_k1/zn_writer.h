@@ -40,12 +40,12 @@ namespace zn1 {
                                                  {WrongPassword,    "Неправильный пароль"         },
                                                  {AlreadyInUse,     "Устройство уже используется" }};
 
-  struct ConnectRequest
+  struct AuthorizeRequest
   {
-    ConnectRequest(QString zone_name = QString(), QString pass = QString(), quint16 cmd = CMD_CONNECT, quint16 access_code = ACC_CODE_WRITE):
+    AuthorizeRequest(QString zone_name = QString(), QString pass = QString(), quint16 cmd = CMD_CONNECT, quint16 access_code = ACC_CODE_WRITE):
+      cmd(cmd),
       zone_name(zone_name),
       pass(pass),
-      cmd(cmd),
       access_code(access_code)
     {
       length = 4 + zone_name.length() + 4 + pass.length() + 2;
@@ -55,14 +55,19 @@ namespace zn1 {
     {
       QByteArray result;
 
-      QDataStream stream(result);
+      QDataStream stream(&result, QIODevice::ReadWrite);
+      stream.setByteOrder(QDataStream::LittleEndian); // !
       stream << length
              << cmd
-             << static_cast<quint32>(zone_name.length())
-             << zone_name.toStdString().c_str()
-             << static_cast<quint32>(pass.length())
-             << pass.toStdString().c_str()
-             << access_code;
+             << static_cast<quint32>(zone_name.length());
+
+      stream.writeRawData(zone_name.toStdString().c_str(), zone_name.length());
+
+      stream << static_cast<quint32>(pass.length());
+
+      stream.writeRawData(pass.toStdString().c_str(), pass.length());
+
+      stream << access_code;
 
       return result;
 
@@ -76,9 +81,9 @@ namespace zn1 {
 
   };
 
-  struct ConnectReply
+  struct AuthorizeReply
   {
-    ConnectReply():
+    AuthorizeReply():
       length(0),
       reply_code(0),
       request_code(0),
@@ -86,9 +91,9 @@ namespace zn1 {
       additional(QByteArray())
     {    }
 
-    static ConnectReply parse(const QByteArray& ba)
+    static AuthorizeReply parse(const QByteArray& ba)
     {
-      ConnectReply result;
+      AuthorizeReply result;
 
       if(ba.size() < 10)
         return result;
@@ -116,8 +121,8 @@ namespace zn1 {
   struct WriteRequest
   {
     WriteRequest(const QByteArray& data):
-      data(data),
-      cmd(CMD_WRITE)
+      cmd(CMD_WRITE),
+      data(data)
     {
       length = data.length();
     }
@@ -126,7 +131,8 @@ namespace zn1 {
     {
       QByteArray result;
 
-      QDataStream stream(result);
+      QDataStream stream(&result, QIODevice::ReadWrite);
+      stream.setByteOrder(QDataStream::LittleEndian); // !
       stream << length << cmd;
 
       result.append(data);
@@ -200,6 +206,8 @@ namespace zn1 {
     sv::tcp::Client* m_socket;
 
     zn1::Params m_params;
+
+    bool m_authorized;
 
   protected:
     void run() override;
