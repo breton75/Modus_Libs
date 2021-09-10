@@ -18,9 +18,11 @@
 #define P_PORT            "port"
 #define P_ZONE            "zone"
 #define P_PASS            "pass"
+#define P_QUEUE_LEN       "queue_len"
 
 #define DEFAULT_PORT      10000
 #define DEFAULT_INTERVAL  1000
+#define DEFAULT_QUEUE_LEN 1000
 
 #define CMD_CONNECT       200
 #define CMD_ANSWER        100
@@ -32,11 +34,12 @@ namespace zn1 {
 
   struct Params {
 
-    QHostAddress host     = QHostAddress();
-    quint16      port     = DEFAULT_PORT;
-    quint16      interval = DEFAULT_INTERVAL;
-    QString      zone     = QString();
-    QString      pass     = QString();
+    QHostAddress host      = QHostAddress();
+    quint16      port      = DEFAULT_PORT;
+    quint16      interval  = DEFAULT_INTERVAL;
+    QString      zone      = QString();
+    QString      pass      = QString();
+    int          queue_len = DEFAULT_QUEUE_LEN;
 
     static Params fromJsonString(const QString& json_string) //throw (SvException)
     {
@@ -133,6 +136,21 @@ namespace zn1 {
       else
         throw SvException(QString(MISSING_PARAM).arg(P));
 
+      /* queue length */
+      P = P_QUEUE_LEN;
+      if(object.contains(P))
+      {
+        if(object.value(P).toInt(-1) < 1)
+          throw SvException(QString(IMPERMISSIBLE_VALUE)
+                             .arg(P).arg(object.value(P).toVariant().toString())
+                             .arg("Длина очереди на запись должна быть задан целым положительным числом"));
+
+        p.queue_len = object.value(P).toInt(DEFAULT_QUEUE_LEN);
+
+      }
+      else
+        p.queue_len = DEFAULT_QUEUE_LEN;
+
 
       return p;
 
@@ -150,9 +168,12 @@ namespace zn1 {
     {
       QJsonObject j;
 
-      j.insert(P_HOST,     QJsonValue(host.toString()).toString());
-      j.insert(P_PORT,     QJsonValue(static_cast<int>(port)).toInt());
-      j.insert(P_INTERVAL, QJsonValue(static_cast<int>(interval)).toInt());
+      j.insert(P_HOST,      QJsonValue(host.toString()).toString());
+      j.insert(P_PORT,      QJsonValue(static_cast<int>(port)).toInt());
+      j.insert(P_INTERVAL,  QJsonValue(static_cast<int>(interval)).toInt());
+      j.insert(P_ZONE,      QJsonValue(zone).toString());
+      j.insert(P_PASS,      QJsonValue(pass).toString());
+      j.insert(P_QUEUE_LEN, QJsonValue(static_cast<int>(queue_len)).toInt());
 
       return j;
 

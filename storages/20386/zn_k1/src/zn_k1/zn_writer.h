@@ -5,6 +5,7 @@
 
 #include "../../../../../../svlib/Network/Tcp/Client/1.0/sv_tcp_client.h"
 #include "../../../../../../svlib/SvException/svexception.h"
+#include "../../../../../../svlib/SvCRC/1.1/sv_crc.h"
 
 #include "../../../../../../Modus/global/storage/sv_abstract_storage.h"
 #include "../../../../../../Modus/global/dbus/sv_dbus.h"
@@ -99,6 +100,8 @@ namespace zn1 {
         return result;
 
       QDataStream stream(ba);
+      stream.setByteOrder(QDataStream::LittleEndian); // !
+
       stream >> result.length
              >> result.reply_code
              >> result.request_code
@@ -165,6 +168,8 @@ namespace zn1 {
         return result;
 
       QDataStream stream(ba);
+      stream.setByteOrder(QDataStream::LittleEndian); // !
+
       stream >> result.length
              >> result.reply_code
              >> result.request_code
@@ -184,6 +189,116 @@ namespace zn1 {
 
   };
 
+  struct BanchHeader {
+
+    const char    marker[4] = {'\170', '\170', '\170', '\170'}; // 0xAAAAAAAA
+
+    BanchHeader(): valid(false)
+    {
+
+    }
+
+    qint64  coarseDateTime;
+    quint32 dataLength;
+    quint16 crc16;
+
+    bool valid;
+
+    void reset()
+    {
+      valid = false;
+    }
+
+    QByteArray toByteArray()
+    {
+      QByteArray result(&marker[0], 4);
+
+      QDataStream stream(result);
+      stream.setByteOrder(QDataStream::LittleEndian);
+
+      stream << coarseDateTime
+             << dataLength;
+
+      crc16 = crc::crc16ccitt(reinterpret_cast<unsigned char*>(result.data()), result.length());
+
+      stream << crc16;
+
+      return result;
+
+    }
+  };
+
+  struct Record
+  {
+    Record();
+
+    Record(qint64  dateTime, const QString& protocolIdentifier, const QByteArray& data);
+
+    qint64      dateTime;
+    QString     protocolIdentifier;
+    QByteArray  data;
+
+    QByteArray toByteArray()
+    {
+      QByteArray result;
+
+      QDataStream stream(result);
+      stream.setByteOrder(QDataStream::LittleEndian);
+
+      stream << dateTime << static_cast<quint16>(protocolIdentifier.length());
+      stream.writeRawData(protocolIdentifier.toStdString().c_str(), protocolIdentifier.length());
+      stream << static_cast<quint16>(data.length());
+
+      result.append(data);
+
+      return result;
+
+    }
+  };
+
+  class Bunch
+  {
+
+  public:
+    enum States {
+      Undefined,
+      Underway,
+      Undelivered,
+      Delivered,
+      Ready
+    };
+
+
+    Bunch(qint64 coarseDateTime, States state = Underway):
+      data(QByteArray()),
+      state(state)
+    {
+      header.coarseDateTime = coarseDateTime;
+    }
+
+    BanchHeader  header;
+    QByteArray    data;
+    States        state;
+
+    void setState(States state)
+    {
+      this->state = state;
+    }
+
+    QByteArray toByteArray()
+    {
+      return QByteArray().append(header.toByteArray()).append(data);
+    }
+
+    void reset()
+    {
+      header.reset();
+      data.clear();
+      state = Undefined;
+    }
+
+  };
+
   class ZNWriter: public modus::SvAbstractStorage
   {
 
@@ -193,21 +308,14 @@ namespace zn1 {
     ZNWriter();
 
     virtual bool configure(modus::StorageConfig* config) override;
-
     virtual bool bindSignal(modus::SvSignal* signal) override;
 
-
   private:
-//    QQueue<QByteArray> m_queue;
-    QByteArray  m_buffer;
-
-    QMutex m_mutex;
-
-    sv::tcp::Client* m_socket;
-
-    zn1::Params m_params;
-
-    bool m_authorized;
+    QQueue<Bunch*>    m_bunches;
+    QMutex            m_mutex;
+    sv::tcp::Client*  m_socket;
+    zn1::Params       m_params;
+    bool              m_authorized;
 
   protected:
     void run() override;

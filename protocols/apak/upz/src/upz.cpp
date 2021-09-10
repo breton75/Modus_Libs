@@ -84,10 +84,7 @@ void apak::SvUPZ::run()
 {
   p_is_active = bool(p_config) && bool(p_io_buffer);
 
-  qint64 estimate;
   while(p_is_active) {
-
-    estimate = QDateTime::currentMSecsSinceEpoch() + m_params.parse_interval;
 
     p_io_buffer->confirm->mutex.lock();     // если нужен ответ квитирование
     p_io_buffer->input->mutex.lock();
@@ -107,10 +104,7 @@ void apak::SvUPZ::run()
 
 //    p_io_buffer->output->mutex.unlock();
 
-//    emit message("protocol before yield", sv::log::llDebug, sv::log::mtReceive);
-//    QThread::yieldCurrentThread();
-    while (p_is_active && (QDateTime::currentMSecsSinceEpoch() < estimate))
-      qApp->processEvents();
+    msleep(m_params.parse_interval);
 
   }
 }
