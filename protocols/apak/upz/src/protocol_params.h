@@ -1,5 +1,5 @@
-﻿#ifndef RADUGA_PROTOCOL_PARAMS
-#define RADUGA_PROTOCOL_PARAMS
+﻿#ifndef UPZ_PROTOCOL_PARAMS
+#define UPZ_PROTOCOL_PARAMS
 
 #include <QString>
 #include <QtCore>
@@ -11,14 +11,12 @@
 #include "../../../../../../Modus/global/global_defs.h"
 //#include "../../../../../Modus/global/device/device_defs.h"
 
-#define P_ABONENT  "abonent"
-
 namespace apak {
 
   struct ProtocolParams {
 
-    quint16 packid         = 0;
-    quint16 abonent        = 0;
+//    quint16 packid         = 0;
+//    quint16 abonent        = 0;
     quint16 parse_interval = 1000;
 
     static ProtocolParams fromJson(const QString& json_string) //throw (SvException)
@@ -44,35 +42,35 @@ namespace apak {
       ProtocolParams p;
       QString P;
 
-      P = P_PACKID;
-      if(object.contains(P)) {
+//      P = P_PACKID;
+//      if(object.contains(P)) {
 
-        if(object.value(P).toInt(-1) < 0)
-          throw SvException(QString(IMPERMISSIBLE_VALUE)
-                            .arg(P)
-                            .arg(object.value(P).toVariant().toString())
-                            .arg("Идентификатор пакета должен быть задан двухбайтным целым числом"));
+//        if(object.value(P).toInt(-1) < 0)
+//          throw SvException(QString(IMPERMISSIBLE_VALUE)
+//                            .arg(P)
+//                            .arg(object.value(P).toVariant().toString())
+//                            .arg("Идентификатор пакета должен быть задан двухбайтным целым числом"));
 
-        p.packid = object.value(P).toInt();
+//        p.packid = object.value(P).toInt();
 
-      }
-      else
-        throw SvException(QString(MISSING_PARAM).arg(P));
+//      }
+//      else
+//        throw SvException(QString(MISSING_PARAM).arg(P));
 
-      P = P_ABONENT;
-      if(object.contains(P)) {
+//      P = P_ABONENT;
+//      if(object.contains(P)) {
 
-        if(object.value(P).toInt(-1) < 0)
-          throw SvException(QString(IMPERMISSIBLE_VALUE)
-                                 .arg(P)
-                                 .arg(object.value(P).toVariant().toString())
-                                 .arg("Идентификатор абонента должен быть задан двухбайтным целым числом"));
+//        if(object.value(P).toInt(-1) < 0)
+//          throw SvException(QString(IMPERMISSIBLE_VALUE)
+//                                 .arg(P)
+//                                 .arg(object.value(P).toVariant().toString())
+//                                 .arg("Идентификатор абонента должен быть задан двухбайтным целым числом"));
 
-        p.abonent = object.value(P).toInt();
+//        p.abonent = object.value(P).toInt();
 
-      }
-      else
-        throw SvException(QString(MISSING_PARAM).arg(P));
+//      }
+//      else
+//        throw SvException(QString(MISSING_PARAM).arg(P));
 
       P = P_PARSE_INTERVAL;
       if(object.contains(P)) {
@@ -87,7 +85,7 @@ namespace apak {
 
       }
       else
-        p.parse_interval = 1000;
+        throw SvException(QString(MISSING_PARAM).arg(P));
 
       return p;
 
@@ -105,8 +103,8 @@ namespace apak {
     {
       QJsonObject j;
 
-      j.insert(P_PACKID,          QJsonValue(packid).toString());
-      j.insert(P_ABONENT,         QJsonValue(abonent).toInt());
+//      j.insert(P_PACKID,          QJsonValue(packid).toString());
+//      j.insert(P_ABONENT,         QJsonValue(abonent).toInt());
       j.insert(P_PARSE_INTERVAL,  QJsonValue(parse_interval).toInt());
 
       return j;
@@ -115,5 +113,5 @@ namespace apak {
   };
 }
 
-#endif // RADUGA_PROTOCOL_PARAMS
+#endif // UPZ_PROTOCOL_PARAMS
 

@@ -18,7 +18,7 @@ bool apak::SvUPZ::configure(modus::DeviceConfig *config, modus::IOBuffer *iobuff
     p_config = config;
     p_io_buffer = iobuffer;
 
-//    m_params = apak::ProtocolParams::fromJson(p_config->protocol.params);
+    m_params = apak::ProtocolParams::fromJson(p_config->protocol.params);
 
     return true;
 
@@ -92,6 +92,8 @@ void apak::SvUPZ::run()
     if(p_io_buffer->input->ready()) {
 
       m_signal->setValue(QByteArray(p_io_buffer->input->data, p_io_buffer->input->offset));
+      emit message(QString("signal %1 updated").arg(m_signal->config()->name), sv::log::llDebug, sv::log::mtParse);
+
       p_io_buffer->input->reset();
     }
 

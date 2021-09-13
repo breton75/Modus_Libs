@@ -92,6 +92,8 @@ void apak::SvUniversalPack::run()
     if(p_io_buffer->input->ready()) {
 
       m_signal->setValue(QByteArray(p_io_buffer->input->data, p_io_buffer->input->offset));
+      emit message(QString("signal %1 updated").arg(m_signal->config()->name), sv::log::llDebug, sv::log::mtParse);
+
       p_io_buffer->input->reset();
     }
 

@@ -1,6 +1,6 @@
 ﻿#include "zn_writer.h"
 
-#include <QDataStream>
+QMutex zn1::ZNWriter::m_mutex;
 
 zn1::ZNWriter::ZNWriter()
 {
@@ -27,7 +27,11 @@ bool zn1::ZNWriter::configure(modus::StorageConfig* config)
 
 bool zn1::ZNWriter::bindSignal(modus::SvSignal* signal)
 {
+
+    qDebug() << QString("run. cal thread %1, current thread: %2").arg(reinterpret_cast<quint64>(this->thread()))
+                 .arg(reinterpret_cast<quint64>(currentThread()));
   connect(signal, &modus::SvSignal::updated, this, &ZNWriter::signalUpdated);
+  moveToThread(new QThread);
 
   return modus::SvAbstractStorage::bindSignal(signal);
 }
@@ -39,6 +43,12 @@ void zn1::ZNWriter::run()
   m_socket = new sv::tcp::Client(); // обязательно создаем здесь, чтобы объект принадлежал этому потоку
 //  m_socket->moveToThread(this); - так не работает
   m_socket->setFlags(0);
+
+
+//  moveToThread(currentThread());
+
+  qDebug() << QString("run. cal thread %1, current thread: %2").arg(reinterpret_cast<quint64>(this->thread()))
+               .arg(reinterpret_cast<quint64>(currentThread()));
 
   m_authorized = false;
   while (p_is_active) {
@@ -84,7 +94,7 @@ void zn1::ZNWriter::run()
 
             emit message(QString("len: %1, reply code: %2, request code: %3, result: %4, addition len: %5 bytes")
                             .arg(reply.length).arg(reply.reply_code).arg(reply.request_code).arg(reply.result).arg(reply.additional.length()),
-                         sv::log::llDebug2, sv::log::mtParse);
+                         sv::log::llDebug2, sv::log::mtDebug);
 
             switch (static_cast<ReplyCode>(reply.result)) {
 
@@ -116,7 +126,8 @@ void zn1::ZNWriter::run()
         if(m_authorized && (m_socket->state() == QAbstractSocket::ConnectedState)) {
 
           // если попали сюда, значит есть подключение и авторизация. можно писать данные
-          m_mutex.lock();
+          zn1::ZNWriter::m_mutex.lock();
+          emit message(QString("2. m_mutex.lock()"), sv::log::llDebug, sv::log::mtDebug1);
 
           if(!m_bunches.isEmpty()) {
 
@@ -127,7 +138,12 @@ void zn1::ZNWriter::run()
 
               quint64 sz = m_socket->write(m_bunches.first()->toByteArray());
 
-              emit message(QString("Пытаюсь записать %1 байт в зону %2").arg(sz).arg(m_params.zone), sv::log::llDebug2, sv::log::mtSuccess);
+              emit message(QString("запись данных. thread %1, mutex: %2").arg(reinterpret_cast<quint64>(currentThread()))
+                           .arg(reinterpret_cast<quint64>(&zn1::ZNWriter::m_mutex)), sv::log::llDebug, sv::log::mtDebug);
+//              emit message(QString("header %1").arg(QString(m_bunches.first()->toByteArray().left(18).toHex())), sv::log::llDebug2, sv::log::mtSend);
+
+              emit message(QString("Пытаюсь записать %1 байт в зону %2").arg(m_bunches.first()->length()).arg(m_params.zone),
+                           sv::log::llDebug2, sv::log::mtDebug);
 
               if(!m_socket->waitForReadyRead(m_params.interval))
                 emit message(QString("Ошибка записи данных в  защищенный накопитель. Нет ответа."), sv::log::llDebug, sv::log::mtFail);
@@ -138,7 +154,7 @@ void zn1::ZNWriter::run()
 
                 emit message(QString("len: %1, reply code: %2, request code: %3, result: %4, addition len: %5 bytes")
                                 .arg(reply.length).arg(reply.reply_code).arg(reply.request_code).arg(reply.result).arg(reply.additional.length()),
-                             sv::log::llDebug2, sv::log::mtReply);
+                             sv::log::llDebug2, sv::log::mtDebug);
 
                 switch (static_cast<ReplyCode>(reply.result )) {
 
@@ -163,8 +179,8 @@ void zn1::ZNWriter::run()
               }
             }
           }
-
-          m_mutex.unlock();
+          emit message(QString("2. m_mutex.unlock()"), sv::log::llDebug, sv::log::mtDebug1);
+          zn1::ZNWriter::m_mutex.unlock();
         }
       } //! ~3
 
@@ -184,7 +200,8 @@ void zn1::ZNWriter::run()
 
 void zn1::ZNWriter::signalUpdated(modus::SvSignal* signal)
 {
-  m_mutex.lock();
+  zn1::ZNWriter::m_mutex.lock();
+  emit message(QString("1. m_mutex.lock()"), sv::log::llDebug, sv::log::mtDebug1);
 
   if(m_bunches.isEmpty() || (m_bunches.last()->state != Bunch::Underway)) {
 
@@ -193,15 +210,27 @@ void zn1::ZNWriter::signalUpdated(modus::SvSignal* signal)
 
     m_bunches.enqueue(new Bunch(QDateTime::currentMSecsSinceEpoch()));
 
+    QByteArray b;
+
+    QDataStream s(&b, QIODevice::WriteOnly);
+    s.setByteOrder(QDataStream::LittleEndian);
+    qint64 t = QDateTime::currentMSecsSinceEpoch();
+    s << t;
+//qDebug() << b;
+    emit message(QString("Bunch added. thread %1, mutex: %2").arg(reinterpret_cast<quint64>(currentThread()))
+                 .arg(reinterpret_cast<quint64>(&zn1::ZNWriter::m_mutex)), sv::log::llDebug2, sv::log::mtDebug);
+
   }
 
-  else //if(m_records.last()->state == Record::Underway)
+  if(m_bunches.last()->state == Bunch::Underway)
   {
     Record p(signal->lastUpdate().toMSecsSinceEpoch(), signal->config()->tag, signal->value().toByteArray());
     m_bunches.last()->data.append(p.toByteArray());
   }
 
-  m_mutex.unlock();
+//  emit message(QString("Bunch data size %1").arg(m_bunches.last()->data.length()), sv::log::llDebug2, sv::log::mtDebug);
+  emit message(QString("1. m_mutex.unlock()"), sv::log::llDebug, sv::log::mtDebug1);
+  zn1::ZNWriter::m_mutex.unlock();
 
 }
 

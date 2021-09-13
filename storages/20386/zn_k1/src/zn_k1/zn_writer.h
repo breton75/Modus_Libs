@@ -1,6 +1,8 @@
 ﻿#ifndef ZN_K1_H
 #define ZN_K1_H
 
+#include <QDataStream>
+
 #include "zn_writer_global.h"
 
 #include "../../../../../../svlib/Network/Tcp/Client/1.0/sv_tcp_client.h"
@@ -191,48 +193,69 @@ namespace zn1 {
 
   struct BanchHeader {
 
-    const char    marker[4] = {'\170', '\170', '\170', '\170'}; // 0xAAAAAAAA
+    const char    marker[4] = {char(0xAA), char(0xAA), char(0xAA), char(0xAA)}; // 0xAAAAAAAA
 
-    BanchHeader(): valid(false)
+    BanchHeader(qint64 coarseDateTime = 0):
+      coarseDateTime(coarseDateTime)
+//      dataLength(0),
+//      crc16(0)
     {
 
     }
+
+//    void reset()
+//    {
+//      coarseDateTime = 0;
+//      dataLength = 0;
+//      crc16 = 0;
+//    }
 
     qint64  coarseDateTime;
-    quint32 dataLength;
-    quint16 crc16;
+//    quint32 dataLength;
+//    quint16 crc16;
 
-    bool valid;
-
-    void reset()
+    QByteArray toByteArray(quint32 dataLength)
     {
-      valid = false;
-    }
+      QByteArray result(&marker[0], sizeof(marker));
 
-    QByteArray toByteArray()
-    {
-      QByteArray result(&marker[0], 4);
-
-      QDataStream stream(result);
+      QDataStream stream(&result, QIODevice::WriteOnly);
       stream.setByteOrder(QDataStream::LittleEndian);
 
       stream << coarseDateTime
              << dataLength;
 
-      crc16 = crc::crc16ccitt(reinterpret_cast<unsigned char*>(result.data()), result.length());
+//      crc16 = crc::crc16ccitt(result);
 
-      stream << crc16;
+      stream << quint16(crc::crc16ccitt(result));
 
       return result;
 
     }
+
+    quint32 length()
+    {
+      return sizeof(marker) + sizeof(coarseDateTime) + sizeof(quint32) + sizeof(quint16);
+    }
+
   };
 
   struct Record
   {
-    Record();
+    Record():
+      dateTime(0),
+      protocolIdentifier(QString()),
+      data(QByteArray())
+    {
 
-    Record(qint64  dateTime, const QString& protocolIdentifier, const QByteArray& data);
+    }
+
+    Record(qint64  dateTime, const QString& protocolIdentifier, const QByteArray& data):
+      dateTime(dateTime),
+      protocolIdentifier(protocolIdentifier),
+      data(data)
+    {
+
+    }
 
     qint64      dateTime;
     QString     protocolIdentifier;
@@ -242,7 +265,7 @@ namespace zn1 {
     {
       QByteArray result;
 
-      QDataStream stream(result);
+      QDataStream stream(&result, QIODevice::WriteOnly);
       stream.setByteOrder(QDataStream::LittleEndian);
 
       stream << dateTime << static_cast<quint16>(protocolIdentifier.length());
@@ -268,17 +291,17 @@ namespace zn1 {
       Ready
     };
 
-
-    Bunch(qint64 coarseDateTime, States state = Underway):
+    Bunch(qint64 coarseDateTime = 0, States state = Underway):
+      header(BanchHeader(coarseDateTime)),
       data(QByteArray()),
       state(state)
     {
-      header.coarseDateTime = coarseDateTime;
+
     }
 
     BanchHeader  header;
-    QByteArray    data;
-    States        state;
+    QByteArray   data;
+    States       state;
 
     void setState(States state)
     {
@@ -287,15 +310,30 @@ namespace zn1 {
 
     QByteArray toByteArray()
     {
-      return QByteArray().append(header.toByteArray()).append(data);
+      QByteArray result;
+
+      QDataStream stream(&result, QIODevice::WriteOnly);
+      stream.setByteOrder(QDataStream::LittleEndian);
+
+      stream << quint32(length())
+             << quint16(CMD_WRITE);
+
+      result.append(header.toByteArray(data.length())).append(data);
+
+      return result;
     }
 
-    void reset()
+    quint32 length()
     {
-      header.reset();
-      data.clear();
-      state = Undefined;
+      return quint32(header.length() + data.length());
     }
+
+//    void reset()
+//    {
+//      header.reset();
+//      data.clear();
+//      state = Undefined;
+//    }
 
   };
 
@@ -307,12 +345,14 @@ namespace zn1 {
   public:
     ZNWriter();
 
+    static QMutex            m_mutex;
+
     virtual bool configure(modus::StorageConfig* config) override;
     virtual bool bindSignal(modus::SvSignal* signal) override;
 
   private:
     QQueue<Bunch*>    m_bunches;
-    QMutex            m_mutex;
+
     sv::tcp::Client*  m_socket;
     zn1::Params       m_params;
     bool              m_authorized;
