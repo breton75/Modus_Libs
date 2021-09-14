@@ -102,14 +102,14 @@ namespace zn1 {
         return result;
 
       QDataStream stream(ba);
-      stream.setByteOrder(QDataStream::LittleEndian); // !
+      stream.setByteOrder(QDataStream::LittleEndian); //!
 
       stream >> result.length
              >> result.reply_code
              >> result.request_code
              >> result.result;
 
-      result.additional = ba.right(result.length - 4); // согласно протокола
+      result.additional = ba.right(result.length - 10); // согласно протокола
 
       return result;
 
@@ -166,18 +166,18 @@ namespace zn1 {
     {
       WriteReply result;
 
-      if(ba.size() < 10)
+      if(ba.length() < 10)
         return result;
 
       QDataStream stream(ba);
-      stream.setByteOrder(QDataStream::LittleEndian); // !
+      stream.setByteOrder(QDataStream::LittleEndian); //!
 
       stream >> result.length
              >> result.reply_code
              >> result.request_code
              >> result.result;
 
-      result.additional = ba.right(result.length - 4); // согласно протокола
+      result.additional = ba.right(result.length - 10); // согласно протокола
 
       return result;
 
@@ -303,6 +303,8 @@ namespace zn1 {
     QByteArray   data;
     States       state;
 
+//    QMutex mutex;
+
     void setState(States state)
     {
       this->state = state;
@@ -311,12 +313,6 @@ namespace zn1 {
     QByteArray toByteArray()
     {
       QByteArray result;
-
-      QDataStream stream(&result, QIODevice::WriteOnly);
-      stream.setByteOrder(QDataStream::LittleEndian);
-
-      stream << quint32(length())
-             << quint16(CMD_WRITE);
 
       result.append(header.toByteArray(data.length())).append(data);
 
@@ -337,6 +333,7 @@ namespace zn1 {
 
   };
 
+
   class ZNWriter: public modus::SvAbstractStorage
   {
 
@@ -345,23 +342,28 @@ namespace zn1 {
   public:
     ZNWriter();
 
-    static QMutex            m_mutex;
+
 
     virtual bool configure(modus::StorageConfig* config) override;
-    virtual bool bindSignal(modus::SvSignal* signal) override;
+//    virtual bool bindSignal(modus::SvSignal* signal) override;
 
   private:
-    QQueue<Bunch*>    m_bunches;
+
 
     sv::tcp::Client*  m_socket;
     zn1::Params       m_params;
     bool              m_authorized;
 
   protected:
+//    void run() override;
     void run() override;
 
   private slots:
-    void signalUpdated(modus::SvSignal* signal);
+    void signalUpdated(modus::SvSignal* signal) override;
+    void signalChanged(modus::SvSignal* signal) override
+    {
+      Q_UNUSED(signal);
+    }
 
   };
 }
