@@ -263,7 +263,10 @@ namespace zn1 {
 
     QByteArray toByteArray()
     {
-      QByteArray result;
+      QByteArray result = QByteArray();
+
+      if((dateTime <= 0) || protocolIdentifier.isNull() || protocolIdentifier.isEmpty())
+        return result;
 
       QDataStream stream(&result, QIODevice::WriteOnly);
       stream.setByteOrder(QDataStream::LittleEndian);
@@ -292,44 +295,54 @@ namespace zn1 {
     };
 
     Bunch(qint64 coarseDateTime = 0, States state = Underway):
-      header(BanchHeader(coarseDateTime)),
-      data(QByteArray()),
-      state(state)
+      m_header(BanchHeader(coarseDateTime)),
+      m_data(QByteArray()),
+      m_state(state),
+      m_record_count(0)
     {
 
     }
 
-    BanchHeader  header;
-    QByteArray   data;
-    States       state;
-
-//    QMutex mutex;
+    const BanchHeader header()  const { return m_header; }
+    const QByteArray& data()    const { return m_data;   }
+    States      state()               { return m_state;  }
 
     void setState(States state)
     {
-      this->state = state;
+      m_state = state;
+    }
+
+    void appendRecord(const QByteArray& record)
+    {
+      m_data.append(record);
+      m_record_count++;
     }
 
     QByteArray toByteArray()
     {
       QByteArray result;
 
-      result.append(header.toByteArray(data.length())).append(data);
+      result.append(m_header.toByteArray(m_data.length())).append(m_data);
 
       return result;
     }
 
     quint32 length()
     {
-      return quint32(header.length() + data.length());
+      return quint32(m_header.length() + m_data.length());
     }
 
-//    void reset()
-//    {
-//      header.reset();
-//      data.clear();
-//      state = Undefined;
-//    }
+    quint16 recordCount()
+    {
+      return m_record_count;
+    }
+
+  private:
+    BanchHeader  m_header;
+    QByteArray   m_data;
+    States       m_state;
+
+    quint16 m_record_count;
 
   };
 
@@ -342,21 +355,26 @@ namespace zn1 {
   public:
     ZNWriter();
 
-
-
     virtual bool configure(modus::StorageConfig* config) override;
-//    virtual bool bindSignal(modus::SvSignal* signal) override;
+
+    virtual void disposeInputSignal  (modus::SvSignal* signal) override;
+    virtual void disposeOutputSignal (modus::SvSignal* signal) override;
+
+    void start() override;
 
   private:
 
+    QQueue<zn1::Bunch*>    bunches;
 
     sv::tcp::Client*  m_socket;
     zn1::Params       m_params;
     bool              m_authorized;
 
-  protected:
-//    void run() override;
-    void run() override;
+    QTimer tm;
+
+    QMap<QString, modus::SvSignal*> m_zn_state;
+
+    void setState(int doChangeFlags, const QString& writeState = STATE_OK, const QString& authorization = STATE_OK, const QString& connectionState = STATE_OK);
 
   private slots:
     void signalUpdated(modus::SvSignal* signal) override;
@@ -364,6 +382,8 @@ namespace zn1 {
     {
       Q_UNUSED(signal);
     }
+
+    void write();
 
   };
 }

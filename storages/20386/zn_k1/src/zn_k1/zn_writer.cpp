@@ -1,9 +1,11 @@
 ﻿#include "zn_writer.h"
 
 QMutex mutex;
-QQueue<zn1::Bunch*>    bunches;
 
-zn1::ZNWriter::ZNWriter()
+QSemaphore sem(1);
+
+zn1::ZNWriter::ZNWriter():
+  m_zn_state(QMap<QString, modus::SvSignal*>())
 {
 //  moveToThread(this);
 //  moveToThread(thread()); //!
@@ -17,6 +19,7 @@ bool zn1::ZNWriter::configure(modus::StorageConfig* config)
 
     m_params = zn1::Params::fromJsonString(p_config->params);
 
+
   }
   catch(SvException& e) {
 
@@ -25,6 +28,16 @@ bool zn1::ZNWriter::configure(modus::StorageConfig* config)
   }
 
   return true;
+}
+
+void zn1::ZNWriter::disposeInputSignal  (modus::SvSignal* signal)
+{
+  Q_UNUSED(signal);
+}
+
+void zn1::ZNWriter::disposeOutputSignal (modus::SvSignal* signal)
+{
+  m_zn_state.insert(signal->config()->tag.toLower(), signal);
 }
 
 //bool zn1::ZNWriter::bindSignal(modus::SvSignal* signal)
@@ -37,208 +50,230 @@ bool zn1::ZNWriter::configure(modus::StorageConfig* config)
 //  return modus::SvAbstractStorage::bindSignal(signal);
 //}
 
-void zn1::ZNWriter::run()
+void zn1::ZNWriter::start()
 {
-  p_is_active = true;
+//  connect(&tm, &QTimer::timeout, this, &zn1::ZNWriter::write);
+  tm.start(m_params.interval);
 
   m_socket = new sv::tcp::Client(); // обязательно создаем здесь, чтобы объект принадлежал этому потоку
 //  m_socket->moveToThread(this); - так не работает
-  m_socket->setFlags(0);
-
-
-//  moveToThread(thread()); //!
+//  m_socket->setFlags(0);
 
   m_authorized = false;
-  while (p_is_active) {
+}
 
-    try {
+void zn1::ZNWriter::setState(int doChangeFlags, const QString& writeState, const QString& authorization, const QString& connectionState)
+{
+  if((doChangeFlags & 0x01) && m_zn_state.contains(TAG_CONNECTION_STATE))
+     m_zn_state.value(TAG_CONNECTION_STATE)->setValue(connectionState);
 
-      { //! 1. осуществляем физическое подключение к хосту
+  if((doChangeFlags & 0x02) && m_zn_state.contains(TAG_AUTHORIZATION))
+     m_zn_state.value(TAG_AUTHORIZATION)->setValue(authorization);
 
-        if(m_socket->state() != QAbstractSocket::ConnectedState) {
+  if((doChangeFlags & 0x04) && m_zn_state.contains(TAG_WRITE_STATE))
+     m_zn_state.value(TAG_WRITE_STATE)->setValue(writeState);
+}
 
-          m_authorized = false;
+void zn1::ZNWriter::write()
+{
+  try {
 
-          if(!m_socket->connectTo(m_params.host, m_params.port))
-            throw SvException(QString("Не удалось подключиться к защищенному накопителю по адресу %1:%2.\n%3")
-                              .arg(m_params.host.toString()).arg(m_params.port).arg(m_socket->lastError()));
+    { //! 1. физическое подключение к хосту
 
-        }
-      } //! ~1
+      if(m_socket->state() != QAbstractSocket::ConnectedState) {
 
-      { //! 2. авторизуемся на устройстве
+        m_authorized = false;
+        setState(0x07, STATE_FAIL_NO_WRITING, STATE_FAIL_NO_AUTHORITY, STATE_FAIL_NO_CONNECTION);
 
-        if((m_socket->state() == QAbstractSocket::ConnectedState) && !m_authorized) {
+        emit message(QString("Подключаюсь к защищенному хранилищу %1:%2")
+                     .arg(m_params.host.toString()).arg(m_params.port), sv::log::llDebug2, sv::log::mtDebug1);
 
-          zn1::AuthorizeRequest connreq(m_params.zone, m_params.pass);
+        if(!m_socket->connectTo(m_params.host, m_params.port))
+          throw SvException(QString("Не удалось подключиться к защищенному накопителю по адресу %1:%2.\n%3")
+                            .arg(m_params.host.toString()).arg(m_params.port).arg(m_socket->lastError()), 1);
 
-          QByteArray r = connreq.toByteArray();
+      }
+    } //! ~физическое подключение к хосту
 
-          emit message(QString(r.toHex()), sv::log::llDebug, sv::log::mtRequest);
+    { //! 2. авторизация на устройстве
 
-          m_socket->write(r);
+      if((m_socket->state() == QAbstractSocket::ConnectedState) && !m_authorized) {
 
-          if(!m_socket->waitForReadyRead(m_params.interval))
-            throw SvException(QString("Ошибка авторизации на защищенном накопителе. Нет ответа. %1").arg(m_params.interval));
+        setState(0x01);
 
-          else {
+        zn1::AuthorizeRequest connreq(m_params.zone, m_params.pass);
 
-            // анализируем полученный ответ
-            QByteArray r = m_socket->readAll();
+        QByteArray r = connreq.toByteArray();
 
-            emit message(QString(r.toHex()), sv::log::llDebug, sv::log::mtReply);
+        emit message(QString("Запрос на авторизацию: %1").arg(QString(r.toHex())), sv::log::llDebug2, sv::log::mtRequest);
 
-            zn1::AuthorizeReply reply = zn1::AuthorizeReply::parse(r);
+        m_socket->write(r);
 
-            emit message(QString("len: %1, reply code: %2, request code: %3, result: %4, addition len: %5 bytes")
-                            .arg(reply.length).arg(reply.reply_code).arg(reply.request_code).arg(reply.result).arg(reply.additional.length()),
-                         sv::log::llDebug2, sv::log::mtDebug);
+        if(!m_socket->waitForReadyRead(m_params.interval))
+          throw SvException(QString("Ошибка авторизации на защищенном накопителе. Нет ответа."), 2);
 
-            switch (static_cast<ReplyCode>(reply.result)) {
+        else {
 
-              case ReplyCode::Success:
+          // анализируем полученный ответ
+          QByteArray r = m_socket->readAll();
 
-                m_authorized = true;
-                emit message(QString("Успешная авторизация"), sv::log::llDebug, sv::log::mtLogin);
-                break;
+          zn1::AuthorizeReply reply = zn1::AuthorizeReply::parse(r);
 
-              case ReplyCode::Failure:
-              case ReplyCode::NotSupportedCmd:
-              case ReplyCode::WrongZoneName:
-              case ReplyCode::WrongPassword:
-              case ReplyCode::AlreadyInUse:
-
-                throw SvException(QString("Ошибка авторизации: %1")
-                                  .arg(ReplyCodeMap.value(static_cast<zn1::ReplyCode>(reply.result), "Ух ты! Как ты это сделал?")));
-                break;
-
-              default:
-                break;
-            }
-          }
-        }
-      } //! ~2
-    }
-    catch(SvException& e) {
-
-      emit message(e.error, sv::log::llDebug, sv::log::mtError);
-      m_socket->disconnectFromHost();
-      m_authorized = false;
-    }
-
-    { //! 3. запись данных
-
-      if(m_authorized && (m_socket->state() == QAbstractSocket::ConnectedState)) {
-
-        // если попали сюда, значит есть подключение и авторизация. можно писать данные
-        mutex.lock();
-        emit message(QString("2. m_mutex.lock()"), sv::log::llDebug, sv::log::mtDebug1);
-
-        if(!bunches.isEmpty()) {
-
-          bunches.last()->setState(Bunch::Ready);
-
-          QByteArray data = QByteArray();
-
-          foreach (Bunch* b, bunches)
-            data.append(b->toByteArray());
-
-          QByteArray pack = QByteArray();
-          QDataStream stream(&pack, QIODevice::WriteOnly);
-          stream.setByteOrder(QDataStream::LittleEndian);
-
-          stream << quint32(data.length())
-                 << quint16(CMD_WRITE);
-
-          quint64 sz = m_socket->write(pack);
-
-//          emit message(QString("запись данных. thread %1, mutex: %2").arg(reinterpret_cast<quint64>(currentThread()))
-//                       .arg(reinterpret_cast<quint64>(&mutex)), sv::log::llDebug, sv::log::mtDebug);
-//              emit message(QString("header %1").arg(QString(m_bunches.first()->toByteArray().left(18).toHex())), sv::log::llDebug2, sv::log::mtSend);
-
-          emit message(QString("Пытаюсь записать %1 байт в зону %2").arg(data.length()).arg(m_params.zone),
+          emit message(QString("Ответ на запрос авторизации: %1\n"
+                               "len: %2, reply code: %3, request code: %4, result: %5, addition len: %6 bytes")
+                          .arg(QString(r.toHex())).arg(reply.length).arg(reply.reply_code).arg(reply.request_code)
+                          .arg(reply.result).arg(reply.additional.length()),
                        sv::log::llDebug2, sv::log::mtDebug);
 
-          if(!m_socket->waitForReadyRead(m_params.interval))
-            emit message(QString("Ошибка записи данных в  защищенный накопитель. Нет ответа."), sv::log::llDebug, sv::log::mtFail);
+          switch (static_cast<ReplyCode>(reply.result)) {
 
-          else {
+            case ReplyCode::Success:
 
-            QByteArray a = m_socket->readAll();
-            zn1::WriteReply reply = zn1::WriteReply::parse(a);
+              m_authorized = true;
+              emit message(QString("Успешная авторизация"), sv::log::llDebug, sv::log::mtSuccess);
+              break;
 
-            emit message(QString("reply: len: %1, reply code: %2, request code: %3, result: %4, addition: %5 bytes, len: %6")
-                              .arg(reply.length).arg(reply.reply_code).arg(reply.request_code)
-                         .arg(reply.result).arg(reply.additional.length()).arg(a.length()),
-                         sv::log::llDebug2, sv::log::mtDebug);
+            case ReplyCode::Failure:
+            case ReplyCode::NotSupportedCmd:
+            case ReplyCode::WrongZoneName:
+            case ReplyCode::WrongPassword:
+            case ReplyCode::AlreadyInUse:
 
-            switch (static_cast<ReplyCode>(reply.result )) {
+              throw SvException(QString("Ошибка авторизации: %1")
+                                .arg(ReplyCodeMap.value(static_cast<zn1::ReplyCode>(reply.result), "Ух ты! Как ты это сделал?")), 2);
+              break;
 
-              case ReplyCode::Success:
-              {
-                while(!bunches.isEmpty())
-                  delete bunches.dequeue();
-
-                emit message(QString("%1 байт успешно записаны в зону %2").arg(sz).arg(m_params.zone), sv::log::llDebug, sv::log::mtReply);
-
-                break;
-              }
-
-              default:
-
-//                bunches.first()->setState(Bunch::Undelivered);
-
-                emit message(QString("Ошибка записи: %1").arg(ReplyCodeMap.value(static_cast<zn1::ReplyCode>(reply.result), "Ух ты! Как ты это сделал?")),
-                             sv::log::llDebug, sv::log::mtFail);
-                break;
-
-            }
+            default:
+              break;
           }
         }
-        emit message(QString("2. m_mutex.unlock()"), sv::log::llDebug, sv::log::mtDebug1);
-        mutex.unlock();
       }
-    } //! ~3
-
-    thread()->msleep(m_params.interval);
-
+    } //! ~авторизация на устройстве
   }
+  catch(SvException& e) {
+
+    emit message(e.error, sv::log::llDebug, sv::log::mtError);
+    m_socket->disconnectFromHost();
+    m_authorized = false;
+
+    switch (e.code) {
+      case 1:
+        setState(0x07, STATE_FAIL_NO_WRITING, STATE_FAIL_NO_AUTHORITY, STATE_FAIL_NO_CONNECTION);
+        break;
+
+      case 2:
+        setState(0x06, STATE_FAIL_NO_WRITING, STATE_FAIL_NO_AUTHORITY);
+        break;
+
+      default:
+        break;
+    }
+  }
+
+  { //! 3. запись данных
+
+    if(m_authorized && (m_socket->state() == QAbstractSocket::ConnectedState)) {
+
+      setState(0x03);
+
+      // если попали сюда, значит есть подключение и авторизация. можно писать данные
+      if(!bunches.isEmpty()) {
+
+        QByteArray data = QByteArray();
+
+        foreach (Bunch* b, bunches)
+          data.append(b->toByteArray());
+
+        QByteArray pack = QByteArray();
+        QDataStream stream(&pack, QIODevice::WriteOnly);
+        stream.setByteOrder(QDataStream::LittleEndian);
+
+        stream << quint32(data.length())
+               << quint16(CMD_WRITE);
+
+        pack.append(data);
+
+        m_socket->write(pack);
+
+        emit message(QString("Запись %1 байт в зону %2").arg(data.length()).arg(m_params.zone),
+                     sv::log::llDebug2, sv::log::mtDebug);
+
+        if(!m_socket->waitForReadyRead(m_params.interval))
+          emit message(QString("Ошибка записи данных в  защищенный накопитель. Нет ответа."), sv::log::llDebug, sv::log::mtFail);
+
+        else {
+
+          QByteArray r = m_socket->readAll();
+          zn1::WriteReply reply = zn1::WriteReply::parse(r);
+
+          emit message(QString("Результат записи: %1\nlen: %2, reply code: %3, request code: %4, result: %5, addition: %6 bytes")
+                            .arg(QString(r.toHex())).arg(reply.length).arg(reply.reply_code).arg(reply.request_code)
+                       .arg(reply.result).arg(reply.additional.length()),
+                       sv::log::llDebug2, sv::log::mtDebug);
+
+          switch (static_cast<ReplyCode>(reply.result )) {
+
+            case ReplyCode::Success:
+            {
+              while(!bunches.isEmpty())
+                delete bunches.dequeue();
+
+              emit message(QString("%1 байт успешно записаны в зону %2").arg(pack.length()).arg(m_params.zone), sv::log::llDebug, sv::log::mtSuccess);
+
+              setState(0x04);
+              break;
+            }
+
+            default:
+
+              emit message(QString("Ошибка записи: %1").arg(ReplyCodeMap.value(static_cast<zn1::ReplyCode>(reply.result), "Ух ты! Как ты это сделал?")),
+                           sv::log::llDebug, sv::log::mtFail);
+
+              setState(0x04, STATE_FAIL_NO_WRITING);
+              break;
+
+          }
+        }
+      }
+    }
+  } //! ~запись данных
 }
 
 
 void zn1::ZNWriter::signalUpdated(modus::SvSignal* signal)
 {
-  mutex.lock();
-  emit message(QString("1. m_mutex.lock()"), sv::log::llDebug, sv::log::mtDebug1);
+//  emit message(QString("1. m_mutex.lock(). bunches.count(): %1").arg(bunches.count()), sv::log::llDebug, sv::log::mtDebug1);
 
-  if(bunches.isEmpty() || (bunches.last()->state != Bunch::Underway)) {
+  if(bunches.isEmpty() || (bunches.last()->state() != Bunch::Underway)) {
 
-    if(bunches.count() >= m_params.queue_len)
+    if(bunches.count() >= int(m_params.queue_len))
       delete bunches.dequeue();
 
     bunches.enqueue(new Bunch(QDateTime::currentMSecsSinceEpoch()));
 
-    QByteArray b;
-
-    QDataStream s(&b, QIODevice::WriteOnly);
-    s.setByteOrder(QDataStream::LittleEndian);
-    qint64 t = QDateTime::currentMSecsSinceEpoch();
-    s << t;
-//qDebug() << b;
-    emit message(QString("Bunch added. thread %1, mutex: %2").arg(reinterpret_cast<quint64>(thread()->currentThread()))
-                 .arg(reinterpret_cast<quint64>(&mutex)), sv::log::llDebug2, sv::log::mtDebug);
+    emit message(QString("Bunch queued. Bunch count: %1").arg(bunches.count()), sv::log::llDebug2, sv::log::mtDebug);
 
   }
 
-  if(bunches.last()->state == Bunch::Underway)
+  if(bunches.last()->state() == Bunch::Underway)
   {
     Record p(signal->lastUpdate().toMSecsSinceEpoch(), signal->config()->tag, signal->value().toByteArray());
-    bunches.last()->data.append(p.toByteArray());
+    QByteArray r = p.toByteArray();
+    bunches.last()->appendRecord(r);
+
+    emit message(QString("%1 bytes appended to bunch. Bunch size: %2, records: %3")
+                 .arg(r.length()).arg(bunches.last()->length()).arg(bunches.last()->recordCount()), sv::log::llDebug2, sv::log::mtDebug);
+  }
+
+  if(bunches.last()->length() >= m_params.write_buf) {
+
+    bunches.last()->setState(Bunch::Ready);
+
+    write();
+
   }
 
 //  emit message(QString("Bunch data size %1").arg(m_bunches.last()->data.length()), sv::log::llDebug2, sv::log::mtDebug);
-  emit message(QString("1. m_mutex.unlock()"), sv::log::llDebug, sv::log::mtDebug1);
-  mutex.unlock();
 
 }
 

@@ -14,20 +14,32 @@
 #include "../../../../../../svlib/SvException/svexception.h"
 #include "../../../../../../Modus/global/global_defs.h"
 
-#define P_HOST            "host"
-#define P_PORT            "port"
-#define P_ZONE            "zone"
-#define P_PASS            "pass"
-#define P_QUEUE_LEN       "queue_len"
+#define P_HOST                    "host"
+#define P_PORT                    "port"
+#define P_ZONE                    "zone"
+#define P_PASS                    "pass"
+#define P_QUEUE_LEN               "queue_len"
+#define P_WRITE_BUF               "write_buf"
 
-#define DEFAULT_PORT      10000
-#define DEFAULT_INTERVAL  1000
-#define DEFAULT_QUEUE_LEN 1000
+#define DEFAULT_PORT              10000
+#define DEFAULT_INTERVAL          1000
+#define DEFAULT_QUEUE_LEN         1000
+#define DEFAULT_WRITE_BUFFER_LEN  102400  // bytes. 100 kB
 
-#define CMD_CONNECT       200
-#define CMD_ANSWER        100
-#define CMD_WRITE         501
-#define ACC_CODE_WRITE    2
+#define CMD_CONNECT               200
+#define CMD_ANSWER                100
+#define CMD_WRITE                 501
+#define ACC_CODE_WRITE            2
+
+#define TAG_CONNECTION_STATE      "c"
+#define TAG_AUTHORIZATION         "a"
+#define TAG_WRITE_STATE           "w"
+
+#define STATE_FAIL_NO_CONNECTION  "No Connection"
+#define STATE_FAIL_NO_AUTHORITY   "No Authorization"
+#define STATE_FAIL_NO_WRITING     "No Writing"
+
+#define STATE_OK                  "OK"
 
 
 namespace zn1 {
@@ -39,7 +51,8 @@ namespace zn1 {
     quint16      interval  = DEFAULT_INTERVAL;
     QString      zone      = QString();
     QString      pass      = QString();
-    int          queue_len = DEFAULT_QUEUE_LEN;
+    quint32      queue_len = DEFAULT_QUEUE_LEN;
+    quint32      write_buf = DEFAULT_WRITE_BUFFER_LEN;
 
     static Params fromJsonString(const QString& json_string) //throw (SvException)
     {
@@ -63,7 +76,7 @@ namespace zn1 {
       QString P;
 
 
-      /* host */
+      // host
       P = P_HOST;
       if(object.contains(P)) {
 
@@ -80,7 +93,7 @@ namespace zn1 {
       else
         throw SvException(QString(MISSING_PARAM).arg(P));
 
-      /* receive port */
+      // receive port
       P = P_PORT;
       if(object.contains(P))
       {
@@ -95,7 +108,7 @@ namespace zn1 {
       else
         throw SvException(QString(MISSING_PARAM).arg(P));
 
-      /* send port */
+      // interval
       P = P_INTERVAL;
       if(object.contains(P))
       {
@@ -110,6 +123,7 @@ namespace zn1 {
       else
         p.interval = DEFAULT_INTERVAL;
 
+      // zone name
       P = P_ZONE;
       if(object.contains(P)) {
 
@@ -123,6 +137,7 @@ namespace zn1 {
       else
         throw SvException(QString(MISSING_PARAM).arg(P));
 
+      // pass
       P = P_PASS;
       if(object.contains(P)) {
 
@@ -136,7 +151,7 @@ namespace zn1 {
       else
         throw SvException(QString(MISSING_PARAM).arg(P));
 
-      /* queue length */
+      // queue length
       P = P_QUEUE_LEN;
       if(object.contains(P))
       {
@@ -151,6 +166,20 @@ namespace zn1 {
       else
         p.queue_len = DEFAULT_QUEUE_LEN;
 
+      /* write biffer length */
+      P = P_WRITE_BUF;
+      if(object.contains(P))
+      {
+        if(object.value(P).toInt(-1) < 1)
+          throw SvException(QString(IMPERMISSIBLE_VALUE)
+                             .arg(P).arg(object.value(P).toVariant().toString())
+                             .arg("Размер буфера записи должен быть задан целым положительным числом в байтах"));
+
+        p.write_buf = object.value(P).toInt(DEFAULT_WRITE_BUFFER_LEN);
+
+      }
+      else
+        p.write_buf = DEFAULT_WRITE_BUFFER_LEN;
 
       return p;
 
@@ -174,6 +203,7 @@ namespace zn1 {
       j.insert(P_ZONE,      QJsonValue(zone).toString());
       j.insert(P_PASS,      QJsonValue(pass).toString());
       j.insert(P_QUEUE_LEN, QJsonValue(static_cast<int>(queue_len)).toInt());
+      j.insert(P_WRITE_BUF, QJsonValue(static_cast<int>(write_buf)).toInt());
 
       return j;
 
