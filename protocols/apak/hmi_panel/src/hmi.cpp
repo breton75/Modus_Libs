@@ -51,8 +51,8 @@ void apak::SvHMI::run()
 
     if(p_io_buffer->input->ready()) {
 
-      m_signal->setValue(QByteArray(p_io_buffer->input->data, p_io_buffer->input->offset));
-      emit message(QString("signal %1 updated").arg(m_signal->config()->name), sv::log::llDebug, sv::log::mtParse);
+//      m_signal->setValue(QByteArray(p_io_buffer->input->data, p_io_buffer->input->offset));
+//      emit message(QString("signal %1 updated").arg(m_signal->config()->name), sv::log::llDebug, sv::log::mtParse);
 
       p_io_buffer->input->reset();
     }
@@ -60,11 +60,9 @@ void apak::SvHMI::run()
     p_io_buffer->input->mutex.unlock();
     p_io_buffer->confirm->mutex.unlock();   // если нужен ответ квитирование
 
-//    p_io_buffer->output->mutex.lock();
-
+    p_io_buffer->output->mutex.lock();
 //    putout();
-
-//    p_io_buffer->output->mutex.unlock();
+    p_io_buffer->output->mutex.unlock();
 
     msleep(m_params.parse_interval);
 

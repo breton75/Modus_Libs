@@ -5,12 +5,12 @@
 
 #include "zn_writer_global.h"
 
-#include "../../../../../../svlib/Network/Tcp/Client/1.0/sv_tcp_client.h"
-#include "../../../../../../svlib/SvException/svexception.h"
-#include "../../../../../../svlib/SvCRC/1.1/sv_crc.h"
+#include "../../../../../svlib/Network/Tcp/Client/1.0/sv_tcp_client.h"
+#include "../../../../../svlib/SvException/svexception.h"
+#include "../../../../../svlib/SvCRC/1.1/sv_crc.h"
 
-#include "../../../../../../Modus/global/storage/sv_abstract_storage.h"
-#include "../../../../../../Modus/global/dbus/sv_dbus.h"
+#include "../../../../../Modus/global/storage/sv_abstract_storage.h"
+#include "../../../../../Modus/global/dbus/sv_dbus.h"
 
 #include "zn_writer_defs.h"
 
