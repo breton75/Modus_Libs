@@ -12,7 +12,7 @@ bool zncs::ZnConnectionState::configure(modus::JobConfig* config)
 
     p_config = config;
 
-    m_params = zncs::Params::fromJsonString(p_config->params);
+//    m_params = zncs::Params::fromJsonString(p_config->params);
 
 
   }
@@ -27,10 +27,20 @@ bool zncs::ZnConnectionState::configure(modus::JobConfig* config)
 
 bool zncs::ZnConnectionState::signalIsSupported(modus::SvSignal* signal)
 {
-
+  return SupportedSignalTags.contains(signal->config()->tag);
 }
 
 void zncs::ZnConnectionState::start()
+{
+
+}
+
+void zncs::ZnConnectionState::signalUpdated(modus::SvSignal* signal)
+{
+
+}
+
+void zncs::ZnConnectionState::signalChanged(modus::SvSignal* signal)
 {
 
 }

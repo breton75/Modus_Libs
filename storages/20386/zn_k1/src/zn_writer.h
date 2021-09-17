@@ -197,22 +197,11 @@ namespace zn1 {
 
     BanchHeader(qint64 coarseDateTime = 0):
       coarseDateTime(coarseDateTime)
-//      dataLength(0),
-//      crc16(0)
     {
 
     }
 
-//    void reset()
-//    {
-//      coarseDateTime = 0;
-//      dataLength = 0;
-//      crc16 = 0;
-//    }
-
     qint64  coarseDateTime;
-//    quint32 dataLength;
-//    quint16 crc16;
 
     QByteArray toByteArray(quint32 dataLength)
     {
@@ -224,9 +213,7 @@ namespace zn1 {
       stream << coarseDateTime
              << dataLength;
 
-//      crc16 = crc::crc16ccitt(result);
-
-      stream << quint16(crc::crc16ccitt(result));
+      stream << crc::crc16ccitt(result);
 
       return result;
 
@@ -352,13 +339,19 @@ namespace zn1 {
 
     Q_OBJECT
 
+    union ZNstate {
+      int c:0;
+      int a:1;
+      int w:2;
+    };
+
   public:
     ZNWriter();
 
     virtual bool configure(modus::StorageConfig* config) override;
 
-    virtual void disposeInputSignal  (modus::SvSignal* signal) override;
-    virtual void disposeOutputSignal (modus::SvSignal* signal) override;
+//    virtual void disposeInputSignal  (modus::SvSignal* signal) override;
+//    virtual void disposeOutputSignal (modus::SvSignal* signal) override;
 
     void start() override;
 
@@ -370,11 +363,13 @@ namespace zn1 {
     zn1::Params       m_params;
     bool              m_authorized;
 
-    QTimer tm;
+    modus::SvSignal* m_state_signal;
 
-    QMap<QString, modus::SvSignal*> m_zn_state;
+//    QMap<QString, modus::SvSignal*> m_zn_state;
+    ZNstate m_zn_state;
 
-    void setState(int doChangeFlags, const QString& writeState = STATE_OK, const QString& authorization = STATE_OK, const QString& connectionState = STATE_OK);
+//    void setState(int doChangeFlags, const QString& writeState = STATE_OK, const QString& authorization = STATE_OK, const QString& connectionState = STATE_OK);
+    void setState(int writeState, int authorization, int connectionState);
 
   private slots:
     void signalUpdated(modus::SvSignal* signal) override;

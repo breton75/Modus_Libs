@@ -1,7 +1,9 @@
 ﻿#include "universal_packet.h"
 
 apak::SvUniversalPack::SvUniversalPack():
-  modus::SvAbstractProtocol()
+  modus::SvAbstractProtocol(),
+  m_in_signal(nullptr),
+  m_job_signal(nullptr)
 {
 
 }
@@ -30,9 +32,34 @@ bool apak::SvUniversalPack::configure(modus::DeviceConfig *config, modus::IOBuff
   }
 }
 
-void apak::SvUniversalPack::disposeInputSignal (modus::SvSignal* signal)
+void apak::SvUniversalPack::disposeSignal (modus::SvSignal* signal)
 {
-  m_signal = signal;
+  switch (signal->config()->usecase) {
+
+    case modus::IN:
+    {
+      if(m_in_signal)
+        throw SvException("К данному устройству может быть привязан только один сигнал с типом использования IN");
+
+      m_in_signal = signal;
+
+      break;
+    }
+
+    case modus::JOB:
+    {
+      if(m_job_signal)
+        throw SvException("К данному устройству может быть привязан только один сигнал с типом использования JOB");
+
+      m_job_signal = signal;
+
+      break;
+    }
+
+    default:
+      throw SvException(QString("Не могу привязать сигнал '%1' к устройству '%2'. Тип использования (usecase) не поддерживается.").arg(signal->config()->name).arg(p_config->name));
+      break;
+  }
 
 //  try {
 
@@ -41,31 +68,6 @@ void apak::SvUniversalPack::disposeInputSignal (modus::SvSignal* signal)
 
 //    if(ok && input_signal_collections.contains(type))
 //      input_signal_collections.value(type)->addSignal(signal, p_config->bufsize);
-
-//    else {
-
-//      emit message(QString("Сигнал %1: Неопознанный тип данных \"%2\"").arg(signal->config()->name).arg(signal->config()->type),
-//                   sv::log::llError, sv::log::mtError);
-
-//    }
-//  }
-
-//  catch(SvException& e) {
-//    throw e;
-//  }
-}
-
-void apak::SvUniversalPack::disposeOutputSignal (modus::SvSignal* signal)
-{
-  Q_UNUSED(signal);
-
-//  try {
-
-//    bool ok;
-//    quint16 type = signal->config()->type.toUInt(&ok, 0);
-
-//    if(ok && output_signal_collections.contains(type))
-//      output_signal_collections.value(type)->addSignal(signal, p_config->bufsize);
 
 //    else {
 
@@ -91,8 +93,8 @@ void apak::SvUniversalPack::run()
 
     if(p_io_buffer->input->ready()) {
 
-      m_signal->setValue(QByteArray(p_io_buffer->input->data, p_io_buffer->input->offset));
-      emit message(QString("signal %1 updated").arg(m_signal->config()->name), sv::log::llDebug, sv::log::mtParse);
+      m_in_signal->setValue(QByteArray(p_io_buffer->input->data, p_io_buffer->input->offset));
+      emit message(QString("Signal '%1' updated").arg(m_in_signal->config()->name), sv::log::llDebug, sv::log::mtParse);
 
       p_io_buffer->input->reset();
     }
@@ -117,3 +119,4 @@ modus::SvAbstractProtocol* create()
   modus::SvAbstractProtocol* protocol = new apak::SvUniversalPack();
   return protocol;
 }
+

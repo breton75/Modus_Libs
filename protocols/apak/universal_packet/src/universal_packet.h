@@ -40,13 +40,16 @@ namespace apak {
   protected:
     void run() override;
 
-    void disposeInputSignal (modus::SvSignal* signal) override;
-    void disposeOutputSignal(modus::SvSignal* signal) override;
+//    void disposeInputSignal (modus::SvSignal* signal) override;
+//    void disposeOutputSignal(modus::SvSignal* signal) override;
+
+    void disposeSignal(modus::SvSignal* signal) override;
 
   private:
     apak::ProtocolParams  m_params;
 
-    modus::SvSignal*      m_signal;
+    modus::SvSignal*      m_in_signal;
+    modus::SvSignal*      m_job_signal;
 
   };
 }

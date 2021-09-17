@@ -1,12 +1,15 @@
 ﻿#ifndef ZN_CONNECTION_STATE_H
 #define ZN_CONNECTION_STATE_H
 
+#include <QSet>
+
 #include "zn_connection_state_global.h"
 
 #include "../../../../../Modus/global/job/sv_abstract_job.h"
 #include "../../../../../Modus/global/signal/sv_signal.h"
 
 #include "zn_connection_state_defs.h"
+#include "supported_signal_tags.h"
 
 extern "C" {
 
@@ -17,7 +20,13 @@ extern "C" {
 namespace zncs {
 
 
-  const QMap<QString, modus::SvSignal* signal> SupportedSignals = {{}, {}, {}};
+  const QSet<QString> SupportedSignalTags = {
+    TAG_ZN_State_data1,
+    TAG_ZN_State_data11,
+    TAG_101_DataType_1,
+    TAG_105_DataType_1
+  };
+
 
   class ZnConnectionState: public modus::SvAbstractJob
   {
@@ -32,6 +41,11 @@ namespace zncs {
 
   private:
     zncs::Params       m_params;
+
+  public slots:
+
+    virtual void signalUpdated(modus::SvSignal* signal) override;
+    virtual void signalChanged(modus::SvSignal* signal) override;
 
   };
 

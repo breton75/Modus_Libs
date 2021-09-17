@@ -5,7 +5,8 @@ QMutex mutex;
 QSemaphore sem(1);
 
 zn1::ZNWriter::ZNWriter():
-  m_zn_state(QMap<QString, modus::SvSignal*>())
+  m_zn_state(0x00), //QMap<QString, modus::SvSignal*>())
+  m_state_signal(nullptr)
 {
 //  moveToThread(this);
 //  moveToThread(thread()); //!
@@ -30,30 +31,56 @@ bool zn1::ZNWriter::configure(modus::StorageConfig* config)
   return true;
 }
 
-void zn1::ZNWriter::disposeInputSignal  (modus::SvSignal* signal)
-{
-  Q_UNUSED(signal);
-}
-
-void zn1::ZNWriter::disposeOutputSignal (modus::SvSignal* signal)
-{
-  m_zn_state.insert(signal->config()->tag.toLower(), signal);
-}
-
-//bool zn1::ZNWriter::bindSignal(modus::SvSignal* signal)
+//void zn1::ZNWriter::disposeInputSignal  (modus::SvSignal* signal)
 //{
+//  Q_UNUSED(signal);
+//}
 
-//    qDebug() << QString("run. cal thread %1, current thread: %2").arg(reinterpret_cast<quint64>(this->thread()))
-//                 .arg(reinterpret_cast<quint64>(currentThread()));
-//  connect(signal, &modus::SvSignal::updated, this, &ZNWriter::signalUpdated);
+//void zn1::ZNWriter::disposeOutputSignal (modus::SvSignal* signal)
+//{
+//  m_zn_state.insert(signal->config()->tag.toLower(), signal);
+//}
+
+bool zn1::ZNWriter::bindSignal(modus::SvSignal* signal)
+{
+  qDebug() << QString("zn1::ZNWriter::bindSignal");
+
+  if(!p_signals.contains(signal)) {
+
+    p_signals.append(signal);
+
+    switch (signal->config()->usecase) {
+
+      case modus::IN:
+
+        connect(signal, &modus::SvSignal::updated, this, &SvAbstractStorage::signalUpdated, Qt::QueuedConnection);
+        connect(signal, &modus::SvSignal::changed, this, &SvAbstractStorage::signalChanged, Qt::QueuedConnection);
+
+        break;
+
+      case modus::JOB:
+
+        if(m_state_signal)
+          throw SvException("К данному хранилищу может быть привязан только один сигнал с типом использования JOB");
+
+        m_state_signal = signal;
+
+        break;
+
+      default:
+        break;
+    }
+  }
+
+  return  true;
 
 //  return modus::SvAbstractStorage::bindSignal(signal);
-//}
+}
 
 void zn1::ZNWriter::start()
 {
 //  connect(&tm, &QTimer::timeout, this, &zn1::ZNWriter::write);
-  tm.start(m_params.interval);
+//  tm.start(m_params.interval);
 
   m_socket = new sv::tcp::Client(); // обязательно создаем здесь, чтобы объект принадлежал этому потоку
 //  m_socket->moveToThread(this); - так не работает
@@ -62,16 +89,25 @@ void zn1::ZNWriter::start()
   m_authorized = false;
 }
 
-void zn1::ZNWriter::setState(int doChangeFlags, const QString& writeState, const QString& authorization, const QString& connectionState)
+//void zn1::ZNWriter::setState(int doChangeFlags, const QString& writeState, const QString& authorization, const QString& connectionState)
+//{
+//  if((doChangeFlags & 0x01) && m_zn_state.contains(TAG_CONNECTION_STATE))
+//     m_zn_state.value(TAG_CONNECTION_STATE)->setValue(connectionState);
+
+//  if((doChangeFlags & 0x02) && m_zn_state.contains(TAG_AUTHORIZATION))
+//     m_zn_state.value(TAG_AUTHORIZATION)->setValue(authorization);
+
+//  if((doChangeFlags & 0x04) && m_zn_state.contains(TAG_WRITE_STATE))
+//     m_zn_state.value(TAG_WRITE_STATE)->setValue(writeState);
+//}
+
+void zn1::ZNWriter::setState(int writeState, int authorization, int connectionState)
 {
-  if((doChangeFlags & 0x01) && m_zn_state.contains(TAG_CONNECTION_STATE))
-     m_zn_state.value(TAG_CONNECTION_STATE)->setValue(connectionState);
+  m_zn_state.c = connectionState;
+  m_zn_state.a = authorization;
+  m_zn_state.w = writeState;
 
-  if((doChangeFlags & 0x02) && m_zn_state.contains(TAG_AUTHORIZATION))
-     m_zn_state.value(TAG_AUTHORIZATION)->setValue(authorization);
-
-  if((doChangeFlags & 0x04) && m_zn_state.contains(TAG_WRITE_STATE))
-     m_zn_state.value(TAG_WRITE_STATE)->setValue(writeState);
+  m_state_signal->setValue(int(m_zn_state));
 }
 
 void zn1::ZNWriter::write()
@@ -83,14 +119,15 @@ void zn1::ZNWriter::write()
       if(m_socket->state() != QAbstractSocket::ConnectedState) {
 
         m_authorized = false;
-        setState(0x07, STATE_FAIL_NO_WRITING, STATE_FAIL_NO_AUTHORITY, STATE_FAIL_NO_CONNECTION);
+//        setState(0x07, STATE_FAIL_NO_WRITING, STATE_FAIL_NO_AUTHORITY, STATE_FAIL_NO_CONNECTION);
+        setState(0, 0, 0);
 
         emit message(QString("Подключаюсь к защищенному хранилищу %1:%2")
                      .arg(m_params.host.toString()).arg(m_params.port), sv::log::llDebug2, sv::log::mtDebug1);
 
         if(!m_socket->connectTo(m_params.host, m_params.port))
           throw SvException(QString("Не удалось подключиться к защищенному накопителю по адресу %1:%2.\n%3")
-                            .arg(m_params.host.toString()).arg(m_params.port).arg(m_socket->lastError()), 1);
+                            .arg(m_params.host.toString()).arg(m_params.port).arg(m_socket->lastError()), 0);
 
       }
     } //! ~физическое подключение к хосту
@@ -99,7 +136,7 @@ void zn1::ZNWriter::write()
 
       if((m_socket->state() == QAbstractSocket::ConnectedState) && !m_authorized) {
 
-        setState(0x01);
+        setState(0, 0, 1);
 
         zn1::AuthorizeRequest connreq(m_params.zone, m_params.pass);
 
@@ -110,7 +147,7 @@ void zn1::ZNWriter::write()
         m_socket->write(r);
 
         if(!m_socket->waitForReadyRead(m_params.interval))
-          throw SvException(QString("Ошибка авторизации на защищенном накопителе. Нет ответа."), 2);
+          throw SvException(QString("Ошибка авторизации на защищенном накопителе. Нет ответа."), 1);
 
         else {
 
@@ -140,7 +177,7 @@ void zn1::ZNWriter::write()
             case ReplyCode::AlreadyInUse:
 
               throw SvException(QString("Ошибка авторизации: %1")
-                                .arg(ReplyCodeMap.value(static_cast<zn1::ReplyCode>(reply.result), "Ух ты! Как ты это сделал?")), 2);
+                                .arg(ReplyCodeMap.value(static_cast<zn1::ReplyCode>(reply.result), "Ух ты! Как ты это сделал?")), 1);
               break;
 
             default:
@@ -156,25 +193,15 @@ void zn1::ZNWriter::write()
     m_socket->disconnectFromHost();
     m_authorized = false;
 
-    switch (e.code) {
-      case 1:
-        setState(0x07, STATE_FAIL_NO_WRITING, STATE_FAIL_NO_AUTHORITY, STATE_FAIL_NO_CONNECTION);
-        break;
+    setState(0, 0, e.code); //0x07, STATE_FAIL_NO_WRITING, STATE_FAIL_NO_AUTHORITY, STATE_FAIL_NO_CONNECTION);
 
-      case 2:
-        setState(0x06, STATE_FAIL_NO_WRITING, STATE_FAIL_NO_AUTHORITY);
-        break;
-
-      default:
-        break;
-    }
   }
 
   { //! 3. запись данных
 
     if(m_authorized && (m_socket->state() == QAbstractSocket::ConnectedState)) {
 
-      setState(0x03);
+      setState(0,1,1);
 
       // если попали сюда, значит есть подключение и авторизация. можно писать данные
       if(!bunches.isEmpty()) {
@@ -220,7 +247,7 @@ void zn1::ZNWriter::write()
 
               emit message(QString("%1 байт успешно записаны в зону %2").arg(pack.length()).arg(m_params.zone), sv::log::llDebug, sv::log::mtSuccess);
 
-              setState(0x04);
+              setState(1,1,1);
               break;
             }
 
@@ -229,7 +256,7 @@ void zn1::ZNWriter::write()
               emit message(QString("Ошибка записи: %1").arg(ReplyCodeMap.value(static_cast<zn1::ReplyCode>(reply.result), "Ух ты! Как ты это сделал?")),
                            sv::log::llDebug, sv::log::mtFail);
 
-              setState(0x04, STATE_FAIL_NO_WRITING);
+              setState(0,1,1); //0x04, STATE_FAIL_NO_WRITING);
               break;
 
           }

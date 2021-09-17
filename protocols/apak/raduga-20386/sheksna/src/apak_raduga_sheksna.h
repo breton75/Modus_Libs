@@ -82,8 +82,10 @@ public:
 protected:
   void run() override;
 
-  void disposeInputSignal (modus::SvSignal* signal) override;
-  void disposeOutputSignal(modus::SvSignal* signal) override;
+//  void disposeInputSignal (modus::SvSignal* signal) override;
+//  void disposeOutputSignal(modus::SvSignal* signal) override;
+
+  void disposeSignal (modus::SvSignal* signal) override;
 
 //  void validateSignals(QDateTime& lastParsedTime) override;
 
@@ -126,6 +128,12 @@ private:
 
   QByteArray m_raduga20386 = QByteArray(&RDGA_NAME[0], RDGA_NAME_LEN);
 
+private slots:
+  void output_queue(modus::SvSignal* signal)
+  {
+    QMutexLocker(&p_out_signal_queue.mutex);
+    p_out_signal_queue.queue.enqueue(signal);
+  }
 
 };
 

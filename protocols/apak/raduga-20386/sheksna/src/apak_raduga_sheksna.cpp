@@ -52,49 +52,51 @@ bool raduga::SvRaduga::configure(modus::DeviceConfig *config, modus::IOBuffer *i
   }
 }
 
-void raduga::SvRaduga::disposeInputSignal (modus::SvSignal* signal)
+void raduga::SvRaduga::disposeSignal (modus::SvSignal* signal)
 {
-  try {
+  switch (signal->config()->usecase) {
 
-    bool ok;
-    quint16 type = signal->config()->type.toUInt(&ok, 0);
+    case modus::IN:
+    {
+      bool ok;
+      quint16 type = signal->config()->type.toUInt(&ok, 0);
 
-    if(ok && input_signal_collections.contains(type))
-      input_signal_collections.value(type)->addSignal(signal, p_config->bufsize);
+      if(ok && input_signal_collections.contains(type))
+        input_signal_collections.value(type)->addSignal(signal, p_config->bufsize);
 
-    else {
+      else {
 
-      emit message(QString("Сигнал %1: Неопознанный тип данных \"%2\"").arg(signal->config()->name).arg(signal->config()->type),
-                   sv::log::llError, sv::log::mtError);
+        emit message(QString("Сигнал %1: Неопознанный тип данных \"%2\"").arg(signal->config()->name).arg(signal->config()->type),
+                     sv::log::llError, sv::log::mtError);
 
+      }
+
+      break;
     }
-  }
 
-  catch(SvException& e) {
-    throw e;
-  }
-}
+    case modus::OUT:
+    {
+      bool ok;
+      quint16 type = signal->config()->type.toUInt(&ok, 0);
 
-void raduga::SvRaduga::disposeOutputSignal (modus::SvSignal* signal)
-{
-  try {
+      if(ok && output_signal_collections.contains(type)) {
 
-    bool ok;
-    quint16 type = signal->config()->type.toUInt(&ok, 0);
+        output_signal_collections.value(type)->addSignal(signal, p_config->bufsize);
+        connect(signal, &modus::SvSignal::updated, this, &SvRaduga::output_queue);
+      }
 
-    if(ok && output_signal_collections.contains(type))
-      output_signal_collections.value(type)->addSignal(signal, p_config->bufsize);
 
-    else {
+      else {
 
-      emit message(QString("Сигнал %1: Неопознанный тип данных \"%2\"").arg(signal->config()->name).arg(signal->config()->type),
-                   sv::log::llError, sv::log::mtError);
+        emit message(QString("Сигнал %1: Неопознанный тип данных \"%2\"").arg(signal->config()->name).arg(signal->config()->type),
+                     sv::log::llError, sv::log::mtError);
 
+      }
     }
-  }
 
-  catch(SvException& e) {
-    throw e;
+    default:
+      throw SvException(QString("Не могу привязать сигнал '%1' к устройству '%2'. Тип использования (usecase) не поддерживается.").arg(signal->config()->name).arg(p_config->name));
+      break;
   }
 }
 
