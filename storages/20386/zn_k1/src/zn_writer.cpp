@@ -49,27 +49,29 @@ bool zn1::ZNWriter::bindSignal(modus::SvSignal* signal)
 
     p_signals.append(signal);
 
-    switch (signal->config()->usecase) {
+    if(signal->isMaster(P_STORAGE, p_config->id)) {
 
-      case modus::IN:
-
-        connect(signal, &modus::SvSignal::updated, this, &SvAbstractStorage::signalUpdated, Qt::QueuedConnection);
-        connect(signal, &modus::SvSignal::changed, this, &SvAbstractStorage::signalChanged, Qt::QueuedConnection);
-
-        break;
-
-      case modus::JOB:
+      if(signal->config()->type.toLower() == "state") {
 
         if(m_state_signal)
-          throw SvException("К данному хранилищу может быть привязан только один сигнал с типом использования JOB");
+          throw SvException("К данному хранилищу может быть привязан только один сигнал состояния");
 
         m_state_signal = signal;
 
-        break;
-
-      default:
-        break;
+      }
     }
+    else if(signal->isBoundToStorage(p_config->id)) {
+
+      connect(signal, &modus::SvSignal::updated, this, &SvAbstractStorage::signalUpdated, Qt::QueuedConnection);
+//      connect(signal, &modus::SvSignal::changed, this, &SvAbstractStorage::signalChanged, Qt::QueuedConnection);
+    }
+
+    else {
+
+      p_last_error = QString("Сигнал '%1' не привязан к хранилищу '%2' в конфигурации").arg(signal->config()->name).arg(p_config->name);
+      return false;
+    }
+
   }
 
   return  true;

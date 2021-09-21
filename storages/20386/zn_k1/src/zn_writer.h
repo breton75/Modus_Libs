@@ -352,6 +352,7 @@ namespace zn1 {
 
 //    virtual void disposeInputSignal  (modus::SvSignal* signal) override;
 //    virtual void disposeOutputSignal (modus::SvSignal* signal) override;
+    bool bindSignal(modus::SvSignal* signal) override;
 
     void start() override;
 

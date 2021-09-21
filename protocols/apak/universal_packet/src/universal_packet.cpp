@@ -34,22 +34,26 @@ bool apak::SvUniversalPack::configure(modus::DeviceConfig *config, modus::IOBuff
 
 void apak::SvUniversalPack::disposeSignal (modus::SvSignal* signal)
 {
-  switch (signal->config()->usecase) {
+  uint uid = entid(P_DEVICE, p_config->id);
+  if(!signal->config()->bindings.contains(uid))
+    return;
 
-    case modus::IN:
+  switch (signal->config()->bindings.value(uid).mode) {
+
+    case modus::ReadWrite:
     {
       if(m_in_signal)
-        throw SvException("К данному устройству может быть привязан только один сигнал с типом использования IN");
+        throw SvException("К данному устройству может быть привязан только один сигнал с типом ReadWrite");
 
       m_in_signal = signal;
 
       break;
     }
 
-    case modus::JOB:
+    case modus::ReadOnly:
     {
       if(m_job_signal)
-        throw SvException("К данному устройству может быть привязан только один сигнал с типом использования JOB");
+        throw SvException("К данному устройству может быть привязан только один сигнал с типом ReadOnly");
 
       m_job_signal = signal;
 
@@ -57,7 +61,7 @@ void apak::SvUniversalPack::disposeSignal (modus::SvSignal* signal)
     }
 
     default:
-      throw SvException(QString("Не могу привязать сигнал '%1' к устройству '%2'. Тип использования (usecase) не поддерживается.").arg(signal->config()->name).arg(p_config->name));
+      throw SvException(QString("Не могу привязать сигнал '%1' к устройству '%2'. Тип привязки не поддерживается.").arg(signal->config()->name).arg(p_config->name));
       break;
   }
 
