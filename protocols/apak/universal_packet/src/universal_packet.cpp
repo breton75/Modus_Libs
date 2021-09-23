@@ -32,58 +32,55 @@ bool apak::SvUniversalPack::configure(modus::DeviceConfig *config, modus::IOBuff
   }
 }
 
-void apak::SvUniversalPack::disposeSignal (modus::SvSignal* signal)
+bool apak::SvUniversalPack::bindSignal(modus::SvSignal* signal, modus::BindMode mode)
 {
-  uint uid = entid(P_DEVICE, p_config->id);
-  if(!signal->config()->bindings.contains(uid))
-    return;
+  if(!p_signals.contains(signal)) {
 
-  switch (signal->config()->bindings.value(uid).mode) {
+    p_signals.append(signal);
 
-    case modus::ReadWrite:
-    {
-      if(m_in_signal)
-        throw SvException("К данному устройству может быть привязан только один сигнал с типом ReadWrite");
+    if(mode == modus::ReadWrite) {
 
-      m_in_signal = signal;
+      if(signal->config()->type.toLower() == "data") {
 
-      break;
+        if(m_data_signal) {
+
+          p_last_error = "К данному устройству может быть привязан только один сигнал с типом 'data'";
+          return false;
+        }
+
+        m_data_signal = signal;
+
+      }
+      else if(signal->config()->type.toLower() == "state") {
+
+        if(m_state_signal) {
+
+          p_last_error = "К данному устройству может быть привязан только один сигнал с типом 'state'";
+          return false;
+        }
+
+        m_state_signal = signal;
+
+      }
     }
+    else {
 
-    case modus::ReadOnly:
-    {
-      if(m_job_signal)
-        throw SvException("К данному устройству может быть привязан только один сигнал с типом ReadOnly");
-
-      m_job_signal = signal;
-
-      break;
+      connect(signal, &modus::SvSignal::updated, this, &SvUniversalPack::signalUpdated, Qt::QueuedConnection);
+      connect(signal, &modus::SvSignal::changed, this, &SvUniversalPack::signalChanged, Qt::QueuedConnection);
     }
-
-    default:
-      throw SvException(QString("Не могу привязать сигнал '%1' к устройству '%2'. Тип привязки не поддерживается.").arg(signal->config()->name).arg(p_config->name));
-      break;
   }
 
-//  try {
+  return  true;
+}
 
-//    bool ok;
-//    quint16 type = signal->config()->type.toUInt(&ok, 0);
+void apak::SvUniversalPack::signalUpdated(modus::SvSignal* signal)
+{
+  Q_UNUSED(signal);
+}
 
-//    if(ok && input_signal_collections.contains(type))
-//      input_signal_collections.value(type)->addSignal(signal, p_config->bufsize);
-
-//    else {
-
-//      emit message(QString("Сигнал %1: Неопознанный тип данных \"%2\"").arg(signal->config()->name).arg(signal->config()->type),
-//                   sv::log::llError, sv::log::mtError);
-
-//    }
-//  }
-
-//  catch(SvException& e) {
-//    throw e;
-//  }
+void apak::SvUniversalPack::signalChanged(modus::SvSignal* signal)
+{
+  Q_UNUSED(signal);
 }
 
 void apak::SvUniversalPack::run()
@@ -97,7 +94,7 @@ void apak::SvUniversalPack::run()
 
     if(p_io_buffer->input->ready()) {
 
-      m_in_signal->setValue(QByteArray(p_io_buffer->input->data, p_io_buffer->input->offset));
+      m_data_signal->setValue(QByteArray(p_io_buffer->input->data, p_io_buffer->input->offset));
       emit message(QString("Signal '%1' updated").arg(m_in_signal->config()->name), sv::log::llDebug, sv::log::mtParse);
 
       p_io_buffer->input->reset();

@@ -43,13 +43,17 @@ namespace apak {
 //    void disposeInputSignal (modus::SvSignal* signal) override;
 //    void disposeOutputSignal(modus::SvSignal* signal) override;
 
-    void disposeSignal(modus::SvSignal* signal) override;
+    bool bindSignal(modus::SvSignal* signal, modus::BindMode mode) override;
 
   private:
     apak::ProtocolParams  m_params;
 
-    modus::SvSignal*      m_in_signal;
-    modus::SvSignal*      m_job_signal;
+    modus::SvSignal*      m_data_signal;
+    modus::SvSignal*      m_state_signal;
+
+  public slots:
+    void signalUpdated(modus::SvSignal* signal) override;
+    void signalChanged(modus::SvSignal* signal) override;
 
   };
 }

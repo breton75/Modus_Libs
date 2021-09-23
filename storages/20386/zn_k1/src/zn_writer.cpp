@@ -53,8 +53,11 @@ bool zn1::ZNWriter::bindSignal(modus::SvSignal* signal)
 
       if(signal->config()->type.toLower() == "state") {
 
-        if(m_state_signal)
-          throw SvException("К данному хранилищу может быть привязан только один сигнал состояния");
+        if(m_state_signal) {
+
+          p_last_error = "К данному хранилищу может быть привязан только один сигнал состояния";
+          return false;
+        }
 
         m_state_signal = signal;
 
