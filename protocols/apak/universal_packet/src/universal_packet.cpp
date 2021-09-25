@@ -83,7 +83,7 @@ void apak::SvUniversalPack::signalChanged(modus::SvSignal* signal)
   Q_UNUSED(signal);
 }
 
-void apak::SvUniversalPack::run()
+void apak::SvUniversalPack::start()
 {
   p_is_active = bool(p_config) && bool(p_io_buffer);
 
@@ -95,7 +95,7 @@ void apak::SvUniversalPack::run()
     if(p_io_buffer->input->ready()) {
 
       m_data_signal->setValue(QByteArray(p_io_buffer->input->data, p_io_buffer->input->offset));
-      emit message(QString("Signal '%1' updated").arg(m_in_signal->config()->name), sv::log::llDebug, sv::log::mtParse);
+      emit message(QString("Signal '%1' updated").arg(m_data_signal->config()->name), sv::log::llDebug, sv::log::mtParse);
 
       p_io_buffer->input->reset();
     }

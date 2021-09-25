@@ -72,7 +72,7 @@ void raduga::SvRaduga::disposeSignal (modus::SvSignal* signal)
     }
 
   }
-  else if(signal->isBoundToDevice(p_config->id)) {
+  else if(signal->hasBindingTo(P_DEVICE, p_config->id)) {
 
     bool ok;
     quint16 type = signal->config()->type.toUInt(&ok, 0);

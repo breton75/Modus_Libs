@@ -271,7 +271,6 @@ void zn1::ZNWriter::write()
   } //! ~запись данных
 }
 
-
 void zn1::ZNWriter::signalUpdated(modus::SvSignal* signal)
 {
 //  emit message(QString("1. m_mutex.lock(). bunches.count(): %1").arg(bunches.count()), sv::log::llDebug, sv::log::mtDebug1);
