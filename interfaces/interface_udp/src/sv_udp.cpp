@@ -37,7 +37,7 @@ bool SvUdp::configure(modus::DeviceConfig* config, modus::IOBuffer*iobuffer)
         throw SvException(m_socket->errorString());
 
     // именно после всего!
-    m_socket->moveToThread(this);
+//    m_socket->moveToThread(this);
 
     return true;
 
@@ -49,7 +49,7 @@ bool SvUdp::configure(modus::DeviceConfig* config, modus::IOBuffer*iobuffer)
   }
 }
 
-void SvUdp::run()
+void SvUdp::start()
 {
   p_is_active = true;
 

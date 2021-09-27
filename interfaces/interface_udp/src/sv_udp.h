@@ -26,7 +26,7 @@ public:
   virtual bool configure(modus::DeviceConfig* config, modus::IOBuffer*iobuffer) override;
 
 protected:
-  virtual void run() override;
+  virtual void start() override;
 
 private:
   QUdpSocket*   m_socket = nullptr;

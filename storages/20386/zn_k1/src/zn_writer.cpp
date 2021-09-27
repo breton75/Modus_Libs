@@ -5,11 +5,10 @@ QMutex mutex;
 QSemaphore sem(1);
 
 zn1::ZNWriter::ZNWriter():
-  m_zn_state(0x00), //QMap<QString, modus::SvSignal*>())
-  m_state_signal(nullptr)
+  m_state_signal(nullptr),
+  m_zn_state()
 {
-//  moveToThread(this);
-//  moveToThread(thread()); //!
+
 }
 
 bool zn1::ZNWriter::configure(modus::StorageConfig* config)
@@ -17,9 +16,7 @@ bool zn1::ZNWriter::configure(modus::StorageConfig* config)
   try {
 
     p_config = config;
-
     m_params = zn1::Params::fromJsonString(p_config->params);
-
 
   }
   catch(SvException& e) {
@@ -31,25 +28,15 @@ bool zn1::ZNWriter::configure(modus::StorageConfig* config)
   return true;
 }
 
-//void zn1::ZNWriter::disposeInputSignal  (modus::SvSignal* signal)
-//{
-//  Q_UNUSED(signal);
-//}
-
-//void zn1::ZNWriter::disposeOutputSignal (modus::SvSignal* signal)
-//{
-//  m_zn_state.insert(signal->config()->tag.toLower(), signal);
-//}
-
-bool zn1::ZNWriter::bindSignal(modus::SvSignal* signal)
+bool zn1::ZNWriter::bindSignal(modus::SvSignal* signal, modus::SignalBinding binding)
 {
   qDebug() << QString("zn1::ZNWriter::bindSignal");
 
   if(!p_signals.contains(signal)) {
 
-    p_signals.append(signal);
+    p_signals.insert(signal, binding);
 
-    if(signal->isMaster(P_STORAGE, p_config->id)) {
+    if(binding.mode == modus::ReadWrite) {
 
       if(signal->config()->type.toLower() == "state") {
 
@@ -63,18 +50,11 @@ bool zn1::ZNWriter::bindSignal(modus::SvSignal* signal)
 
       }
     }
-    else if(signal->isBoundToStorage(p_config->id)) {
-
-      connect(signal, &modus::SvSignal::updated, this, &SvAbstractStorage::signalUpdated, Qt::QueuedConnection);
-//      connect(signal, &modus::SvSignal::changed, this, &SvAbstractStorage::signalChanged, Qt::QueuedConnection);
-    }
-
     else {
 
-      p_last_error = QString("Сигнал '%1' не привязан к хранилищу '%2' в конфигурации").arg(signal->config()->name).arg(p_config->name);
-      return false;
+      connect(signal, &modus::SvSignal::updated, this, &SvAbstractStorage::signalUpdated, Qt::QueuedConnection);
+      connect(signal, &modus::SvSignal::changed, this, &SvAbstractStorage::signalChanged, Qt::QueuedConnection);
     }
-
   }
 
   return  true;
@@ -112,7 +92,7 @@ void zn1::ZNWriter::setState(int writeState, int authorization, int connectionSt
   m_zn_state.a = authorization;
   m_zn_state.w = writeState;
 
-  m_state_signal->setValue(int(m_zn_state));
+  m_state_signal->setValue(m_zn_state.state());
 }
 
 void zn1::ZNWriter::write()

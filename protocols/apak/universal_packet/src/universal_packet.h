@@ -38,12 +38,12 @@ namespace apak {
     bool configure(modus::DeviceConfig* config, modus::IOBuffer *iobuffer) override;
 
   protected:
-    void run() override;
+    void start() override;
 
 //    void disposeInputSignal (modus::SvSignal* signal) override;
 //    void disposeOutputSignal(modus::SvSignal* signal) override;
 
-    bool bindSignal(modus::SvSignal* signal, modus::BindMode mode) override;
+    bool bindSignal(modus::SvSignal* signal, modus::SignalBinding binding) override;
 
   private:
     apak::ProtocolParams  m_params;

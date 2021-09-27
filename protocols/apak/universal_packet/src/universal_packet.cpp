@@ -2,8 +2,8 @@
 
 apak::SvUniversalPack::SvUniversalPack():
   modus::SvAbstractProtocol(),
-  m_in_signal(nullptr),
-  m_job_signal(nullptr)
+  m_data_signal(nullptr),
+  m_state_signal(nullptr)
 {
 
 }
@@ -32,13 +32,13 @@ bool apak::SvUniversalPack::configure(modus::DeviceConfig *config, modus::IOBuff
   }
 }
 
-bool apak::SvUniversalPack::bindSignal(modus::SvSignal* signal, modus::BindMode mode)
+bool apak::SvUniversalPack::bindSignal(modus::SvSignal* signal, modus::SignalBinding binding)
 {
   if(!p_signals.contains(signal)) {
 
-    p_signals.append(signal);
+    p_signals.insert(signal, binding);
 
-    if(mode == modus::ReadWrite) {
+    if(binding.mode == modus::ReadWrite) {
 
       if(signal->config()->type.toLower() == "data") {
 
@@ -109,7 +109,7 @@ void apak::SvUniversalPack::start()
 
 //    p_io_buffer->output->mutex.unlock();
 
-    msleep(m_params.parse_interval);
+    thread()->msleep(m_params.parse_interval);
 
   }
 }

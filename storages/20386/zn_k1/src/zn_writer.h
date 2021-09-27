@@ -339,10 +339,16 @@ namespace zn1 {
 
     Q_OBJECT
 
-    union ZNstate {
-      int c:0;
-      int a:1;
-      int w:2;
+    struct ZNstate {
+      ZNstate(int c = 0, int a = 0, int w = 0):
+        c(c), a(a), w(w)
+      {}
+
+      quint8 state() { return quint8(c + (a << 1) + (w << 2)); }
+
+      quint8 c;
+      quint8 a;
+      quint8 w;
     };
 
   public:
@@ -352,7 +358,7 @@ namespace zn1 {
 
 //    virtual void disposeInputSignal  (modus::SvSignal* signal) override;
 //    virtual void disposeOutputSignal (modus::SvSignal* signal) override;
-    bool bindSignal(modus::SvSignal* signal) override;
+    bool bindSignal(modus::SvSignal* signal, modus::SignalBinding binding) override;
 
     void start() override;
 
