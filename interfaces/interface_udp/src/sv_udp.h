@@ -25,14 +25,18 @@ public:
 
   virtual bool configure(modus::DeviceConfig* config, modus::IOBuffer*iobuffer) override;
 
-protected:
-  virtual void start() override;
+public slots:
+  void start() override;
+  void read() override;
+  void write(modus::BUFF* buffer);
 
 private:
   QUdpSocket*   m_socket = nullptr;
   UdpParams     m_params;
 
-  void write(modus::BUFF* buffer);
+
+//private slots:
+//  void read();
 
 };
 

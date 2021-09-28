@@ -30,8 +30,6 @@ bool zn1::ZNWriter::configure(modus::StorageConfig* config)
 
 bool zn1::ZNWriter::bindSignal(modus::SvSignal* signal, modus::SignalBinding binding)
 {
-  qDebug() << QString("zn1::ZNWriter::bindSignal");
-
   if(!p_signals.contains(signal)) {
 
     p_signals.insert(signal, binding);
@@ -42,7 +40,7 @@ bool zn1::ZNWriter::bindSignal(modus::SvSignal* signal, modus::SignalBinding bin
 
         if(m_state_signal) {
 
-          p_last_error = "К данному хранилищу может быть привязан только один сигнал состояния";
+          p_last_error = TOO_MUCH(p_config->name);
           return false;
         }
 

@@ -378,7 +378,7 @@ namespace zn1 {
 //    void setState(int doChangeFlags, const QString& writeState = STATE_OK, const QString& authorization = STATE_OK, const QString& connectionState = STATE_OK);
     void setState(int writeState, int authorization, int connectionState);
 
-  private slots:
+  public slots:
     void signalUpdated(modus::SvSignal* signal) override;
     void signalChanged(modus::SvSignal* signal) override
     {

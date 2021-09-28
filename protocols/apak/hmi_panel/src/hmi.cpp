@@ -30,18 +30,39 @@ bool apak::SvHMI::configure(modus::DeviceConfig *config, modus::IOBuffer *iobuff
   }
 }
 
-void apak::SvHMI::disposeInputSignal (modus::SvSignal* signal)
+bool apak::SvHMI::bindSignal(modus::SvSignal *signal, modus::SignalBinding binding)
 {
-  m_input_signals.insert(signal->config()->tag, signal);
+  bool r = modus::SvAbstractProtocol::bindSignal(signal, binding);
+
+  if(r) {
+
+    if(binding.mode == modus::ReadWrite) {
+
+      m_input_signals.insert(signal->config()->tag, signal);
+
+    }
+    else
+      m_output_signals.insert(signal->config()->tag, signal);
+
+  }
+
+  return r;
 }
 
-void apak::SvHMI::disposeOutputSignal (modus::SvSignal* signal)
+void apak::SvHMI::signalUpdated(modus::SvSignal* signal)
 {
-  m_output_signals.insert(signal->config()->tag, signal);
+
 }
 
-void apak::SvHMI::run()
+void apak::SvHMI::signalChanged(modus::SvSignal* signal)
 {
+
+}
+
+void apak::SvHMI::start()
+{
+//  connect(m_s)
+
   p_is_active = bool(p_config) && bool(p_io_buffer);
 
   while(p_is_active) {
@@ -61,7 +82,7 @@ void apak::SvHMI::run()
 //    putout();
     p_io_buffer->output->mutex.unlock();
 
-    msleep(m_params.parse_interval);
+    thread()->msleep(m_params.parse_interval);
 
   }
 }

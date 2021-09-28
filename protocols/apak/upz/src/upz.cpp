@@ -30,57 +30,64 @@ bool apak::SvUPZ::configure(modus::DeviceConfig *config, modus::IOBuffer *iobuff
   }
 }
 
-void apak::SvUPZ::disposeInputSignal (modus::SvSignal* signal)
+bool apak::SvUPZ::bindSignal(modus::SvSignal* signal, modus::SignalBinding binding)
 {
-  m_signal = signal;
+  try {
 
-//  try {
+    bool r = modus::SvAbstractProtocol::bindSignal(signal, binding);
 
-//    bool ok;
-//    quint16 type = signal->config()->type.toUInt(&ok, 0);
+    if(r) {
 
-//    if(ok && input_signal_collections.contains(type))
-//      input_signal_collections.value(type)->addSignal(signal, p_config->bufsize);
+      if(binding.mode == modus::ReadWrite) {
 
-//    else {
+        if(signal->config()->type.toLower() == "state") {
 
-//      emit message(QString("Сигнал %1: Неопознанный тип данных \"%2\"").arg(signal->config()->name).arg(signal->config()->type),
-//                   sv::log::llError, sv::log::mtError);
+          if(m_state_signal)
+            throw SvException(TOO_MUCH(p_config->name));
 
-//    }
-//  }
+          else
+            m_state_signal = signal;
 
-//  catch(SvException& e) {
-//    throw e;
-//  }
+        }
+        else if(m_data_signal) {
+          throw SvException(TOO_MUCH(p_config->name));
+
+        }
+        else
+          m_data_signal = signal;
+
+        return true;
+
+      }
+      else {
+
+        connect(signal, &modus::SvSignal::updated, this, &SvUPZ::signalUpdated, Qt::QueuedConnection);
+        connect(signal, &modus::SvSignal::changed, this, &SvUPZ::signalChanged, Qt::QueuedConnection);
+      }
+    }
+
+    return r;
+
+  }
+
+  catch(SvException& e) {
+
+    p_last_error = e.error;
+    return false;
+  }
 }
 
-void apak::SvUPZ::disposeOutputSignal (modus::SvSignal* signal)
+void apak::SvUPZ::signalUpdated(modus::SvSignal* signal)
 {
   Q_UNUSED(signal);
-
-//  try {
-
-//    bool ok;
-//    quint16 type = signal->config()->type.toUInt(&ok, 0);
-
-//    if(ok && output_signal_collections.contains(type))
-//      output_signal_collections.value(type)->addSignal(signal, p_config->bufsize);
-
-//    else {
-
-//      emit message(QString("Сигнал %1: Неопознанный тип данных \"%2\"").arg(signal->config()->name).arg(signal->config()->type),
-//                   sv::log::llError, sv::log::mtError);
-
-//    }
-//  }
-
-//  catch(SvException& e) {
-//    throw e;
-//  }
 }
 
-void apak::SvUPZ::run()
+void apak::SvUPZ::signalChanged(modus::SvSignal* signal)
+{
+  Q_UNUSED(signal);
+}
+
+void apak::SvUPZ::start()
 {
   p_is_active = bool(p_config) && bool(p_io_buffer);
 
@@ -91,8 +98,10 @@ void apak::SvUPZ::run()
 
     if(p_io_buffer->input->ready()) {
 
-      m_signal->setValue(QByteArray(p_io_buffer->input->data, p_io_buffer->input->offset));
-      emit message(QString("signal %1 updated").arg(m_signal->config()->name), sv::log::llDebug, sv::log::mtParse);
+      m_data_signal->setValue(QByteArray(p_io_buffer->input->data, p_io_buffer->input->offset));
+      emit message(QString("signal %1 updated").arg(m_data_signal->config()->name), sv::log::llDebug, sv::log::mtParse);
+
+      m_state_signal->setValue(int(1));
 
       p_io_buffer->input->reset();
     }
@@ -106,7 +115,7 @@ void apak::SvUPZ::run()
 
 //    p_io_buffer->output->mutex.unlock();
 
-    msleep(m_params.parse_interval);
+    thread()->msleep(m_params.parse_interval);
 
   }
 }
