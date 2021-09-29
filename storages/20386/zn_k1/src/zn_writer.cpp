@@ -40,7 +40,7 @@ bool zn1::ZNWriter::bindSignal(modus::SvSignal* signal, modus::SignalBinding bin
 
         if(m_state_signal) {
 
-          p_last_error = TOO_MUCH(p_config->name);
+          p_last_error = TOO_MUCH(p_config->name, "state");
           return false;
         }
 

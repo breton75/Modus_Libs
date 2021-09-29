@@ -27,7 +27,7 @@ public:
 
 public slots:
   void start() override;
-  void read() override;
+//  void read() override;
   void write(modus::BUFF* buffer);
 
 private:

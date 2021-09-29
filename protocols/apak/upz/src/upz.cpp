@@ -43,14 +43,14 @@ bool apak::SvUPZ::bindSignal(modus::SvSignal* signal, modus::SignalBinding bindi
         if(signal->config()->type.toLower() == "state") {
 
           if(m_state_signal)
-            throw SvException(TOO_MUCH(p_config->name));
+            throw SvException(TOO_MUCH(p_config->name, "state"));
 
           else
             m_state_signal = signal;
 
         }
         else if(m_data_signal) {
-          throw SvException(TOO_MUCH(p_config->name));
+          throw SvException(TOO_MUCH(p_config->name, "data"));
 
         }
         else
@@ -90,9 +90,9 @@ void apak::SvUPZ::signalChanged(modus::SvSignal* signal)
 void apak::SvUPZ::start()
 {
   p_is_active = bool(p_config) && bool(p_io_buffer);
-
   while(p_is_active) {
 
+    qDebug() << 1;
     p_io_buffer->confirm->mutex.lock();     // если нужен ответ квитирование
     p_io_buffer->input->mutex.lock();
 
@@ -115,7 +115,7 @@ void apak::SvUPZ::start()
 
 //    p_io_buffer->output->mutex.unlock();
 
-    thread()->msleep(m_params.parse_interval);
+//    thread()->msleep(m_params.parse_interval);
 
   }
 }

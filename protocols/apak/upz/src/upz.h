@@ -36,10 +36,6 @@ namespace apak {
     ~SvUPZ();
 
     bool configure(modus::DeviceConfig* config, modus::IOBuffer *iobuffer) override;
-
-  protected:
-
-
     bool bindSignal(modus::SvSignal* signal, modus::SignalBinding binding) override;
 
   private:
@@ -51,7 +47,8 @@ namespace apak {
   public slots:
     void signalUpdated(modus::SvSignal* signal) override;
     void signalChanged(modus::SvSignal* signal) override;
-void start() override;
+    void start() override;
+//    void parse(modus::BUFF* buffer) override;
   };
 }
 

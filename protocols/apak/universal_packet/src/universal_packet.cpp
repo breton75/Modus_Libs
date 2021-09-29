@@ -44,7 +44,7 @@ bool apak::SvUniversalPack::bindSignal(modus::SvSignal* signal, modus::SignalBin
 
         if(m_data_signal) {
 
-          p_last_error = "К данному устройству может быть привязан только один сигнал с типом 'data'";
+          p_last_error = TOO_MUCH(p_config->name, "data");
           return false;
         }
 
@@ -55,7 +55,7 @@ bool apak::SvUniversalPack::bindSignal(modus::SvSignal* signal, modus::SignalBin
 
         if(m_state_signal) {
 
-          p_last_error = "К данному устройству может быть привязан только один сигнал с типом 'state'";
+          p_last_error = TOO_MUCH(p_config->name, "state");
           return false;
         }
 
@@ -87,7 +87,7 @@ void apak::SvUniversalPack::start()
 {
   p_is_active = bool(p_config) && bool(p_io_buffer);
 
-  while(p_is_active) {
+  if(p_is_active) {
 
     p_io_buffer->confirm->mutex.lock();     // если нужен ответ квитирование
     p_io_buffer->input->mutex.lock();
@@ -96,6 +96,8 @@ void apak::SvUniversalPack::start()
 
       m_data_signal->setValue(QByteArray(p_io_buffer->input->data, p_io_buffer->input->offset));
       emit message(QString("Signal '%1' updated").arg(m_data_signal->config()->name), sv::log::llDebug, sv::log::mtParse);
+
+      m_state_signal->setValue(int(1));
 
       p_io_buffer->input->reset();
     }
@@ -109,7 +111,7 @@ void apak::SvUniversalPack::start()
 
 //    p_io_buffer->output->mutex.unlock();
 
-    thread()->msleep(m_params.parse_interval);
+//    thread()->msleep(m_params.parse_interval);
 
   }
 }

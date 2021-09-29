@@ -51,19 +51,11 @@ bool SvUdp::configure(modus::DeviceConfig* config, modus::IOBuffer*iobuffer)
 
 void SvUdp::start()
 {
-  connect(m_socket, &QUdpSocket::readyRead, this, &SvUdp::read);
   p_is_active = true;
-}
 
-void SvUdp::read()
-{
-
-//  while(p_is_active) {
+  while(p_is_active) {
 
     p_io_buffer->input->mutex.lock();
-//    emit message("udp after lock()", sv::log::llDebug, sv::log::mtReceive);
-
-//    p_io_buffer->input->reset();
 
     while(m_socket->waitForReadyRead(m_params.grain_gap) && p_is_active) {
 
@@ -82,52 +74,33 @@ void SvUdp::read()
 
         p_io_buffer->input->offset += readed;
 
-
       }
     }
 
     p_io_buffer->input->mutex.unlock();
+    p_io_buffer->confirm->mutex.lock();
+//    emit message("confirm after lock()", sv::log::llDebug, sv::log::mtReceive);
+    if(p_io_buffer->confirm->ready())
+      write(p_io_buffer->confirm);
 
-    emit bufferIsReady(p_io_buffer->input);
+    p_io_buffer->confirm->mutex.unlock();
 
+    // отправляем управляющие данные, если они есть
+    p_io_buffer->output->mutex.lock();
+//    qDebug() << "write" << int(p_io_buffer->output->data[256]);
+    if(p_io_buffer->output->ready())
+      write(p_io_buffer->output);
+
+    p_io_buffer->output->mutex.unlock();
+
+  }
 }
-
-//    emit message("udp after unlock()", sv::log::llDebug, sv::log::mtReceive);
-
-    // переключаемся на другой поток
-//    emit message("udp before yield", sv::log::llDebug, sv::log::mtReceive);
-//    QThread::yieldCurrentThread();
-
-//void SvUdp::writeConfirm()
-//{
-//    p_io_buffer->confirm->mutex.lock();
-////    emit message("confirm after lock()", sv::log::llDebug, sv::log::mtReceive);
-//    if(p_io_buffer->confirm->ready())
-//      write(p_io_buffer->confirm);
-
-//    p_io_buffer->confirm->mutex.unlock();
-////    emit message("confirm after unlock()", sv::log::llDebug, sv::log::mtReceive);
-
-////    p_io_buffer->input->mutex.lock();
-////    emit message("reset after lock()", sv::log::llDebug, sv::log::mtReceive);
-////    p_io_buffer->input->reset();
-////    p_io_buffer->input->mutex.unlock();
-////    emit message("reset after unlock()", sv::log::llDebug, sv::log::mtReceive);
-
-//    // отправляем управляющие данные, если они есть
-//    p_io_buffer->output->mutex.lock();
-////    qDebug() << "write" << int(p_io_buffer->output->data[256]);
-//    if(p_io_buffer->output->ready())
-//      write(p_io_buffer->output);
-
-//    p_io_buffer->output->mutex.unlock();
-
-////  }
-//}
 
 
 void SvUdp::write(modus::BUFF* buffer)
 {
+  QMutexLocker(&(buffer->mutex));
+
   if(!buffer->ready())
     return;
 
