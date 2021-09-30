@@ -26,8 +26,8 @@ public:
   virtual bool configure(modus::DeviceConfig* config, modus::IOBuffer*iobuffer) override;
 
 public slots:
-  void start() override;
-//  void read() override;
+  bool start() override;
+  void read() override;
   void write(modus::BUFF* buffer);
 
 private:

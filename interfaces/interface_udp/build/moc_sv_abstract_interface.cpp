@@ -19,8 +19,8 @@
 
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_modus__SvAbstractInterface_t {
-    QByteArrayData data[12];
-    char stringdata0[97];
+    QByteArrayData data[14];
+    char stringdata0[108];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -36,16 +36,18 @@ QT_MOC_LITERAL(3, 36, 3), // "msg"
 QT_MOC_LITERAL(4, 40, 5), // "level"
 QT_MOC_LITERAL(5, 46, 4), // "type"
 QT_MOC_LITERAL(6, 51, 8), // "finished"
-QT_MOC_LITERAL(7, 60, 5), // "start"
-QT_MOC_LITERAL(8, 66, 5), // "write"
-QT_MOC_LITERAL(9, 72, 12), // "modus::BUFF*"
-QT_MOC_LITERAL(10, 85, 6), // "buffer"
-QT_MOC_LITERAL(11, 92, 4) // "stop"
+QT_MOC_LITERAL(7, 60, 5), // "error"
+QT_MOC_LITERAL(8, 66, 5), // "start"
+QT_MOC_LITERAL(9, 72, 4), // "read"
+QT_MOC_LITERAL(10, 77, 5), // "write"
+QT_MOC_LITERAL(11, 83, 12), // "modus::BUFF*"
+QT_MOC_LITERAL(12, 96, 6), // "buffer"
+QT_MOC_LITERAL(13, 103, 4) // "stop"
 
     },
     "modus::SvAbstractInterface\0message\0\0"
-    "msg\0level\0type\0finished\0start\0write\0"
-    "modus::BUFF*\0buffer\0stop"
+    "msg\0level\0type\0finished\0error\0start\0"
+    "read\0write\0modus::BUFF*\0buffer\0stop"
 };
 #undef QT_MOC_LITERAL
 
@@ -55,33 +57,37 @@ static const uint qt_meta_data_modus__SvAbstractInterface[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-       7,   14, // methods
+       9,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
        0,       // flags
-       4,       // signalCount
+       5,       // signalCount
 
  // signals: name, argc, parameters, tag, flags
-       1,    3,   49,    2, 0x06 /* Public */,
-       1,    2,   56,    2, 0x26 /* Public | MethodCloned */,
-       1,    1,   61,    2, 0x26 /* Public | MethodCloned */,
-       6,    0,   64,    2, 0x06 /* Public */,
+       1,    3,   59,    2, 0x06 /* Public */,
+       1,    2,   66,    2, 0x26 /* Public | MethodCloned */,
+       1,    1,   71,    2, 0x26 /* Public | MethodCloned */,
+       6,    0,   74,    2, 0x06 /* Public */,
+       7,    0,   75,    2, 0x06 /* Public */,
 
  // slots: name, argc, parameters, tag, flags
-       7,    0,   65,    2, 0x0a /* Public */,
-       8,    1,   66,    2, 0x0a /* Public */,
-      11,    0,   69,    2, 0x0a /* Public */,
+       8,    0,   76,    2, 0x0a /* Public */,
+       9,    0,   77,    2, 0x0a /* Public */,
+      10,    1,   78,    2, 0x0a /* Public */,
+      13,    0,   81,    2, 0x0a /* Public */,
 
  // signals: parameters
     QMetaType::Void, QMetaType::QString, QMetaType::Int, QMetaType::Int,    3,    4,    5,
     QMetaType::Void, QMetaType::QString, QMetaType::Int,    3,    4,
     QMetaType::Void, QMetaType::QString,    3,
     QMetaType::Void,
+    QMetaType::Void,
 
  // slots: parameters
+    QMetaType::Bool,
     QMetaType::Void,
-    QMetaType::Void, 0x80000000 | 9,   10,
+    QMetaType::Void, 0x80000000 | 11,   12,
     QMetaType::Void,
 
        0        // eod
@@ -97,9 +103,12 @@ void modus::SvAbstractInterface::qt_static_metacall(QObject *_o, QMetaObject::Ca
         case 1: _t->message((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
         case 2: _t->message((*reinterpret_cast< const QString(*)>(_a[1]))); break;
         case 3: _t->finished(); break;
-        case 4: _t->start(); break;
-        case 5: _t->write((*reinterpret_cast< modus::BUFF*(*)>(_a[1]))); break;
-        case 6: _t->stop(); break;
+        case 4: _t->error(); break;
+        case 5: { bool _r = _t->start();
+            if (_a[0]) *reinterpret_cast< bool*>(_a[0]) = _r; }  break;
+        case 6: _t->read(); break;
+        case 7: _t->write((*reinterpret_cast< modus::BUFF*(*)>(_a[1]))); break;
+        case 8: _t->stop(); break;
         default: ;
         }
     } else if (_c == QMetaObject::IndexOfMethod) {
@@ -115,6 +124,12 @@ void modus::SvAbstractInterface::qt_static_metacall(QObject *_o, QMetaObject::Ca
             typedef void (SvAbstractInterface::*_t)();
             if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&SvAbstractInterface::finished)) {
                 *result = 3;
+            }
+        }
+        {
+            typedef void (SvAbstractInterface::*_t)();
+            if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&SvAbstractInterface::error)) {
+                *result = 4;
             }
         }
     }
@@ -145,13 +160,13 @@ int modus::SvAbstractInterface::qt_metacall(QMetaObject::Call _c, int _id, void 
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 7)
+        if (_id < 9)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 7;
+        _id -= 9;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 7)
+        if (_id < 9)
             *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 7;
+        _id -= 9;
     }
     return _id;
 }
@@ -167,5 +182,11 @@ void modus::SvAbstractInterface::message(const QString _t1, int _t2, int _t3)
 void modus::SvAbstractInterface::finished()
 {
     QMetaObject::activate(this, &staticMetaObject, 3, Q_NULLPTR);
+}
+
+// SIGNAL 4
+void modus::SvAbstractInterface::error()
+{
+    QMetaObject::activate(this, &staticMetaObject, 4, Q_NULLPTR);
 }
 QT_END_MOC_NAMESPACE

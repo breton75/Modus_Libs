@@ -44,11 +44,17 @@ namespace apak {
     modus::SvSignal*      m_data_signal;
     modus::SvSignal*      m_state_signal;    
 
+//    QTimer* m_timer;
+
   public slots:
     void signalUpdated(modus::SvSignal* signal) override;
     void signalChanged(modus::SvSignal* signal) override;
     void start() override;
 //    void parse(modus::BUFF* buffer) override;
+
+  private slots:
+    void parse();
+
   };
 }
 

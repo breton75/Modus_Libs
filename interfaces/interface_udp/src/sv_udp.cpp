@@ -13,6 +13,46 @@ bool SvUdp::configure(modus::DeviceConfig* config, modus::IOBuffer*iobuffer)
 
     m_params = UdpParams::fromJsonString(p_config->interface.params);
 
+//    m_socket = new QUdpSocket();
+
+//    if(!m_params.ifc.isEmpty()) {
+
+//      QNetworkInterface ifc = QNetworkInterface::interfaceFromName(m_params.ifc);
+//      if(!ifc.isValid())
+//        throw SvException(QString("Wrong ifc name: %1").arg(m_params.ifc));
+
+//      if(ifc.addressEntries().count() == 0)
+//        throw SvException(QString("Wrong ifc name: %1").arg(m_params.ifc));
+
+//      /* For TCP sockets, this function may be used to specify
+//       * which interface to use for an outgoing connection,
+//       * which is useful in case of multiple network interfaces */
+//    //  socket->bind(ifc.addressEntries().at(0).ip());
+
+//      if(!m_socket->bind(ifc.addressEntries().at(0).ip(), m_params.recv_port, QAbstractSocket::DontShareAddress))
+//        throw SvException(m_socket->errorString());
+//    }
+//    else
+//      if(!m_socket->bind(QHostAddress::Any, m_params.recv_port, QAbstractSocket::DontShareAddress))
+//        throw SvException(m_socket->errorString());
+
+//    // именно после всего!
+////    m_socket->moveToThread(this);
+
+    return true;
+
+  } catch (SvException& e) {
+
+    p_last_error = e.error;
+    return false;
+
+  }
+}
+
+bool SvUdp::start()
+{
+  try {
+
     m_socket = new QUdpSocket();
 
     if(!m_params.ifc.isEmpty()) {
@@ -39,7 +79,6 @@ bool SvUdp::configure(modus::DeviceConfig* config, modus::IOBuffer*iobuffer)
     // именно после всего!
 //    m_socket->moveToThread(this);
 
-    return true;
 
   } catch (SvException& e) {
 
@@ -47,37 +86,54 @@ bool SvUdp::configure(modus::DeviceConfig* config, modus::IOBuffer*iobuffer)
     return false;
 
   }
-}
 
-void SvUdp::start()
-{
   p_is_active = true;
 
-  while(p_is_active) {
+  connect(m_socket, &QUdpSocket::readyRead, this, &SvUdp::read);
+  return true;
+}
+
+void SvUdp::read()
+{
+//  while(p_is_active) {
+//  QUdpSocket* socket = (QUdpSocket*)(sender());
+  disconnect(m_socket, &QUdpSocket::readyRead, this, &SvUdp::read);
 
     p_io_buffer->input->mutex.lock();
 
+    if(p_io_buffer->input->offset + m_socket->bytesAvailable() > p_config->bufsize)
+      p_io_buffer->input->reset();
+
+//    /* ... the rest of the datagram will be lost ... */
+    qint64 readed = m_socket->readDatagram(&p_io_buffer->input->data[p_io_buffer->input->offset], p_config->bufsize - p_io_buffer->input->offset);
+////qDebug() << QString(QByteArray((const char*)&p_io_buffer->input->data[p_io_buffer->input->offset], readed).toHex());
+//    emit message(QString(QByteArray((const char*)&p_io_buffer->input->data[p_io_buffer->input->offset], readed).toHex()), sv::log::llDebug, sv::log::mtReceive);
+
+    p_io_buffer->input->offset = readed;
+
+//qDebug() << 1;
     while(m_socket->waitForReadyRead(m_params.grain_gap) && p_is_active) {
 
       while(m_socket->hasPendingDatagrams() && p_is_active) {
-
-        if(m_socket->pendingDatagramSize() <= 0)
-          continue;
+//qDebug() << 2;
+//        if(m_socket->pendingDatagramSize() <= 0)
+//          continue;
 
         if(p_io_buffer->input->offset + m_socket->bytesAvailable() > p_config->bufsize)
           p_io_buffer->input->reset();
 
         /* ... the rest of the datagram will be lost ... */
-        qint64 readed = m_socket->readDatagram(&p_io_buffer->input->data[p_io_buffer->input->offset], p_config->bufsize - p_io_buffer->input->offset);
+        qint64 readed2 = m_socket->readDatagram(&p_io_buffer->input->data[p_io_buffer->input->offset], p_config->bufsize - p_io_buffer->input->offset);
+
 //qDebug() << QString(QByteArray((const char*)&p_io_buffer->input->data[p_io_buffer->input->offset], readed).toHex());
         emit message(QString(QByteArray((const char*)&p_io_buffer->input->data[p_io_buffer->input->offset], readed).toHex()), sv::log::llDebug, sv::log::mtReceive);
-
-        p_io_buffer->input->offset += readed;
+        p_io_buffer->input->offset += readed2;
 
       }
     }
 
     p_io_buffer->input->mutex.unlock();
+
     p_io_buffer->confirm->mutex.lock();
 //    emit message("confirm after lock()", sv::log::llDebug, sv::log::mtReceive);
     if(p_io_buffer->confirm->ready())
@@ -93,7 +149,9 @@ void SvUdp::start()
 
     p_io_buffer->output->mutex.unlock();
 
-  }
+    connect(m_socket, &QUdpSocket::readyRead, this, &SvUdp::read);
+
+//  }
 }
 
 

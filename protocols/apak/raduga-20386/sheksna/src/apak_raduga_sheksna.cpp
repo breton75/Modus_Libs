@@ -107,7 +107,7 @@ void raduga::SvRaduga::run()
     p_io_buffer->confirm->mutex.unlock();   // если нужен ответ квитирование
 
     if(result.parse_time.isValid())
-      validateSignals(result.parse_time);
+      checkupSignals(result.parse_time);
 
 //    p_io_buffer->output->mutex.lock();
 
