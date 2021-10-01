@@ -106,16 +106,13 @@ void SvUdp::read()
 
 //    /* ... the rest of the datagram will be lost ... */
     qint64 readed = m_socket->readDatagram(&p_io_buffer->input->data[p_io_buffer->input->offset], p_config->bufsize - p_io_buffer->input->offset);
-////qDebug() << QString(QByteArray((const char*)&p_io_buffer->input->data[p_io_buffer->input->offset], readed).toHex());
 //    emit message(QString(QByteArray((const char*)&p_io_buffer->input->data[p_io_buffer->input->offset], readed).toHex()), sv::log::llDebug, sv::log::mtReceive);
 
     p_io_buffer->input->offset = readed;
 
-//qDebug() << 1;
     while(m_socket->waitForReadyRead(m_params.grain_gap) && p_is_active) {
 
       while(m_socket->hasPendingDatagrams() && p_is_active) {
-//qDebug() << 2;
 //        if(m_socket->pendingDatagramSize() <= 0)
 //          continue;
 

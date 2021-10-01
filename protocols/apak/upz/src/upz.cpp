@@ -35,6 +35,7 @@ bool apak::SvUPZ::configure(modus::DeviceConfig *config, modus::IOBuffer *iobuff
 bool apak::SvUPZ::bindSignal(modus::SvSignal* signal, modus::SignalBinding binding)
 {
   try {
+
     bool r = modus::SvAbstractProtocol::bindSignal(signal, binding);
 
     if(r) {
@@ -101,8 +102,6 @@ void apak::SvUPZ::parse()
     p_io_buffer->confirm->mutex.lock();     // если нужен ответ квитирование
     p_io_buffer->input->mutex.lock();
 
-    checkupSignals();
-
     if(p_io_buffer->input->ready()) {
 
       m_data_signal->setValue(QVariant(QByteArray(p_io_buffer->input->data, p_io_buffer->input->offset)));
@@ -114,31 +113,8 @@ void apak::SvUPZ::parse()
     }
     else {
 
-      /* алгоритм обновления значения сигнала:
-         1. если для сиганала НЕ задан timeout, то есть timeout = 0, то смотрим время,
-            когда последний раз происходил парсинг данных (last_parsed_time). если время парсинга данных не превышает
-            timeout, то освежаем сигнал (обновляем last_update_time). другими словами - если timeout = 0, то освежаем сигнал
-            пока last_parsed_time + DEFAULT_TIMEOUT меньше текущего времени
+      checkupSignals();
 
-         2. если время обновления сигнала превышает timeout (сигнал утратил свежесть), то смотрим время,
-            когда последний раз происходил парсинг данных (last_parsed_time). если время парсинга данных не превышает
-            timeout, то освежаем сигнал (обновляем last_update_time). другими словами - если сигнал давно не обновлялся, а
-            данные от устройства продолжают идти, считаем, что данный сигнал тоже актуален.
-
-         3. если сигнал не утратил свежести, то есть врем обновления не превышает timeout, то и не трогаем его.
-      */
-      for (modus::SvSignal* signal: p_signals.keys()) {
-
-        if(p_signals.value(signal).mode != modus::ReadWrite)
-          continue;
-
-        if(!signal->hasTimeout())
-          signal->approve(p_last_parsed_time.toMSecsSinceEpoch() + DEFAULT_TIMEOUT < QDateTime::currentMSecsSinceEpoch());
-
-        else if(signal->lastUpdate().toMSecsSinceEpoch() + signal->config()->timeout > QDateTime::currentMSecsSinceEpoch())
-          signal->approve(p_last_parsed_time.toMSecsSinceEpoch() + signal->config()->timeout < QDateTime::currentMSecsSinceEpoch());
-
-      }
     }
 
     p_io_buffer->input->mutex.unlock();

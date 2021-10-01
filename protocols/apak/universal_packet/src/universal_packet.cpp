@@ -34,43 +34,51 @@ bool apak::SvUniversalPack::configure(modus::DeviceConfig *config, modus::IOBuff
 
 bool apak::SvUniversalPack::bindSignal(modus::SvSignal* signal, modus::SignalBinding binding)
 {
-  if(!p_signals.contains(signal)) {
+  try {
 
-    p_signals.insert(signal, binding);
+    bool r = modus::SvAbstractProtocol::bindSignal(signal, binding);
 
-    if(binding.mode == modus::ReadWrite) {
+    if(r) {
 
-      if(signal->config()->type.toLower() == "data") {
+      if(binding.mode == modus::ReadWrite) {
 
-        if(m_data_signal) {
+        if(signal->config()->type.toLower() == "data") {
 
-          p_last_error = TOO_MUCH(p_config->name, "data");
-          return false;
+          if(m_data_signal) {
+
+            p_last_error = TOO_MUCH(p_config->name, "data");
+            return false;
+          }
+
+          m_data_signal = signal;
+
         }
+        else if(signal->config()->type.toLower() == "state") {
 
-        m_data_signal = signal;
+          if(m_state_signal) {
 
+            p_last_error = TOO_MUCH(p_config->name, "state");
+            return false;
+          }
+
+          m_state_signal = signal;
+
+        }
       }
-      else if(signal->config()->type.toLower() == "state") {
+      else {
 
-        if(m_state_signal) {
-
-          p_last_error = TOO_MUCH(p_config->name, "state");
-          return false;
-        }
-
-        m_state_signal = signal;
-
+        connect(signal, &modus::SvSignal::updated, this, &SvUniversalPack::signalUpdated, Qt::QueuedConnection);
+        connect(signal, &modus::SvSignal::changed, this, &SvUniversalPack::signalChanged, Qt::QueuedConnection);
       }
     }
-    else {
 
-      connect(signal, &modus::SvSignal::updated, this, &SvUniversalPack::signalUpdated, Qt::QueuedConnection);
-      connect(signal, &modus::SvSignal::changed, this, &SvUniversalPack::signalChanged, Qt::QueuedConnection);
-    }
+    return r;
   }
 
-  return  true;
+  catch(SvException& e) {
+    p_last_error = e.error;
+    return false;
+  }
 }
 
 void apak::SvUniversalPack::signalUpdated(modus::SvSignal* signal)
@@ -85,8 +93,15 @@ void apak::SvUniversalPack::signalChanged(modus::SvSignal* signal)
 
 void apak::SvUniversalPack::start()
 {
-  p_is_active = bool(p_config) && bool(p_io_buffer);
+  QTimer* m_timer = new QTimer;
+  connect(m_timer, &QTimer::timeout, this, &SvUniversalPack::parse);
+  m_timer->start(m_params.parse_interval);
 
+  p_is_active = bool(p_config) && bool(p_io_buffer);
+}
+
+void apak::SvUniversalPack::parse()
+{
   if(p_is_active) {
 
     p_io_buffer->confirm->mutex.lock();     // если нужен ответ квитирование
@@ -94,24 +109,25 @@ void apak::SvUniversalPack::start()
 
     if(p_io_buffer->input->ready()) {
 
-      m_data_signal->setValue(QByteArray(p_io_buffer->input->data, p_io_buffer->input->offset));
-      emit message(QString("Signal '%1' updated").arg(m_data_signal->config()->name), sv::log::llDebug, sv::log::mtParse);
+      m_data_signal->setValue(QVariant(QByteArray(p_io_buffer->input->data, p_io_buffer->input->offset)));
 
+      emit message(QString("signal %1 updated").arg(m_data_signal->config()->name), sv::log::llDebug, sv::log::mtParse);
       m_state_signal->setValue(int(1));
 
       p_io_buffer->input->reset();
+    }
+    else {
+
+      checkupSignals();
+
     }
 
     p_io_buffer->input->mutex.unlock();
     p_io_buffer->confirm->mutex.unlock();   // если нужен ответ квитирование
 
 //    p_io_buffer->output->mutex.lock();
-
 //    putout();
-
 //    p_io_buffer->output->mutex.unlock();
-
-//    thread()->msleep(m_params.parse_interval);
 
   }
 }

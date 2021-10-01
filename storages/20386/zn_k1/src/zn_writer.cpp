@@ -5,6 +5,7 @@ QMutex mutex;
 QSemaphore sem(1);
 
 zn1::ZNWriter::ZNWriter():
+  m_socket(nullptr),
   m_state_signal(nullptr),
   m_zn_state()
 {
@@ -30,9 +31,9 @@ bool zn1::ZNWriter::configure(modus::StorageConfig* config)
 
 bool zn1::ZNWriter::bindSignal(modus::SvSignal* signal, modus::SignalBinding binding)
 {
-  if(!p_signals.contains(signal)) {
+  bool r = modus::SvAbstractStorage::bindSignal(signal, binding);
 
-    p_signals.insert(signal, binding);
+  if(r) {
 
     if(binding.mode == modus::ReadWrite) {
 
@@ -48,11 +49,6 @@ bool zn1::ZNWriter::bindSignal(modus::SvSignal* signal, modus::SignalBinding bin
 
       }
     }
-    else {
-
-      connect(signal, &modus::SvSignal::updated, this, &SvAbstractStorage::signalUpdated, Qt::QueuedConnection);
-      connect(signal, &modus::SvSignal::changed, this, &SvAbstractStorage::signalChanged, Qt::QueuedConnection);
-    }
   }
 
   return  true;
@@ -62,27 +58,11 @@ bool zn1::ZNWriter::bindSignal(modus::SvSignal* signal, modus::SignalBinding bin
 
 void zn1::ZNWriter::start()
 {
-//  connect(&tm, &QTimer::timeout, this, &zn1::ZNWriter::write);
-//  tm.start(m_params.interval);
-
   m_socket = new sv::tcp::Client(); // обязательно создаем здесь, чтобы объект принадлежал этому потоку
-//  m_socket->moveToThread(this); - так не работает
-//  m_socket->setFlags(0);
 
   m_authorized = false;
+
 }
-
-//void zn1::ZNWriter::setState(int doChangeFlags, const QString& writeState, const QString& authorization, const QString& connectionState)
-//{
-//  if((doChangeFlags & 0x01) && m_zn_state.contains(TAG_CONNECTION_STATE))
-//     m_zn_state.value(TAG_CONNECTION_STATE)->setValue(connectionState);
-
-//  if((doChangeFlags & 0x02) && m_zn_state.contains(TAG_AUTHORIZATION))
-//     m_zn_state.value(TAG_AUTHORIZATION)->setValue(authorization);
-
-//  if((doChangeFlags & 0x04) && m_zn_state.contains(TAG_WRITE_STATE))
-//     m_zn_state.value(TAG_WRITE_STATE)->setValue(writeState);
-//}
 
 void zn1::ZNWriter::setState(int writeState, int authorization, int connectionState)
 {
@@ -96,6 +76,9 @@ void zn1::ZNWriter::setState(int writeState, int authorization, int connectionSt
 void zn1::ZNWriter::write()
 {
   try {
+
+    if(!m_socket)
+      throw SvException("Panic! m_socket is not defined!");
 
     { //! 1. физическое подключение к хосту
 

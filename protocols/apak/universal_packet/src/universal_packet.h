@@ -49,6 +49,9 @@ namespace apak {
     void signalChanged(modus::SvSignal* signal) override;
     void start() override;
 
+  private slots:
+    void parse();
+
   };
 }
 

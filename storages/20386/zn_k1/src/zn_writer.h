@@ -354,13 +354,8 @@ namespace zn1 {
   public:
     ZNWriter();
 
-    virtual bool configure(modus::StorageConfig* config) override;
-
-//    virtual void disposeInputSignal  (modus::SvSignal* signal) override;
-//    virtual void disposeOutputSignal (modus::SvSignal* signal) override;
+    bool configure(modus::StorageConfig* config) override;
     bool bindSignal(modus::SvSignal* signal, modus::SignalBinding binding) override;
-
-    void start() override;
 
   private:
 
@@ -379,6 +374,7 @@ namespace zn1 {
     void setState(int writeState, int authorization, int connectionState);
 
   public slots:
+    void start() override;
     void signalUpdated(modus::SvSignal* signal) override;
     void signalChanged(modus::SvSignal* signal) override
     {
