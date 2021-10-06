@@ -1,4 +1,4 @@
-﻿#include "universal_packet.h"
+﻿#include "gamma_opa_imitator.h"
 
 apak::SvGammaOpaImitator::SvGammaOpaImitator():
   modus::SvAbstractProtocol(),
@@ -83,7 +83,31 @@ bool apak::SvGammaOpaImitator::bindSignal(modus::SvSignal* signal, modus::Signal
 
 void apak::SvGammaOpaImitator::signalUpdated(modus::SvSignal* signal)
 {
-  Q_UNUSED(signal);
+  // лочим мьютекс, чтобы синхронизироваться с отправкой
+  QList<QString> sl = QString(signal->value().toByteArray()).split("<CR><CL>");
+
+  send_data.clear();
+
+  for(QString s: sl) {
+
+    if(!(s.startsWith("$PPAS") && s.endsWith("<CRC>")))
+      continue;
+
+    // контрольная сумма
+    // восьмибитная XOR-сумма всех символов (включая «,» и «^») в строке между «$» и «*»,
+    // приведенная к двум ASCII-символам в верхнем регистре для 16-ричного представления байта (0–9, A–F).
+    uchar crc = 0x00;
+    QString d = s.mid(1, s.length() - s.indexOf("*"));
+
+    for(QChar c: d)
+      crc ^= c.cell();
+
+    s.replace("<CRC>", QString(QByteArray(1, crc).toHex()));
+
+    send_data.append(s).append(QChar(0x0D)).append(QChar(0x0A));
+
+  }
+
 }
 
 void apak::SvGammaOpaImitator::signalChanged(modus::SvSignal* signal)
@@ -93,41 +117,23 @@ void apak::SvGammaOpaImitator::signalChanged(modus::SvSignal* signal)
 
 void apak::SvGammaOpaImitator::start()
 {
-  QTimer* m_timer = new QTimer;
-  connect(m_timer, &QTimer::timeout, this, &SvGammaOpaImitator::parse);
-  m_timer->start(m_params.parse_interval);
+  m_timer = new QTimer;
+  connect(m_timer, &QTimer::timeout, this, &SvGammaOpaImitator::send);
+  m_timer->start(m_params.send_interval);
 
   p_is_active = bool(p_config) && bool(p_io_buffer);
 }
 
-void apak::SvGammaOpaImitator::parse()
+void apak::SvGammaOpaImitator::send()
 {
   if(p_is_active) {
 
-    p_io_buffer->confirm->mutex.lock();     // если нужен ответ квитирование
-    p_io_buffer->input->mutex.lock();
+    p_io_buffer->output->mutex.lock();
 
-    if(p_io_buffer->input->ready()) {
+    memcpy(&p_io_buffer->output->data[0], send_data.data(), send_data.length());
+    p_io_buffer->output->offset = send_data.length();
 
-      m_data_signal->setValue(QVariant(QByteArray(p_io_buffer->input->data, p_io_buffer->input->offset)));
-
-      emit message(QString("signal %1 updated").arg(m_data_signal->config()->name), sv::log::llDebug, sv::log::mtParse);
-      m_state_signal->setValue(int(1));
-
-      p_io_buffer->input->reset();
-    }
-    else {
-
-      checkupSignals();
-
-    }
-
-    p_io_buffer->input->mutex.unlock();
-    p_io_buffer->confirm->mutex.unlock();   // если нужен ответ квитирование
-
-//    p_io_buffer->output->mutex.lock();
-//    putout();
-//    p_io_buffer->output->mutex.unlock();
+    p_io_buffer->output->mutex.unlock();
 
   }
 }

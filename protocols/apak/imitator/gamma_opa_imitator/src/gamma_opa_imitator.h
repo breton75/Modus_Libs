@@ -1,10 +1,10 @@
-﻿#ifndef UNIVERSAL_PACK_H
-#define UNIVERSAL_PACK_H
+﻿#ifndef GAMMA_OPA_IMITATOR_H
+#define GAMMA_OPA_IMITATOR_H
 
 #include <QMutex>
 #include <QMutexLocker>
 
-#include "universal_packet_global.h"
+#include "gamma_opa_imitator_global.h"
 
 #include "../../../../../../Modus/global/device/protocol/sv_abstract_protocol.h"
 #include "../../../../../../Modus/global/signal/sv_signal.h"
@@ -17,7 +17,7 @@
 
 extern "C" {
 
-    UNIVERSAL_PACKET_EXPORT modus::SvAbstractProtocol* create();
+    GAMMA_OPA_IMITATOR_EXPORT modus::SvAbstractProtocol* create();
 
 //    VIRTUAL_DEVICESHARED_EXPORT QString defaultDeviceParams();
 //    VIRTUAL_DEVICESHARED_EXPORT QString defaultIfcParams(const QString& ifc);
@@ -44,16 +44,20 @@ namespace apak {
     modus::SvSignal*      m_data_signal;
     modus::SvSignal*      m_state_signal;
 
+    QByteArray send_data;
+
+    QTimer* m_timer;
+
   public slots:
     void signalUpdated(modus::SvSignal* signal) override;
     void signalChanged(modus::SvSignal* signal) override;
     void start() override;
 
   private slots:
-    void parse();
+    void send();
 
   };
 }
 
 
-#endif // UNIVERSAL_PACK_H
+#endif // GAMMA_OPA_IMITATOR_H
