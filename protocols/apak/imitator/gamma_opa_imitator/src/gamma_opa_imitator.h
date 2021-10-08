@@ -41,12 +41,12 @@ namespace apak {
   private:
     apak::ProtocolParams  m_params;
 
-    modus::SvSignal*      m_data_signal;
-    modus::SvSignal*      m_state_signal;
+    modus::SvSignal*      m_send_signal;
 
     QByteArray send_data;
 
     QTimer* m_timer;
+    QSemaphore sem;
 
   public slots:
     void signalUpdated(modus::SvSignal* signal) override;

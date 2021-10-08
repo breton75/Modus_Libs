@@ -50,7 +50,7 @@ namespace apak {
     void start() override;
 
   private slots:
-    void parse();
+    void parse(modus::BUFF* buffer);
 
   };
 }

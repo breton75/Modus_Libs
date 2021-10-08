@@ -13,7 +13,22 @@ bool SvRS::configure(modus::DeviceConfig *config, modus::IOBuffer *iobuffer)
 
     m_params = SerialParams::fromJsonString(p_config->interface.params);
 
+    return true;
+
+  } catch (SvException& e) {
+
+    p_last_error = e.error;
+    return false;
+
+  }
+}
+
+bool SvRS::start()
+{
+  try {
+
     m_port = new QSerialPort();
+
     m_port->setPortName(m_params.portname);
     m_port->setBaudRate(m_params.baudrate);
     m_port->setDataBits(m_params.databits);
@@ -24,7 +39,8 @@ bool SvRS::configure(modus::DeviceConfig *config, modus::IOBuffer *iobuffer)
     if(!m_port->open(QIODevice::ReadWrite))
       throw SvException(m_port->errorString());
 
-    m_port->moveToThread(this);
+    connect(m_port, &QSerialPort::readyRead, this, &SvRS::read);
+    connect(p_io_buffer, &modus::IOBuffer::readyWrite, this, &SvRS::write);
 
     return true;
 
@@ -36,56 +52,55 @@ bool SvRS::configure(modus::DeviceConfig *config, modus::IOBuffer *iobuffer)
   }
 }
 
-void SvRS::run()
+
+void SvRS::read()
 {
-  p_is_active = true;
+  p_io_buffer->input->mutex.lock();
 
-  while(p_is_active) {
+  if(p_io_buffer->input->offset + m_port->bytesAvailable() > p_config->bufsize)
+    p_io_buffer->input->reset();
 
-    while(m_port->waitForReadyRead(p_config->interface.buffer_reset_interval) && p_is_active) {
+//    /* ... the rest of the datagram will be lost ... */
+  qint64 readed = m_port->read(&p_io_buffer->input->data[0], p_config->bufsize);
+  emit message(QString(QByteArray((const char*)&p_io_buffer->input->data[0], readed).toHex()), sv::log::llDebug, sv::log::mtReceive);
 
-      p_io_buffer->input->mutex.lock();
+  p_io_buffer->input->offset = readed;
 
-      if(p_io_buffer->input->offset > p_config->bufsize)
-        p_io_buffer->input->reset();
-
-      p_io_buffer->input->offset += m_port->read((char*)(&p_io_buffer->input->data[p_io_buffer->input->offset]), p_config->bufsize - p_io_buffer->input->offset);
-
-      p_io_buffer->input->mutex.unlock();
-
-      QThread::yieldCurrentThread();
-
-      // отправляем ответ-квитирование, если он был сформирован в parse_input_data
-      p_io_buffer->confirm->mutex.lock();
-      write(p_io_buffer->confirm);
-      p_io_buffer->confirm->mutex.unlock();
-
-    }
+  while(m_port->waitForReadyRead(m_params.grain_gap)) {
 
     p_io_buffer->input->mutex.lock();
-    p_io_buffer->input->reset();
-    p_io_buffer->input->mutex.unlock();
 
-    // отправляем управляющие данные, если они есть
-    p_io_buffer->output->mutex.lock();
-    write(p_io_buffer->output);
-    p_io_buffer->output->mutex.unlock();
+    if(p_io_buffer->input->offset + m_port->bytesAvailable() > p_config->bufsize)
+      p_io_buffer->input->reset();
+
+    /* ... the rest of the datagram will be lost ... */
+    qint64 readed2 = m_port->read(&p_io_buffer->input->data[p_io_buffer->input->offset], p_config->bufsize - p_io_buffer->input->offset);
+
+//qDebug() << QString(QByteArray((const char*)&p_io_buffer->input->data[p_io_buffer->input->offset], readed).toHex());
+    emit message(QString(QByteArray((const char*)&p_io_buffer->input->data[p_io_buffer->input->offset], readed2).toHex()), sv::log::llDebug, sv::log::mtReceive);
+    p_io_buffer->input->offset += readed2;
 
   }
+
+  p_io_buffer->input->mutex.unlock();
+
+  emit p_io_buffer->dataReaded(p_io_buffer->input);
+
 }
 
 
 void SvRS::write(modus::BUFF* buffer)
 {
+  QMutexLocker(&(buffer->mutex));
+
   if(!buffer->ready())
     return;
-
+qDebug() << 1;
   bool written = m_port->write(&buffer->data[0], buffer->offset) > 0;
   m_port->flush();
 
-  if(written) {
-    emit message(QString("<< %1").arg(QString(QByteArray((const char*)&buffer->data[0], buffer->offset).toHex())));
-  }
+  if(written)
+    emit message(QString(QByteArray((const char*)&buffer->data[0], buffer->offset).toHex()), sv::log::llDebug, sv::log::mtSend);
 
   buffer->reset();
 

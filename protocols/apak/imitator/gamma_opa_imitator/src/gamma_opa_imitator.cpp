@@ -2,8 +2,7 @@
 
 apak::SvGammaOpaImitator::SvGammaOpaImitator():
   modus::SvAbstractProtocol(),
-  m_data_signal(nullptr),
-  m_state_signal(nullptr)
+  m_send_signal(nullptr)
 {
 
 }
@@ -20,7 +19,7 @@ bool apak::SvGammaOpaImitator::configure(modus::DeviceConfig *config, modus::IOB
     p_config = config;
     p_io_buffer = iobuffer;
 
-//    m_params = apak::ProtocolParams::fromJson(p_config->protocol.params);
+    m_params = apak::ProtocolParams::fromJson(p_config->protocol.params);
 
     return true;
 
@@ -42,30 +41,17 @@ bool apak::SvGammaOpaImitator::bindSignal(modus::SvSignal* signal, modus::Signal
 
       if(binding.mode == modus::ReadWrite) {
 
-        if(signal->config()->type.toLower() == "data") {
 
-          if(m_data_signal) {
-
-            p_last_error = TOO_MUCH(p_config->name, "data");
-            return false;
-          }
-
-          m_data_signal = signal;
-
-        }
-        else if(signal->config()->type.toLower() == "state") {
-
-          if(m_state_signal) {
-
-            p_last_error = TOO_MUCH(p_config->name, "state");
-            return false;
-          }
-
-          m_state_signal = signal;
-
-        }
       }
       else {
+
+        if(m_send_signal) {
+
+          p_last_error = TOO_MUCH(p_config->name, "send");
+          return false;
+        }
+
+        m_send_signal = signal;
 
         connect(signal, &modus::SvSignal::updated, this, &SvGammaOpaImitator::signalUpdated, Qt::QueuedConnection);
         connect(signal, &modus::SvSignal::changed, this, &SvGammaOpaImitator::signalChanged, Qt::QueuedConnection);
@@ -83,30 +69,36 @@ bool apak::SvGammaOpaImitator::bindSignal(modus::SvSignal* signal, modus::Signal
 
 void apak::SvGammaOpaImitator::signalUpdated(modus::SvSignal* signal)
 {
-  // лочим мьютекс, чтобы синхронизироваться с отправкой
-  QList<QString> sl = QString(signal->value().toByteArray()).split("<CR><CL>");
+  Q_UNUSED(signal);
+//  // лочим мьютекс, чтобы синхронизироваться с отправкой
+//  QList<QString> sl = QString(signal->value().toByteArray()).split("<CR><CL>");
 
-  send_data.clear();
+//  while(!sem.tryAcquire())
+//    qApp->processEvents();
 
-  for(QString s: sl) {
+//  send_data.clear();
 
-    if(!(s.startsWith("$PPAS") && s.endsWith("<CRC>")))
-      continue;
+//  for(QString s: sl) {
 
-    // контрольная сумма
-    // восьмибитная XOR-сумма всех символов (включая «,» и «^») в строке между «$» и «*»,
-    // приведенная к двум ASCII-символам в верхнем регистре для 16-ричного представления байта (0–9, A–F).
-    uchar crc = 0x00;
-    QString d = s.mid(1, s.length() - s.indexOf("*"));
+//    if(!(s.startsWith("$PPAS") && s.endsWith("<CRC>")))
+//      continue;
 
-    for(QChar c: d)
-      crc ^= c.cell();
+//    // контрольная сумма
+//    // восьмибитная XOR-сумма всех символов (включая «,» и «^») в строке между «$» и «*»,
+//    // приведенная к двум ASCII-символам в верхнем регистре для 16-ричного представления байта (0–9, A–F).
+//    uchar crc = 0x00;
+//    QString d = s.mid(1, s.length() - s.indexOf("*"));
 
-    s.replace("<CRC>", QString(QByteArray(1, crc).toHex()));
+//    for(QChar c: d)
+//      crc ^= c.cell();
 
-    send_data.append(s).append(QChar(0x0D)).append(QChar(0x0A));
+//    s.replace("<CRC>", QString(QByteArray(1, crc).toHex()));
 
-  }
+//    send_data.append(s).append(QChar(0x0D)).append(QChar(0x0A));
+
+//  }
+
+//  sem.release();
 
 }
 
@@ -121,19 +113,47 @@ void apak::SvGammaOpaImitator::start()
   connect(m_timer, &QTimer::timeout, this, &SvGammaOpaImitator::send);
   m_timer->start(m_params.send_interval);
 
-  p_is_active = bool(p_config) && bool(p_io_buffer);
+  p_is_active = bool(p_config) && bool(p_io_buffer) && bool(m_send_signal);
 }
 
 void apak::SvGammaOpaImitator::send()
 {
   if(p_is_active) {
 
+    QList<QString> sl = QString(m_send_signal->value().toByteArray()).split("<CR><LF>");
+
+    send_data.clear();
+
+    for(QString s: sl) {
+
+      if(!(s.startsWith("$PPAS") && s.endsWith("<CRC>")))
+        continue;
+
+      // контрольная сумма
+      // восьмибитная XOR-сумма всех символов (включая «,» и «^») в строке между «$» и «*»,
+      // приведенная к двум ASCII-символам в верхнем регистре для 16-ричного представления байта (0–9, A–F).
+      uchar crc = 0x00;
+      QString d = s.mid(1, s.length() - s.indexOf("*"));
+
+      for(QChar c: d)
+        crc ^= c.cell();
+
+      s.replace("<CRC>", QString(QByteArray(1, crc).toHex()));
+
+      send_data.append(s).append(QChar(0x0D)).append(QChar(0x0A));
+
+    }
+
     p_io_buffer->output->mutex.lock();
 
     memcpy(&p_io_buffer->output->data[0], send_data.data(), send_data.length());
     p_io_buffer->output->offset = send_data.length();
 
+    emit message(QString(send_data), lldbg, sv::log::mtNew);
+
     p_io_buffer->output->mutex.unlock();
+
+    emit p_io_buffer->readyWrite(p_io_buffer->output);
 
   }
 }

@@ -728,13 +728,17 @@ moc_sv_abstract_interface.cpp: /opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QObject \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qtimezone.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qxmlstream.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/qtcoreversion.h \
-		../../../../Modus/global/misc/sv_exception.h \
+		../../../../svlib/SvException/1.1/sv_exception.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QString \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QException \
 		../../../../Modus/global/global_defs.h \
-		../../../../svlib/sv_abstract_logger.h \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDateTime \
+		../../../../svlib/SvAbstractLogger/1.2/sv_abstract_logger.h \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QDate \
 		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QTime \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QJsonParseError \
+		/opt/Qt5.5.1/5.5/gcc_64/include/QtCore/QMutex \
+		../../../../svlib/SvException/svexception.h \
 		../../../../Modus/global/device/interface/sv_abstract_interface.h
 	/opt/Qt5.5.1/5.5/gcc_64/bin/moc $(DEFINES) -I/opt/Qt5.5.1/5.5/gcc_64/mkspecs/linux-g++ -I/home/user/c++/Modus_Libs/interfaces/interface_rs/src -I/opt/Qt5.5.1/5.5/gcc_64/include -I/opt/Qt5.5.1/5.5/gcc_64/include/QtSerialPort -I/opt/Qt5.5.1/5.5/gcc_64/include/QtCore -I. ../../../../Modus/global/device/interface/sv_abstract_interface.h -o moc_sv_abstract_interface.cpp
 

@@ -65,11 +65,6 @@ bool apak::SvGammaOpaImitator::bindSignal(modus::SvSignal* signal, modus::Signal
 
         }
       }
-      else {
-
-        connect(signal, &modus::SvSignal::updated, this, &SvGammaOpaImitator::signalUpdated, Qt::QueuedConnection);
-        connect(signal, &modus::SvSignal::changed, this, &SvGammaOpaImitator::signalChanged, Qt::QueuedConnection);
-      }
     }
 
     return r;
@@ -93,28 +88,30 @@ void apak::SvGammaOpaImitator::signalChanged(modus::SvSignal* signal)
 
 void apak::SvGammaOpaImitator::start()
 {
-  QTimer* m_timer = new QTimer;
-  connect(m_timer, &QTimer::timeout, this, &SvGammaOpaImitator::parse);
-  m_timer->start(m_params.parse_interval);
+//  QTimer* m_timer = new QTimer;
+//  connect(m_timer, &QTimer::timeout, this, &SvGammaOpaImitator::parse);
+//  m_timer->start(m_params.parse_interval);
+
+  connect(p_io_buffer, &modus::IOBuffer::dataReaded, this, &SvGammaOpaImitator::parse);
 
   p_is_active = bool(p_config) && bool(p_io_buffer);
 }
 
-void apak::SvGammaOpaImitator::parse()
+void apak::SvGammaOpaImitator::parse(modus::BUFF* buffer)
 {
   if(p_is_active) {
 
-    p_io_buffer->confirm->mutex.lock();     // если нужен ответ квитирование
-    p_io_buffer->input->mutex.lock();
+//    p_io_buffer->confirm->mutex.lock();     // если нужен ответ квитирование
+    buffer->mutex.lock();
 
-    if(p_io_buffer->input->ready()) {
+    if(buffer->ready()) {
 
-      m_data_signal->setValue(QVariant(QByteArray(p_io_buffer->input->data, p_io_buffer->input->offset)));
+      m_data_signal->setValue(QVariant(QByteArray(buffer->data, buffer->offset)));
 
       emit message(QString("signal %1 updated").arg(m_data_signal->config()->name), sv::log::llDebug, sv::log::mtParse);
       m_state_signal->setValue(int(1));
 
-      p_io_buffer->input->reset();
+      buffer->reset();
     }
     else {
 
@@ -122,8 +119,8 @@ void apak::SvGammaOpaImitator::parse()
 
     }
 
-    p_io_buffer->input->mutex.unlock();
-    p_io_buffer->confirm->mutex.unlock();   // если нужен ответ квитирование
+    buffer->mutex.unlock();
+//    p_io_buffer->confirm->mutex.unlock();   // если нужен ответ квитирование
 
 //    p_io_buffer->output->mutex.lock();
 //    putout();

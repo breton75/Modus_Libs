@@ -55,7 +55,7 @@ const QMap<QSerialPort::FlowControl, QString> FlowControls = {{QSerialPort::NoFl
 #define DEFAULT_BAUDRATE    19200
 #define DEFAULT_DATABITS    8
 #define DEFAULT_PARITY      0
-#define DEFAULT_STOPBITS    2
+#define DEFAULT_STOPBITS    1
 #define DEFAULT_FLOWCONTROL 0
 
 /** структура для хранения параметров последовательного порта **/
@@ -67,6 +67,7 @@ struct SerialParams {
   QSerialPort::Parity       parity      =     QSerialPort::NoParity;
   QSerialPort::StopBits     stopbits    =     QSerialPort::OneStop;
   QSerialPort::FlowControl  flowcontrol =     QSerialPort::NoFlowControl;
+  quint16                   grain_gap   =     DEFAULT_GRAIN_GAP;
 
   bool isValid = true;
 
@@ -177,6 +178,22 @@ struct SerialParams {
     }
     else
       p.flowcontrol = static_cast<QSerialPort::FlowControl>(DEFAULT_FLOWCONTROL);
+
+    /* grain gap*/
+    P = P_GRAIN_GAP;
+    if(object.contains(P)) {
+
+      if(object.value(P).toInt(-1) < 1)
+        throw SvException(QString(IMPERMISSIBLE_VALUE)
+                          .arg(P)
+                          .arg(object.value(P).toVariant().toString())
+                          .arg("Интервал ожидания частей пакета не может быть меньше 1 мсек."));
+
+      p.grain_gap = object.value(P).toInt(DEFAULT_GRAIN_GAP);
+
+    }
+    else
+      p.grain_gap = quint16(DEFAULT_GRAIN_GAP);
 
     return p;
 

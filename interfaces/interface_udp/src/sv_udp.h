@@ -28,7 +28,7 @@ public:
 public slots:
   bool start() override;
   void read() override;
-  void write(modus::BUFF* buffer);
+  void write(modus::BUFF* buffer) override;
 
 private:
   QUdpSocket*   m_socket = nullptr;

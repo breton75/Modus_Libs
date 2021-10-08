@@ -76,9 +76,11 @@ bool SvUdp::start()
       if(!m_socket->bind(QHostAddress::Any, m_params.recv_port, QAbstractSocket::DontShareAddress))
         throw SvException(m_socket->errorString());
 
-    // именно после всего!
-//    m_socket->moveToThread(this);
 
+    connect(m_socket, &QUdpSocket::readyRead, this, &SvUdp::read);
+    connect(p_io_buffer, &modus::IOBuffer::readyWrite, this, &SvUdp::write);
+
+    return true;
 
   } catch (SvException& e) {
 
@@ -86,18 +88,11 @@ bool SvUdp::start()
     return false;
 
   }
-
-  p_is_active = true;
-
-  connect(m_socket, &QUdpSocket::readyRead, this, &SvUdp::read);
-  return true;
 }
 
 void SvUdp::read()
 {
-//  while(p_is_active) {
-//  QUdpSocket* socket = (QUdpSocket*)(sender());
-  disconnect(m_socket, &QUdpSocket::readyRead, this, &SvUdp::read);
+//  disconnect(m_socket, &QUdpSocket::readyRead, this, &SvUdp::read);
 
     p_io_buffer->input->mutex.lock();
 
@@ -106,13 +101,13 @@ void SvUdp::read()
 
 //    /* ... the rest of the datagram will be lost ... */
     qint64 readed = m_socket->readDatagram(&p_io_buffer->input->data[p_io_buffer->input->offset], p_config->bufsize - p_io_buffer->input->offset);
-//    emit message(QString(QByteArray((const char*)&p_io_buffer->input->data[p_io_buffer->input->offset], readed).toHex()), sv::log::llDebug, sv::log::mtReceive);
+    emit message(QString(QByteArray((const char*)&p_io_buffer->input->data[p_io_buffer->input->offset], readed).toHex()), sv::log::llDebug, sv::log::mtReceive);
 
     p_io_buffer->input->offset = readed;
 
-    while(m_socket->waitForReadyRead(m_params.grain_gap) && p_is_active) {
+    while(m_socket->waitForReadyRead(m_params.grain_gap)) {
 
-      while(m_socket->hasPendingDatagrams() && p_is_active) {
+      while(m_socket->hasPendingDatagrams()) {
 //        if(m_socket->pendingDatagramSize() <= 0)
 //          continue;
 
@@ -123,7 +118,7 @@ void SvUdp::read()
         qint64 readed2 = m_socket->readDatagram(&p_io_buffer->input->data[p_io_buffer->input->offset], p_config->bufsize - p_io_buffer->input->offset);
 
 //qDebug() << QString(QByteArray((const char*)&p_io_buffer->input->data[p_io_buffer->input->offset], readed).toHex());
-        emit message(QString(QByteArray((const char*)&p_io_buffer->input->data[p_io_buffer->input->offset], readed).toHex()), sv::log::llDebug, sv::log::mtReceive);
+        emit message(QString(QByteArray((const char*)&p_io_buffer->input->data[p_io_buffer->input->offset], readed2).toHex()), sv::log::llDebug, sv::log::mtReceive);
         p_io_buffer->input->offset += readed2;
 
       }
@@ -131,22 +126,25 @@ void SvUdp::read()
 
     p_io_buffer->input->mutex.unlock();
 
-    p_io_buffer->confirm->mutex.lock();
-//    emit message("confirm after lock()", sv::log::llDebug, sv::log::mtReceive);
-    if(p_io_buffer->confirm->ready())
-      write(p_io_buffer->confirm);
+    emit p_io_buffer->dataReaded(p_io_buffer->input);
 
-    p_io_buffer->confirm->mutex.unlock();
+
+//    p_io_buffer->confirm->mutex.lock();
+////    emit message("confirm after lock()", sv::log::llDebug, sv::log::mtReceive);
+//    if(p_io_buffer->confirm->ready())
+//      write(p_io_buffer->confirm);
+
+//    p_io_buffer->confirm->mutex.unlock();
 
     // отправляем управляющие данные, если они есть
-    p_io_buffer->output->mutex.lock();
+//    p_io_buffer->output->mutex.lock();
 //    qDebug() << "write" << int(p_io_buffer->output->data[256]);
-    if(p_io_buffer->output->ready())
-      write(p_io_buffer->output);
+//    if(p_io_buffer->output->ready())
+//      write(p_io_buffer->output);
 
-    p_io_buffer->output->mutex.unlock();
+//    p_io_buffer->output->mutex.unlock();
 
-    connect(m_socket, &QUdpSocket::readyRead, this, &SvUdp::read);
+//    connect(m_socket, &QUdpSocket::readyRead, this, &SvUdp::read);
 
 //  }
 }

@@ -18,7 +18,7 @@ bool apak::SvHMI::configure(modus::DeviceConfig *config, modus::IOBuffer *iobuff
     p_config = config;
     p_io_buffer = iobuffer;
 
-    m_params = apak::ProtocolParams::fromJson(p_config->protocol.params);
+    m_params = hmi::ProtocolParams::fromJson(p_config->protocol.params);
 
     return true;
 
@@ -32,59 +32,106 @@ bool apak::SvHMI::configure(modus::DeviceConfig *config, modus::IOBuffer *iobuff
 
 bool apak::SvHMI::bindSignal(modus::SvSignal *signal, modus::SignalBinding binding)
 {
-  bool r = modus::SvAbstractProtocol::bindSignal(signal, binding);
+  try {
 
-  if(r) {
+    bool r = modus::SvAbstractProtocol::bindSignal(signal, binding);
 
-    if(binding.mode == modus::ReadWrite) {
+    if(r) {
 
-      m_input_signals.insert(signal->config()->tag, signal);
+      hmi::SignalParams params = hmi::SignalParams::fromJson(binding.params);
+
+      if(binding.mode == modus::ReadWrite) {
+
+        m_input_signals.insert(signal, params);
+
+      }
+      else
+        m_output_signals.insert(signal, params);
 
     }
-    else
-      m_output_signals.insert(signal->config()->tag, signal);
+
+    return r;
 
   }
+  catch(SvException& e) {
 
-  return r;
+    p_last_error = e.error;
+    return false;
+
+  }
 }
 
 void apak::SvHMI::signalUpdated(modus::SvSignal* signal)
 {
-
+  Q_UNUSED(signal);
 }
 
 void apak::SvHMI::signalChanged(modus::SvSignal* signal)
 {
-
+  Q_UNUSED(signal);
 }
 
 void apak::SvHMI::start()
 {
-//  connect(m_s)
+  QTimer* m_timer = new QTimer;
+  connect(m_timer, &QTimer::timeout, this, &SvHMI::putout);
+  m_timer->start(m_params.interval);
+
+//  connect(p_io_buffer, &modus::IOBuffer::dataReaded, this, &SvGammaOpaImitator::parse);
 
   p_is_active = bool(p_config) && bool(p_io_buffer);
+}
 
-  while(p_is_active) {
+void apak::SvHMI::putout()
+{
+  QMap<quint16, quint16> dataByRegisters;
+  for(modus::SvSignal* signal: m_output_signals.keys()) {
 
-    p_io_buffer->confirm->mutex.lock();     // если нужен ответ квитирование
-    p_io_buffer->input->mutex.lock();
+    hmi::SignalParams params = m_output_signals.value(signal);
 
-    if(p_io_buffer->input->ready()) {
-//    parse(p_io_buffer->input);
-      p_io_buffer->input->reset();
-    }
+    bool ok;
+    quint16 v = signal->value().toUInt(&ok);
+    if(!ok)
+      continue;
 
-    p_io_buffer->input->mutex.unlock();
-    p_io_buffer->confirm->mutex.unlock();   // если нужен ответ квитирование
+    quint16 mask = ~(((1 << params.len) - 1) << params.offset); // даже если больше 1го бита
+    v = mask | (v << params.offset);
 
-    p_io_buffer->output->mutex.lock();
-//    putout();
-    p_io_buffer->output->mutex.unlock();
+    if(dataByRegisters.contains(params.registr))
+      dataByRegisters.insert(params.registr, 0);
 
-    thread()->msleep(m_params.parse_interval);
+    dataByRegisters[params.registr] |= v;
 
   }
+qDebug() << 100;
+  foreach (quint16 registr, dataByRegisters.keys()) {
+
+    QByteArray data;
+    QDataStream stream(&data, QIODevice::WriteOnly);
+
+    stream << quint8(m_params.address)                  // Адрес устройства
+           << quint8(0x0F)                              // Функциональный код     у нас всегда 0x0F
+           << registr                                   // Адрес первого регистра
+           << quint16(1)                                // Количество регистров
+           << quint16(2)                                // Количество байт далее
+           << quint16(dataByRegisters.value(registr));  // Значение байт
+
+    quint16 crc = CRC::MODBUS_CRC16((const quint8*)data.data(), data.length());
+
+    stream << crc;                                      // Контрольная сумма CRC
+
+    p_io_buffer->output->mutex.lock();
+
+    memcpy(&p_io_buffer->output[0], data.data(), data.length());
+    p_io_buffer->output->offset = data.length();
+
+    p_io_buffer->output->mutex.unlock();
+
+    emit p_io_buffer->readyWrite(p_io_buffer->output);
+
+  }
+
+
 }
 
 /** ********** EXPORT ************ **/

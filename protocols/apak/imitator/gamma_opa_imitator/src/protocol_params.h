@@ -1,4 +1,4 @@
-﻿#ifndef RADUGA_PROTOCOL_PARAMS
+﻿#ifndef GAMMA_OPA_IMITATOR_PARAMS
 #define GAMMA_OPA_IMITATOR_PARAMS
 
 #include <QString>
@@ -11,14 +11,10 @@
 #include "../../../../../../Modus/global/global_defs.h"
 //#include "../../../../../Modus/global/device/device_defs.h"
 
-#define P_ABONENT  "abonent"
-
 namespace apak {
 
   struct ProtocolParams {
 
-    quint16 packid       = 0;
-    quint16 abonent      = 0;
     quint16 send_interval = 1000;
 
     static ProtocolParams fromJson(const QString& json_string) //throw (SvException)
@@ -43,36 +39,6 @@ namespace apak {
     {
       ProtocolParams p;
       QString P;
-
-      P = P_PACKID;
-      if(object.contains(P)) {
-
-        if(object.value(P).toInt(-1) < 0)
-          throw SvException(QString(IMPERMISSIBLE_VALUE)
-                            .arg(P)
-                            .arg(object.value(P).toVariant().toString())
-                            .arg("Идентификатор пакета должен быть задан двухбайтным целым числом"));
-
-        p.packid = object.value(P).toInt();
-
-      }
-      else
-        throw SvException(QString(MISSING_PARAM).arg(P));
-
-      P = P_ABONENT;
-      if(object.contains(P)) {
-
-        if(object.value(P).toInt(-1) < 0)
-          throw SvException(QString(IMPERMISSIBLE_VALUE)
-                                 .arg(P)
-                                 .arg(object.value(P).toVariant().toString())
-                                 .arg("Идентификатор абонента должен быть задан целым числом"));
-
-        p.abonent = object.value(P).toInt();
-
-      }
-      else
-        throw SvException(QString(MISSING_PARAM).arg(P));
 
       P = P_SEND_INTERVAL;
       if(object.contains(P)) {
@@ -105,8 +71,6 @@ namespace apak {
     {
       QJsonObject j;
 
-      j.insert(P_PACKID,          QJsonValue(packid).toString());
-      j.insert(P_ABONENT,         QJsonValue(abonent).toInt());
       j.insert(P_SEND_INTERVAL,   QJsonValue(send_interval).toInt());
 
       return j;

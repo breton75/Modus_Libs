@@ -28,7 +28,7 @@ HEADERS += \
     hmi_global.h \
     ../../../../../Modus/global/signal/sv_signal.h \
     hmi.h \
-    protocol_params.h
+    params.h
 
 # Default rules for deployment.
 unix {

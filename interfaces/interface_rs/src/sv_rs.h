@@ -24,14 +24,14 @@ public:
 
   virtual bool configure(modus::DeviceConfig* config, modus::IOBuffer*iobuffer) override;
 
-protected:
-  virtual void run() override;
-
 private:
   QSerialPort*  m_port    = nullptr;
   SerialParams  m_params;
 
-  void write(modus::BUFF* buffer);
+public slots:
+  bool start() override;
+  void read() override;
+  void write(modus::BUFF* buffer) override;
 
 };
 

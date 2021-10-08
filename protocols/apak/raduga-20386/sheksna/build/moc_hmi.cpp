@@ -1,16 +1,16 @@
 /****************************************************************************
-** Meta object code from reading C++ file 'gamma_opa_imitator.h'
+** Meta object code from reading C++ file 'hmi.h'
 **
 ** Created by: The Qt Meta Object Compiler version 67 (Qt 5.5.1)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
-#include "../../../imitator/gamma_opa_imitator/src/gamma_opa_imitator.h"
+#include "../../../hmi_panel/src/hmi.h"
 #include <QtCore/qbytearray.h>
 #include <QtCore/qmetatype.h>
 #if !defined(Q_MOC_OUTPUT_REVISION)
-#error "The header file 'gamma_opa_imitator.h' doesn't include <QObject>."
+#error "The header file 'hmi.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 67
 #error "This file was generated using the moc from 5.5.1. It"
 #error "cannot be used with the include files from this version of Qt."
@@ -18,34 +18,34 @@
 #endif
 
 QT_BEGIN_MOC_NAMESPACE
-struct qt_meta_stringdata_apak__SvGammaOpaImitator_t {
+struct qt_meta_stringdata_apak__SvHMI_t {
     QByteArrayData data[8];
-    char stringdata0[89];
+    char stringdata0[78];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
-    qptrdiff(offsetof(qt_meta_stringdata_apak__SvGammaOpaImitator_t, stringdata0) + ofs \
+    qptrdiff(offsetof(qt_meta_stringdata_apak__SvHMI_t, stringdata0) + ofs \
         - idx * sizeof(QByteArrayData)) \
     )
-static const qt_meta_stringdata_apak__SvGammaOpaImitator_t qt_meta_stringdata_apak__SvGammaOpaImitator = {
+static const qt_meta_stringdata_apak__SvHMI_t qt_meta_stringdata_apak__SvHMI = {
     {
-QT_MOC_LITERAL(0, 0, 24), // "apak::SvGammaOpaImitator"
-QT_MOC_LITERAL(1, 25, 13), // "signalUpdated"
-QT_MOC_LITERAL(2, 39, 0), // ""
-QT_MOC_LITERAL(3, 40, 16), // "modus::SvSignal*"
-QT_MOC_LITERAL(4, 57, 6), // "signal"
-QT_MOC_LITERAL(5, 64, 13), // "signalChanged"
-QT_MOC_LITERAL(6, 78, 5), // "start"
-QT_MOC_LITERAL(7, 84, 4) // "send"
+QT_MOC_LITERAL(0, 0, 11), // "apak::SvHMI"
+QT_MOC_LITERAL(1, 12, 5), // "start"
+QT_MOC_LITERAL(2, 18, 0), // ""
+QT_MOC_LITERAL(3, 19, 13), // "signalUpdated"
+QT_MOC_LITERAL(4, 33, 16), // "modus::SvSignal*"
+QT_MOC_LITERAL(5, 50, 6), // "signal"
+QT_MOC_LITERAL(6, 57, 13), // "signalChanged"
+QT_MOC_LITERAL(7, 71, 6) // "putout"
 
     },
-    "apak::SvGammaOpaImitator\0signalUpdated\0"
-    "\0modus::SvSignal*\0signal\0signalChanged\0"
-    "start\0send"
+    "apak::SvHMI\0start\0\0signalUpdated\0"
+    "modus::SvSignal*\0signal\0signalChanged\0"
+    "putout"
 };
 #undef QT_MOC_LITERAL
 
-static const uint qt_meta_data_apak__SvGammaOpaImitator[] = {
+static const uint qt_meta_data_apak__SvHMI[] = {
 
  // content:
        7,       // revision
@@ -59,43 +59,43 @@ static const uint qt_meta_data_apak__SvGammaOpaImitator[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags
-       1,    1,   34,    2, 0x0a /* Public */,
-       5,    1,   37,    2, 0x0a /* Public */,
-       6,    0,   40,    2, 0x0a /* Public */,
+       1,    0,   34,    2, 0x0a /* Public */,
+       3,    1,   35,    2, 0x0a /* Public */,
+       6,    1,   38,    2, 0x0a /* Public */,
        7,    0,   41,    2, 0x08 /* Private */,
 
  // slots: parameters
-    QMetaType::Void, 0x80000000 | 3,    4,
-    QMetaType::Void, 0x80000000 | 3,    4,
     QMetaType::Void,
+    QMetaType::Void, 0x80000000 | 4,    5,
+    QMetaType::Void, 0x80000000 | 4,    5,
     QMetaType::Void,
 
        0        // eod
 };
 
-void apak::SvGammaOpaImitator::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+void apak::SvHMI::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
-        SvGammaOpaImitator *_t = static_cast<SvGammaOpaImitator *>(_o);
+        SvHMI *_t = static_cast<SvHMI *>(_o);
         Q_UNUSED(_t)
         switch (_id) {
-        case 0: _t->signalUpdated((*reinterpret_cast< modus::SvSignal*(*)>(_a[1]))); break;
-        case 1: _t->signalChanged((*reinterpret_cast< modus::SvSignal*(*)>(_a[1]))); break;
-        case 2: _t->start(); break;
-        case 3: _t->send(); break;
+        case 0: _t->start(); break;
+        case 1: _t->signalUpdated((*reinterpret_cast< modus::SvSignal*(*)>(_a[1]))); break;
+        case 2: _t->signalChanged((*reinterpret_cast< modus::SvSignal*(*)>(_a[1]))); break;
+        case 3: _t->putout(); break;
         default: ;
         }
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
         switch (_id) {
         default: *reinterpret_cast<int*>(_a[0]) = -1; break;
-        case 0:
+        case 1:
             switch (*reinterpret_cast<int*>(_a[1])) {
             default: *reinterpret_cast<int*>(_a[0]) = -1; break;
             case 0:
                 *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< modus::SvSignal* >(); break;
             }
             break;
-        case 1:
+        case 2:
             switch (*reinterpret_cast<int*>(_a[1])) {
             default: *reinterpret_cast<int*>(_a[0]) = -1; break;
             case 0:
@@ -106,26 +106,26 @@ void apak::SvGammaOpaImitator::qt_static_metacall(QObject *_o, QMetaObject::Call
     }
 }
 
-const QMetaObject apak::SvGammaOpaImitator::staticMetaObject = {
-    { &modus::SvAbstractProtocol::staticMetaObject, qt_meta_stringdata_apak__SvGammaOpaImitator.data,
-      qt_meta_data_apak__SvGammaOpaImitator,  qt_static_metacall, Q_NULLPTR, Q_NULLPTR}
+const QMetaObject apak::SvHMI::staticMetaObject = {
+    { &modus::SvAbstractProtocol::staticMetaObject, qt_meta_stringdata_apak__SvHMI.data,
+      qt_meta_data_apak__SvHMI,  qt_static_metacall, Q_NULLPTR, Q_NULLPTR}
 };
 
 
-const QMetaObject *apak::SvGammaOpaImitator::metaObject() const
+const QMetaObject *apak::SvHMI::metaObject() const
 {
     return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
-void *apak::SvGammaOpaImitator::qt_metacast(const char *_clname)
+void *apak::SvHMI::qt_metacast(const char *_clname)
 {
     if (!_clname) return Q_NULLPTR;
-    if (!strcmp(_clname, qt_meta_stringdata_apak__SvGammaOpaImitator.stringdata0))
-        return static_cast<void*>(const_cast< SvGammaOpaImitator*>(this));
+    if (!strcmp(_clname, qt_meta_stringdata_apak__SvHMI.stringdata0))
+        return static_cast<void*>(const_cast< SvHMI*>(this));
     return modus::SvAbstractProtocol::qt_metacast(_clname);
 }
 
-int apak::SvGammaOpaImitator::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+int apak::SvHMI::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = modus::SvAbstractProtocol::qt_metacall(_c, _id, _a);
     if (_id < 0)

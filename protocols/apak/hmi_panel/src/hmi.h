@@ -9,7 +9,7 @@
 #include "../../../../../../Modus/global/device/protocol/sv_abstract_protocol.h"
 #include "../../../../../../Modus/global/signal/sv_signal.h"
 
-#include "protocol_params.h"
+#include "params.h"
 
 #include "../../../../../../svlib/SvAbstractLogger/1.2/sv_abstract_logger.h"
 #include "../../../../../../svlib/SvException/1.1/sv_exception.h"
@@ -46,10 +46,13 @@ namespace apak {
     void signalChanged(modus::SvSignal* signal) override;
 
   private:
-    apak::ProtocolParams                m_params;
+    hmi::ProtocolParams                       m_params;
 
-    QMap<QString, modus::SvSignal*>     m_input_signals;
-    QMap<QString, modus::SvSignal*>     m_output_signals;
+    QMap<modus::SvSignal*, hmi::SignalParams> m_input_signals;
+    QMap<modus::SvSignal*, hmi::SignalParams> m_output_signals;
+
+  private slots:
+    void putout();
 
   };
 }
