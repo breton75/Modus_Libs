@@ -35,7 +35,7 @@ bool zn1::ZNWriter::bindSignal(modus::SvSignal* signal, modus::SignalBinding bin
 
   if(r) {
 
-    if(binding.mode == modus::ReadWrite) {
+    if(binding.mode == modus::Master) {
 
       if(signal->config()->type.toLower() == "state") {
 
@@ -53,15 +53,37 @@ bool zn1::ZNWriter::bindSignal(modus::SvSignal* signal, modus::SignalBinding bin
 
   return  true;
 
-//  return modus::SvAbstractStorage::bindSignal(signal);
 }
 
 void zn1::ZNWriter::start()
 {
+  QTimer* m_timer = new QTimer;
+  connect(m_timer, &QTimer::timeout, this, &ZNWriter::checkupSignals);
+  m_timer->start(DEFAULT_INTERVAL);
+
   m_socket = new sv::tcp::Client(); // обязательно создаем здесь, чтобы объект принадлежал этому потоку
 
   m_authorized = false;
 
+}
+
+void zn1::ZNWriter::checkupSignals()
+{
+  for (modus::SvSignal* signal: p_signals.keys()) {
+
+    if(p_signals.value(signal).mode != modus::Master)
+      continue;
+
+    if(!p_last_parsed_time.isValid())
+      signal->approve(false);
+
+    if(!signal->hasTimeout())
+      signal->approve(p_last_parsed_time.toMSecsSinceEpoch() + p_config->timeout < QDateTime::currentMSecsSinceEpoch());
+
+    else if(signal->lastUpdate().toMSecsSinceEpoch() + signal->config()->timeout > QDateTime::currentMSecsSinceEpoch())
+      signal->approve(p_last_parsed_time.toMSecsSinceEpoch() + signal->config()->timeout < QDateTime::currentMSecsSinceEpoch());
+
+  }
 }
 
 void zn1::ZNWriter::setState(int writeState, int authorization, int connectionState)
@@ -70,7 +92,8 @@ void zn1::ZNWriter::setState(int writeState, int authorization, int connectionSt
   m_zn_state.a = authorization;
   m_zn_state.w = writeState;
 
-  m_state_signal->setValue(m_zn_state.state());
+  if(m_state_signal)
+    m_state_signal->setValue(m_zn_state.state());
 }
 
 void zn1::ZNWriter::write()

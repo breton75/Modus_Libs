@@ -15,13 +15,18 @@
 #define P_REGISTER      "register"
 #define P_OFFSET        "offset"
 #define P_LEN           "len"
+#define P_REGISTER_LEN  "register_len"
+
+#define HMI_DEFAULT_SEND_INTERVAL 1000
+#define HMI_DEFAULT_REGISTER_LEN  2
 
 namespace hmi {
 
   struct ProtocolParams {
 
-    quint8  address   = 0;
-    quint16 interval  = 1000;
+    quint8  address       = 0;
+    quint16 interval      = HMI_DEFAULT_SEND_INTERVAL;
+    quint8  register_len  = HMI_DEFAULT_REGISTER_LEN;
 
     static ProtocolParams fromJson(const QString& json_string) //throw (SvException)
     {
@@ -70,11 +75,27 @@ namespace hmi {
                             .arg(object.value(P).toVariant().toString())
                             .arg("Интервал обновления данных должен быть задан целым числом в миллисекундах"));
 
-        p.interval = object.value(P).toInt();
+        p.interval = object.value(P).toInt(HMI_DEFAULT_SEND_INTERVAL);
 
       }
       else
-        p.interval = 1000;
+        p.interval = HMI_DEFAULT_SEND_INTERVAL;
+
+
+      P = P_REGISTER_LEN;
+      if(object.contains(P)) {
+
+        if(object.value(P).toInt(-1) < 0)
+          throw SvException(QString(IMPERMISSIBLE_VALUE)
+                            .arg(P)
+                            .arg(object.value(P).toVariant().toString())
+                            .arg("Длина регистра должна быть задана целым числом в байтах"));
+
+        p.register_len = object.value(P).toInt(HMI_DEFAULT_REGISTER_LEN);
+
+      }
+      else
+        p.interval = HMI_DEFAULT_REGISTER_LEN;
 
       return p;
 
@@ -92,8 +113,9 @@ namespace hmi {
     {
       QJsonObject j;
 
-      j.insert(P_ADDRESS,   QJsonValue(address).toString());
-      j.insert(P_INTERVAL,  QJsonValue(interval).toInt());
+      j.insert(P_ADDRESS,       QJsonValue(address).toString());
+      j.insert(P_INTERVAL,      QJsonValue(interval).toInt());
+      j.insert(P_REGISTER_LEN,  QJsonValue(register_len).toInt());
 
       return j;
 
@@ -146,11 +168,9 @@ namespace hmi {
                             .arg(P)
                             .arg(object.value(P).toVariant().toString())
                             .arg("Номер регистра должен быть задан в виде строки двухбайтным числом в формате hex: \"0x0000\""));
-
-
       }
       else
-        throw SvException(QString(MISSING_PARAM).arg(P));
+        throw SvException(QString(MISSING_PARAM).arg(P) + QString("\n%1").arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact))));
 
       P = P_OFFSET;
       if(object.contains(P)) {

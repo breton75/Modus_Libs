@@ -27,13 +27,13 @@ extern "C" {
 
 namespace apak {
 
-  class SvGammaOpaImitator: public modus::SvAbstractProtocol
+  class SvUniversalPacket: public modus::SvAbstractProtocol
   {
     Q_OBJECT
 
   public:
-    SvGammaOpaImitator();
-    ~SvGammaOpaImitator();
+    SvUniversalPacket();
+    ~SvUniversalPacket();
 
     bool configure(modus::DeviceConfig* config, modus::IOBuffer *iobuffer) override;
     bool bindSignal(modus::SvSignal* signal, modus::SignalBinding binding) override;
@@ -51,6 +51,7 @@ namespace apak {
 
   private slots:
     void parse(modus::BUFF* buffer);
+//    void checkup();
 
   };
 }

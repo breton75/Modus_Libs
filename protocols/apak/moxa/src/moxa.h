@@ -1,15 +1,15 @@
-﻿#ifndef HMI_H
-#define HMI_H
+﻿#ifndef MOXA_H
+#define MOXA_H
 
 #include <QMutex>
 #include <QMutexLocker>
 
-#include "hmi_global.h"
+#include "moxa_global.h"
 
 #include "../../../../../../Modus/global/device/protocol/sv_abstract_protocol.h"
 #include "../../../../../../Modus/global/signal/sv_signal.h"
 
-#include "params.h"
+#include "protocol_params.h"
 
 #include "../../../../../../svlib/SvAbstractLogger/1.2/sv_abstract_logger.h"
 #include "../../../../../../svlib/SvException/1.1/sv_exception.h"
@@ -17,7 +17,7 @@
 
 extern "C" {
 
-    HMI_EXPORT modus::SvAbstractProtocol* create();
+    MOXA_EXPORT modus::SvAbstractProtocol* create();
 
 //    VIRTUAL_DEVICESHARED_EXPORT QString defaultDeviceParams();
 //    VIRTUAL_DEVICESHARED_EXPORT QString defaultIfcParams(const QString& ifc);
@@ -27,37 +27,33 @@ extern "C" {
 
 namespace apak {
 
-  class SvHMI: public modus::SvAbstractProtocol
+  class SvMoxa: public modus::SvAbstractProtocol
   {
     Q_OBJECT
 
   public:
-    SvHMI();
-    ~SvHMI();
+    SvMoxa();
+    ~SvMoxa();
 
     bool configure(modus::DeviceConfig* config, modus::IOBuffer *iobuffer) override;
-
-    bool bindSignal(modus::SvSignal *signal, modus::SignalBinding binding) override;
-
-  public slots:
-    void start() override;
-
-    void signalUpdated(modus::SvSignal* signal) override;
-    void signalChanged(modus::SvSignal* signal) override;
+    bool bindSignal(modus::SvSignal* signal, modus::SignalBinding binding) override;
 
   private:
-    hmi::ProtocolParams                       m_params;
+    apak::ProtocolParams  m_params;
 
-    QMap<modus::SvSignal*, hmi::SignalParams> m_input_signals;
-    QMap<modus::SvSignal*, hmi::SignalParams> m_params_by_signals;
-    QMap<quint16, QList<modus::SvSignal*>> m_signals_by_registers;
+    modus::SvSignal*      m_data_signal;
+    modus::SvSignal*      m_state_signal;
 
+  public slots:
+    void signalUpdated(modus::SvSignal* signal) override;
+    void signalChanged(modus::SvSignal* signal) override;
+    void start() override;
 
   private slots:
-    void putout();
+    void parse(modus::BUFF* buffer);
 
   };
 }
 
 
-#endif // UNIVERSAL_PACK_H
+#endif // MOXA_H

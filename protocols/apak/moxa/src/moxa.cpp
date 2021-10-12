@@ -1,6 +1,6 @@
-﻿#include "universal_packet.h"
+﻿#include "moxa.h"
 
-apak::SvUniversalPacket::SvUniversalPacket():
+apak::SvMoxa::SvMoxa():
   modus::SvAbstractProtocol(),
   m_data_signal(nullptr),
   m_state_signal(nullptr)
@@ -8,12 +8,12 @@ apak::SvUniversalPacket::SvUniversalPacket():
 
 }
 
-apak::SvUniversalPacket::~SvUniversalPacket()
+apak::SvMoxa::~SvMoxa()
 {
   deleteLater();
 }
 
-bool apak::SvUniversalPacket::configure(modus::DeviceConfig *config, modus::IOBuffer *iobuffer)
+bool apak::SvMoxa::configure(modus::DeviceConfig *config, modus::IOBuffer *iobuffer)
 {
   try {
 
@@ -32,7 +32,7 @@ bool apak::SvUniversalPacket::configure(modus::DeviceConfig *config, modus::IOBu
   }
 }
 
-bool apak::SvUniversalPacket::bindSignal(modus::SvSignal* signal, modus::SignalBinding binding)
+bool apak::SvMoxa::bindSignal(modus::SvSignal* signal, modus::SignalBinding binding)
 {
   try {
 
@@ -76,38 +76,40 @@ bool apak::SvUniversalPacket::bindSignal(modus::SvSignal* signal, modus::SignalB
   }
 }
 
-void apak::SvUniversalPacket::signalUpdated(modus::SvSignal* signal)
+void apak::SvMoxa::signalUpdated(modus::SvSignal* signal)
 {
   Q_UNUSED(signal);
 }
 
-void apak::SvUniversalPacket::signalChanged(modus::SvSignal* signal)
+void apak::SvMoxa::signalChanged(modus::SvSignal* signal)
 {
   Q_UNUSED(signal);
 }
 
-void apak::SvUniversalPacket::start()
+void apak::SvMoxa::start()
 {
-  QTimer* m_timer = new QTimer;
-  connect(m_timer, &QTimer::timeout, this, &SvUniversalPacket::checkupSignals);
-  m_timer->start(DEFAULT_INTERVAL);
+//  QTimer* m_timer = new QTimer;
+//  connect(m_timer, &QTimer::timeout, this, &SvGammaOpaImitator::parse);
+//  m_timer->start(m_params.parse_interval);
 
-  connect(p_io_buffer, &modus::IOBuffer::dataReaded, this, &SvUniversalPacket::parse);
+  connect(p_io_buffer, &modus::IOBuffer::dataReaded, this, &SvMoxa::parse);
 
   p_is_active = bool(p_config) && bool(p_io_buffer);
 }
 
-void apak::SvUniversalPacket::parse(modus::BUFF* buffer)
+void apak::SvMoxa::parse(modus::BUFF* buffer)
 {
   if(p_is_active) {
 
+//    p_io_buffer->confirm->mutex.lock();     // если нужен ответ квитирование
     buffer->mutex.lock();
-
+qDebug() << buffer->ready() << m_data_signal;
     if(buffer->ready()) {
 
       if(m_data_signal) {
 
         m_data_signal->setValue(QVariant(QByteArray(buffer->data, buffer->offset)));
+        qDebug() << m_data_signal->value();
         emit message(QString("signal %1 updated").arg(m_data_signal->config()->name), sv::log::llDebug, sv::log::mtParse);
 
       }
@@ -116,12 +118,19 @@ void apak::SvUniversalPacket::parse(modus::BUFF* buffer)
         m_state_signal->setValue(int(1));
 
       buffer->reset();
+    }
+    else {
 
-      p_last_parsed_time = QDateTime::currentDateTime();
+      checkupSignals();
 
     }
 
     buffer->mutex.unlock();
+//    p_io_buffer->confirm->mutex.unlock();   // если нужен ответ квитирование
+
+//    p_io_buffer->output->mutex.lock();
+//    putout();
+//    p_io_buffer->output->mutex.unlock();
 
   }
 }
@@ -129,7 +138,7 @@ void apak::SvUniversalPacket::parse(modus::BUFF* buffer)
 /** ********** EXPORT ************ **/
 modus::SvAbstractProtocol* create()
 {
-  modus::SvAbstractProtocol* protocol = new apak::SvUniversalPacket();
+  modus::SvAbstractProtocol* protocol = new apak::SvMoxa();
   return protocol;
 }
 

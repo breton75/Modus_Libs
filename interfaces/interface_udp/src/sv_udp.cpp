@@ -128,25 +128,6 @@ void SvUdp::read()
 
     emit p_io_buffer->dataReaded(p_io_buffer->input);
 
-
-//    p_io_buffer->confirm->mutex.lock();
-////    emit message("confirm after lock()", sv::log::llDebug, sv::log::mtReceive);
-//    if(p_io_buffer->confirm->ready())
-//      write(p_io_buffer->confirm);
-
-//    p_io_buffer->confirm->mutex.unlock();
-
-    // отправляем управляющие данные, если они есть
-//    p_io_buffer->output->mutex.lock();
-//    qDebug() << "write" << int(p_io_buffer->output->data[256]);
-//    if(p_io_buffer->output->ready())
-//      write(p_io_buffer->output);
-
-//    p_io_buffer->output->mutex.unlock();
-
-//    connect(m_socket, &QUdpSocket::readyRead, this, &SvUdp::read);
-
-//  }
 }
 
 

@@ -38,16 +38,23 @@ bool apak::SvHMI::bindSignal(modus::SvSignal *signal, modus::SignalBinding bindi
 
     if(r) {
 
-      hmi::SignalParams params = hmi::SignalParams::fromJson(binding.params);
+      if(binding.mode == modus::Master) {
 
-      if(binding.mode == modus::ReadWrite) {
-
-        m_input_signals.insert(signal, params);
+        m_input_signals.insert(signal, hmi::SignalParams());
 
       }
-      else
-        m_output_signals.insert(signal, params);
+      else {
 
+        //! параметры params для каждого свои! для master'a свои, а для bindings - свои
+        hmi::SignalParams params = hmi::SignalParams::fromJson(binding.params);
+        m_params_by_signals.insert(signal, params);
+
+        if(!m_signals_by_registers.contains(params.registr))
+          m_signals_by_registers.insert(params.registr, QList<modus::SvSignal*>());
+
+        m_signals_by_registers[params.registr].append(signal);
+
+      }
     }
 
     return r;
@@ -84,54 +91,55 @@ void apak::SvHMI::start()
 
 void apak::SvHMI::putout()
 {
-  QMap<quint16, quint16> dataByRegisters;
-  for(modus::SvSignal* signal: m_output_signals.keys()) {
+  QMap<quint16, quint16> valueByRegister;
 
-    hmi::SignalParams params = m_output_signals.value(signal);
+  for(quint16 registr: m_signals_by_registers.keys()) {
 
-    bool ok;
-    quint16 v = signal->value().toUInt(&ok);
-    if(!ok)
-      continue;
+    quint16 value = 0;
 
-    quint16 mask = ~(((1 << params.len) - 1) << params.offset); // даже если больше 1го бита
-    v = mask | (v << params.offset);
+    for(modus::SvSignal* signal: m_signals_by_registers.value(registr)) {
 
-    if(dataByRegisters.contains(params.registr))
-      dataByRegisters.insert(params.registr, 0);
+      bool ok;
+      quint16 signal_value = signal->value().toUInt(&ok);
+      if(!ok)
+        continue;
 
-    dataByRegisters[params.registr] |= v;
+      hmi::SignalParams params = m_params_by_signals.value(signal);
 
-  }
-qDebug() << 100;
-  foreach (quint16 registr, dataByRegisters.keys()) {
+      quint16 mask = ((1 << params.len) - 1) << params.offset; // даже если больше 1го бита
+      value |= mask & (signal_value << params.offset);
 
-    QByteArray data;
-    QDataStream stream(&data, QIODevice::WriteOnly);
+//      qDebug() << "mask" << mask << "value" << value << signal->config()->name << signal->value();
 
-    stream << quint8(m_params.address)                  // Адрес устройства
-           << quint8(0x0F)                              // Функциональный код     у нас всегда 0x0F
-           << registr                                   // Адрес первого регистра
-           << quint16(1)                                // Количество регистров
-           << quint16(2)                                // Количество байт далее
-           << quint16(dataByRegisters.value(registr));  // Значение байт
+    }
 
-    quint16 crc = CRC::MODBUS_CRC16((const quint8*)data.data(), data.length());
-
-    stream << crc;                                      // Контрольная сумма CRC
-
-    p_io_buffer->output->mutex.lock();
-
-    memcpy(&p_io_buffer->output[0], data.data(), data.length());
-    p_io_buffer->output->offset = data.length();
-
-    p_io_buffer->output->mutex.unlock();
-
-    emit p_io_buffer->readyWrite(p_io_buffer->output);
+    valueByRegister.insert(registr, value);
 
   }
 
+  QByteArray data;
+  QDataStream stream(&data, QIODevice::WriteOnly);
 
+  stream << quint8(m_params.address)                                      // Адрес устройства
+         << quint8(0x0F)                                                  // Функциональный код. у нас всегда 0x0F
+         << valueByRegister.firstKey()                                    // Адрес первого регистра
+         << quint16(valueByRegister.count())                              // Количество регистров
+         << quint16(valueByRegister.count() * m_params.register_len);     // Количество байт
+
+  //! With QMap, the items are always sorted by key.
+  for(quint16 registr: valueByRegister.keys())
+    stream << quint16(valueByRegister.value(registr));                    // Значение байт
+
+  stream << CRC::MODBUS_CRC16((const quint8*)data.data(), data.length()); // Контрольная сумма CRC
+
+  p_io_buffer->output->mutex.lock();
+
+  memcpy(&(p_io_buffer->output->data[0]), data.data(), data.length());
+  p_io_buffer->output->offset = data.length();
+
+  p_io_buffer->output->mutex.unlock();
+
+  emit p_io_buffer->readyWrite(p_io_buffer->output);
 }
 
 /** ********** EXPORT ************ **/

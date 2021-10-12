@@ -52,9 +52,9 @@ bool SvRS::start()
   }
 }
 
-
 void SvRS::read()
 {
+
   p_io_buffer->input->mutex.lock();
 
   if(p_io_buffer->input->offset + m_port->bytesAvailable() > p_config->bufsize)
@@ -67,8 +67,6 @@ void SvRS::read()
   p_io_buffer->input->offset = readed;
 
   while(m_port->waitForReadyRead(m_params.grain_gap)) {
-
-    p_io_buffer->input->mutex.lock();
 
     if(p_io_buffer->input->offset + m_port->bytesAvailable() > p_config->bufsize)
       p_io_buffer->input->reset();
@@ -85,7 +83,7 @@ void SvRS::read()
   p_io_buffer->input->mutex.unlock();
 
   emit p_io_buffer->dataReaded(p_io_buffer->input);
-
+qDebug() << 7;
 }
 
 
@@ -95,7 +93,7 @@ void SvRS::write(modus::BUFF* buffer)
 
   if(!buffer->ready())
     return;
-qDebug() << 1;
+
   bool written = m_port->write(&buffer->data[0], buffer->offset) > 0;
   m_port->flush();
 

@@ -39,7 +39,7 @@ bool apak::SvGammaOpaImitator::bindSignal(modus::SvSignal* signal, modus::Signal
 
     if(r) {
 
-      if(binding.mode == modus::ReadWrite) {
+      if(binding.mode == modus::Master) {
 
 
       }

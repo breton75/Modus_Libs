@@ -40,7 +40,7 @@ bool apak::SvUPZ::bindSignal(modus::SvSignal* signal, modus::SignalBinding bindi
 
     if(r) {
 
-      if(binding.mode == modus::ReadWrite) {
+      if(binding.mode == modus::Master) {
 
         if(signal->config()->type.toLower() == "state") {
 
@@ -88,9 +88,9 @@ void apak::SvUPZ::signalChanged(modus::SvSignal* signal)
 
 void apak::SvUPZ::start()
 {
-//  QTimer* m_timer = new QTimer;
-//  connect(m_timer, &QTimer::timeout, this, &SvUPZ::parse);
-//  m_timer->start(m_params.parse_interval);
+  QTimer* m_timer = new QTimer;
+  connect(m_timer, &QTimer::timeout, this, &SvUPZ::checkupSignals);
+  m_timer->start(DEFAULT_INTERVAL);
 
   connect(p_io_buffer, &modus::IOBuffer::dataReaded, this, &SvUPZ::parse);
 
@@ -101,30 +101,26 @@ void apak::SvUPZ::parse(modus::BUFF* buffer)
 {
   if(p_is_active) {
 
-    buffer->mutex.lock();     // если нужен ответ квитирование
-//    p_io_buffer->input->mutex.lock();
+    buffer->mutex.lock();
 
     if(buffer->ready()) {
 
-      m_data_signal->setValue(QVariant(QByteArray(buffer->data, buffer->offset)));
+      if(m_data_signal) {
 
-      emit message(QString("signal %1 updated").arg(m_data_signal->config()->name), sv::log::llDebug, sv::log::mtParse);
-      m_state_signal->setValue(int(1));
+        m_data_signal->setValue(QVariant(QByteArray(buffer->data, buffer->offset)));
+        emit message(QString("signal %1 updated").arg(m_data_signal->config()->name), sv::log::llDebug, sv::log::mtParse);
+      }
+
+      if(m_state_signal)
+        m_state_signal->setValue(int(1));
 
       buffer->reset();
-    }
-    else {
 
-      checkupSignals();
+      p_last_parsed_time = QDateTime::currentDateTime();
 
     }
 
     buffer->mutex.unlock();
-//    p_io_buffer->confirm->mutex.unlock();   // если нужен ответ квитирование
-
-//    p_io_buffer->output->mutex.lock();
-//    putout();
-//    p_io_buffer->output->mutex.unlock();
 
   }
 }
