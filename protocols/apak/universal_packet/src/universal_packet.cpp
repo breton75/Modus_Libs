@@ -88,9 +88,9 @@ void apak::SvUniversalPacket::signalChanged(modus::SvSignal* signal)
 
 void apak::SvUniversalPacket::start()
 {
-  QTimer* m_timer = new QTimer;
-  connect(m_timer, &QTimer::timeout, this, &SvUniversalPacket::checkupSignals);
-  m_timer->start(DEFAULT_INTERVAL);
+//  QTimer* m_timer = new QTimer;
+//  connect(m_timer, &QTimer::timeout, this, &SvUniversalPacket::checkupSignals);
+//  m_timer->start(DEFAULT_INTERVAL);
 
   connect(p_io_buffer, &modus::IOBuffer::dataReaded, this, &SvUniversalPacket::parse);
 
@@ -117,7 +117,7 @@ void apak::SvUniversalPacket::parse(modus::BUFF* buffer)
 
       buffer->reset();
 
-      p_last_parsed_time = QDateTime::currentDateTime();
+//      p_last_parsed_time = QDateTime::currentDateTime();
 
     }
 

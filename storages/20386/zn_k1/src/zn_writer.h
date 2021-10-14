@@ -344,7 +344,8 @@ namespace zn1 {
         c(c), a(a), w(w)
       {}
 
-      quint8 state() { return quint8(c + (a << 1) + (w << 2)); }
+//      quint8 state() { return quint8(c + (a << 1) + (w << 2)); }
+      quint8 state() { return c & a & w; }
 
       quint8 c;
       quint8 a;
@@ -370,11 +371,13 @@ namespace zn1 {
 //    QMap<QString, modus::SvSignal*> m_zn_state;
     ZNstate m_zn_state;
 
+//    QTimer* m_timer = nullptr;
+
 //    void setState(int doChangeFlags, const QString& writeState = STATE_OK, const QString& authorization = STATE_OK, const QString& connectionState = STATE_OK);
     void setState(int writeState, int authorization, int connectionState);
 
-  private slots:
-    void checkupSignals();
+//  private slots:
+//    void checkupSignals();
 
   public slots:
     void start() override;

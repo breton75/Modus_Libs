@@ -121,10 +121,10 @@ void apak::SvHMI::putout()
   QDataStream stream(&data, QIODevice::WriteOnly);
 
   stream << quint8(m_params.address)                                      // Адрес устройства
-         << quint8(0x0F)                                                  // Функциональный код. у нас всегда 0x0F
+         << quint8(m_params.func_code)                                    // Функциональный код. у нас 0x10
          << valueByRegister.firstKey()                                    // Адрес первого регистра
          << quint16(valueByRegister.count())                              // Количество регистров
-         << quint16(valueByRegister.count() * m_params.register_len);     // Количество байт
+         << quint8 (valueByRegister.count() * m_params.register_len);     // Количество байт
 
   //! With QMap, the items are always sorted by key.
   for(quint16 registr: valueByRegister.keys())

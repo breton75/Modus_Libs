@@ -12,11 +12,13 @@
 //#include "../../../../../Modus/global/device/device_defs.h"
 
 #define P_ADDRESS       "address"
+#define P_FUNC_CODE     "func_code"
 #define P_REGISTER      "register"
 #define P_OFFSET        "offset"
 #define P_LEN           "len"
 #define P_REGISTER_LEN  "register_len"
 
+#define HMI_DEFAULT_FUNC_CODE     0x10
 #define HMI_DEFAULT_SEND_INTERVAL 1000
 #define HMI_DEFAULT_REGISTER_LEN  2
 
@@ -25,6 +27,7 @@ namespace hmi {
   struct ProtocolParams {
 
     quint8  address       = 0;
+    quint8  func_code     = HMI_DEFAULT_FUNC_CODE;
     quint16 interval      = HMI_DEFAULT_SEND_INTERVAL;
     quint8  register_len  = HMI_DEFAULT_REGISTER_LEN;
 
@@ -66,6 +69,21 @@ namespace hmi {
       else
         throw SvException(QString(MISSING_PARAM).arg(P));
 
+      P = P_FUNC_CODE;
+      if(object.contains(P)) {
+
+        if(object.value(P).toInt(-1) < 0)
+          throw SvException(QString(IMPERMISSIBLE_VALUE)
+                            .arg(P)
+                            .arg(object.value(P).toVariant().toString())
+                            .arg("Код функции Modbus должен быть задан целым числом"));
+
+        p.func_code = object.value(P).toInt(HMI_DEFAULT_FUNC_CODE);
+
+      }
+      else
+        p.func_code = HMI_DEFAULT_FUNC_CODE;
+
       P = P_INTERVAL;
       if(object.contains(P)) {
 
@@ -95,7 +113,7 @@ namespace hmi {
 
       }
       else
-        p.interval = HMI_DEFAULT_REGISTER_LEN;
+        p.register_len = HMI_DEFAULT_REGISTER_LEN;
 
       return p;
 

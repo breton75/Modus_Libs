@@ -41,12 +41,15 @@ bool zn1::ZNWriter::bindSignal(modus::SvSignal* signal, modus::SignalBinding bin
 
         if(m_state_signal) {
 
-          p_last_error = TOO_MUCH(p_config->name, "state");
+          p_last_error = TOO_MUCH(p_config->name, "state") + QString("\n%1").arg(signal->config()->name);
+//          qDebug() << QString("Second: %1").arg(signal->config()->name);
           return false;
         }
+        else {
+//          qDebug() << QString("First: %1").arg(signal->config()->name);
+          m_state_signal = signal;
 
-        m_state_signal = signal;
-
+        }
       }
     }
   }
@@ -57,9 +60,9 @@ bool zn1::ZNWriter::bindSignal(modus::SvSignal* signal, modus::SignalBinding bin
 
 void zn1::ZNWriter::start()
 {
-  QTimer* m_timer = new QTimer;
-  connect(m_timer, &QTimer::timeout, this, &ZNWriter::checkupSignals);
-  m_timer->start(DEFAULT_INTERVAL);
+//  m_timer = new QTimer;
+//  connect(m_timer, &QTimer::timeout, this, &ZNWriter::checkupSignals);
+//  m_timer->start(DEFAULT_INTERVAL);
 
   m_socket = new sv::tcp::Client(); // обязательно создаем здесь, чтобы объект принадлежал этому потоку
 
@@ -67,24 +70,11 @@ void zn1::ZNWriter::start()
 
 }
 
-void zn1::ZNWriter::checkupSignals()
-{
-  for (modus::SvSignal* signal: p_signals.keys()) {
-
-    if(p_signals.value(signal).mode != modus::Master)
-      continue;
-
-    if(!p_last_parsed_time.isValid())
-      signal->approve(false);
-
-    if(!signal->hasTimeout())
-      signal->approve(p_last_parsed_time.toMSecsSinceEpoch() + p_config->timeout < QDateTime::currentMSecsSinceEpoch());
-
-    else if(signal->lastUpdate().toMSecsSinceEpoch() + signal->config()->timeout > QDateTime::currentMSecsSinceEpoch())
-      signal->approve(p_last_parsed_time.toMSecsSinceEpoch() + signal->config()->timeout < QDateTime::currentMSecsSinceEpoch());
-
-  }
-}
+//void zn1::ZNWriter::checkupSignals()
+//{
+//  if(m_state_signal)
+//    m_state_signal->approve(false);
+//}
 
 void zn1::ZNWriter::setState(int writeState, int authorization, int connectionState)
 {
@@ -94,6 +84,9 @@ void zn1::ZNWriter::setState(int writeState, int authorization, int connectionSt
 
   if(m_state_signal)
     m_state_signal->setValue(m_zn_state.state());
+
+//  m_timer->start();
+
 }
 
 void zn1::ZNWriter::write()

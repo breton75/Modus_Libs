@@ -88,9 +88,9 @@ void apak::SvUPZ::signalChanged(modus::SvSignal* signal)
 
 void apak::SvUPZ::start()
 {
-  QTimer* m_timer = new QTimer;
-  connect(m_timer, &QTimer::timeout, this, &SvUPZ::checkupSignals);
-  m_timer->start(DEFAULT_INTERVAL);
+//  QTimer* m_timer = new QTimer;
+//  connect(m_timer, &QTimer::timeout, this, &SvUPZ::checkupSignals);
+//  m_timer->start(DEFAULT_INTERVAL);
 
   connect(p_io_buffer, &modus::IOBuffer::dataReaded, this, &SvUPZ::parse);
 
@@ -116,7 +116,7 @@ void apak::SvUPZ::parse(modus::BUFF* buffer)
 
       buffer->reset();
 
-      p_last_parsed_time = QDateTime::currentDateTime();
+//      p_last_parsed_time = QDateTime::currentDateTime();
 
     }
 
