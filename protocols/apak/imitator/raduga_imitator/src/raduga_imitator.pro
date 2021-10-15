@@ -1,10 +1,10 @@
 QT -= gui
 
-DEFINES += PROJ_APAK_RADUGA_DATATYPE1_LIBRARY
+DEFINES += APAK_RADUGA_IMITATOR_LIBRARY
 
 CONFIG += c++11 plugin
 
-TARGET = /home/user/Modus/lib/protocols/apak_raduga_data_type_1_sim
+TARGET = /home/user/Modus/lib/protocols/apak_raduga_imitator
 TEMPLATE = lib
 
 # The following define makes your compiler emit warnings if you use
@@ -19,18 +19,18 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    ../../../../../../../Modus/global/signal/sv_signal.cpp \
+    ../../../../../../Modus/global/signal/sv_signal.cpp \
     data_type_collection.cpp \
-    apak_raduga_sim.cpp
+    raduga_imitator.cpp
 
 HEADERS += \
-    ../../../../../../../Modus/global/device/protocol/sv_abstract_protocol.h \
-    ../../../../../../../Modus/global/global_defs.h \
-    apak_raduga_data_type_1_sim_global.h \
-    ../../../../../../../Modus/global/signal/sv_signal.h \
+    ../../../../../../Modus/global/device/protocol/sv_abstract_protocol.h \
+    ../../../../../../Modus/global/global_defs.h \
+    ../../../../../../Modus/global/signal/sv_signal.h \
+    raduga_imitator_global.h \
     raduga_defs.h \
     data_type_collection.h \
-    apak_raduga_sim.h \
+    raduga_imitator.h \
     protocol_params.h
 
 # Default rules for deployment.

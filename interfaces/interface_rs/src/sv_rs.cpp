@@ -54,7 +54,6 @@ bool SvRS::start()
 
 void SvRS::read()
 {
-
   p_io_buffer->input->mutex.lock();
 
   if(p_io_buffer->input->offset + m_port->bytesAvailable() > p_config->bufsize)
@@ -83,7 +82,7 @@ void SvRS::read()
   p_io_buffer->input->mutex.unlock();
 
   emit p_io_buffer->dataReaded(p_io_buffer->input);
-qDebug() << 7;
+
 }
 
 

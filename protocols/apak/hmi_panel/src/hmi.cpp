@@ -128,9 +128,11 @@ void apak::SvHMI::putout()
 
   //! With QMap, the items are always sorted by key.
   for(quint16 registr: valueByRegister.keys())
-    stream << quint16(valueByRegister.value(registr));                    // Значение байт
+    stream << quint16(valueByRegister.value(registr));                    // данные
 
-  stream << CRC::MODBUS_CRC16((const quint8*)data.data(), data.length()); // Контрольная сумма CRC
+  quint16 crc = CRC::MODBUS_CRC16((const quint8*)data.data(), data.length()); // Контрольная сумма CRC
+  data.append(quint8(crc & 0xFF));
+  data.append(quint8(crc >> 8));
 
   p_io_buffer->output->mutex.lock();
 

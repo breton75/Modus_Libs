@@ -1,10 +1,10 @@
-﻿#ifndef APAK_RADUGA_DATATYPE1_H
-#define APAK_RADUGA_DATATYPE1_H
+﻿#ifndef RADUGA_IMITATOR_H
+#define RADUGA_IMITATOR_H
 
 #include <QMutex>
 #include <QMutexLocker>
 
-#include "apak_raduga_data_type_1_sim_global.h"
+#include "raduga_imitator_global.h"
 
 #include "../../../../../Modus/global/device/protocol/sv_abstract_protocol.h"
 #include "../../../../../Modus/global/signal/sv_signal.h"
@@ -20,7 +20,7 @@
 
 extern "C" {
 
-    APAK_RADUGA_DATATYPE1_EXPORT modus::SvAbstractProtocol* create();
+    RADUGA_IMITATOR_EXPORT modus::SvAbstractProtocol* create();
 
 //    VIRTUAL_DEVICESHARED_EXPORT QString defaultDeviceParams();
 //    VIRTUAL_DEVICESHARED_EXPORT QString defaultIfcParams(const QString& ifc);
@@ -74,14 +74,21 @@ public:
   SvRaduga();
 
   bool configure(modus::DeviceConfig* config, modus::IOBuffer *iobuffer) override;
+  bool bindSignal (modus::SvSignal* signal, modus::SignalBinding binding) override;
 
-protected:
-  void run() override;
+public slots:
+  void start() override;
 
-  void disposeInputSignal  (modus::SvSignal* signal) override;
-  void disposeOutputSignal (modus::SvSignal* signal) override;
+  void signalUpdated(modus::SvSignal* signal) override
+  {
+    Q_UNUSED(signal);
+  }
 
-//  void validateSignals(QDateTime& lastParsedTime) override;
+  void signalChanged(modus::SvSignal* signal) override
+  {
+    Q_UNUSED(signal);
+  }
+
 
 private:
   QList<modus::SvSignal*>    p_input_signals;
@@ -112,8 +119,9 @@ private:
 
   QMap<quint16, raduga::SvAbstractSignalCollection*> output_signal_collections;
 
+private slots:
   void putout();
 
 };
 
-#endif // APAK_RADUGA_DATATYPE1_H
+#endif // RADUGA_IMITATOR_H

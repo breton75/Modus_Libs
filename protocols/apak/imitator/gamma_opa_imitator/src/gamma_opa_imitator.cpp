@@ -50,11 +50,9 @@ bool apak::SvGammaOpaImitator::bindSignal(modus::SvSignal* signal, modus::Signal
           p_last_error = TOO_MUCH(p_config->name, "send");
           return false;
         }
+        else
+          m_send_signal = signal;
 
-        m_send_signal = signal;
-
-        connect(signal, &modus::SvSignal::updated, this, &SvGammaOpaImitator::signalUpdated, Qt::QueuedConnection);
-        connect(signal, &modus::SvSignal::changed, this, &SvGammaOpaImitator::signalChanged, Qt::QueuedConnection);
       }
     }
 

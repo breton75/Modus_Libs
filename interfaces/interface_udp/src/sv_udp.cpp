@@ -93,7 +93,6 @@ bool SvUdp::start()
 void SvUdp::read()
 {
 //  disconnect(m_socket, &QUdpSocket::readyRead, this, &SvUdp::read);
-
     p_io_buffer->input->mutex.lock();
 
     if(p_io_buffer->input->offset + m_socket->bytesAvailable() > p_config->bufsize)

@@ -1,16 +1,16 @@
 /****************************************************************************
-** Meta object code from reading C++ file 'universal_packet.h'
+** Meta object code from reading C++ file 'gamma_opa_imitator.h'
 **
 ** Created by: The Qt Meta Object Compiler version 67 (Qt 5.5.1)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
-#include "../../../universal_packet/src/universal_packet.h"
+#include "../../../imitator/gamma_opa_imitator/src/gamma_opa_imitator.h"
 #include <QtCore/qbytearray.h>
 #include <QtCore/qmetatype.h>
 #if !defined(Q_MOC_OUTPUT_REVISION)
-#error "The header file 'universal_packet.h' doesn't include <QObject>."
+#error "The header file 'gamma_opa_imitator.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 67
 #error "This file was generated using the moc from 5.5.1. It"
 #error "cannot be used with the include files from this version of Qt."
@@ -18,36 +18,34 @@
 #endif
 
 QT_BEGIN_MOC_NAMESPACE
-struct qt_meta_stringdata_apak__SvUniversalPacket_t {
-    QByteArrayData data[10];
-    char stringdata0[109];
+struct qt_meta_stringdata_apak__SvGammaOpaImitator_t {
+    QByteArrayData data[8];
+    char stringdata0[89];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
-    qptrdiff(offsetof(qt_meta_stringdata_apak__SvUniversalPacket_t, stringdata0) + ofs \
+    qptrdiff(offsetof(qt_meta_stringdata_apak__SvGammaOpaImitator_t, stringdata0) + ofs \
         - idx * sizeof(QByteArrayData)) \
     )
-static const qt_meta_stringdata_apak__SvUniversalPacket_t qt_meta_stringdata_apak__SvUniversalPacket = {
+static const qt_meta_stringdata_apak__SvGammaOpaImitator_t qt_meta_stringdata_apak__SvGammaOpaImitator = {
     {
-QT_MOC_LITERAL(0, 0, 23), // "apak::SvUniversalPacket"
-QT_MOC_LITERAL(1, 24, 13), // "signalUpdated"
-QT_MOC_LITERAL(2, 38, 0), // ""
-QT_MOC_LITERAL(3, 39, 16), // "modus::SvSignal*"
-QT_MOC_LITERAL(4, 56, 6), // "signal"
-QT_MOC_LITERAL(5, 63, 13), // "signalChanged"
-QT_MOC_LITERAL(6, 77, 5), // "start"
-QT_MOC_LITERAL(7, 83, 5), // "parse"
-QT_MOC_LITERAL(8, 89, 12), // "modus::BUFF*"
-QT_MOC_LITERAL(9, 102, 6) // "buffer"
+QT_MOC_LITERAL(0, 0, 24), // "apak::SvGammaOpaImitator"
+QT_MOC_LITERAL(1, 25, 13), // "signalUpdated"
+QT_MOC_LITERAL(2, 39, 0), // ""
+QT_MOC_LITERAL(3, 40, 16), // "modus::SvSignal*"
+QT_MOC_LITERAL(4, 57, 6), // "signal"
+QT_MOC_LITERAL(5, 64, 13), // "signalChanged"
+QT_MOC_LITERAL(6, 78, 5), // "start"
+QT_MOC_LITERAL(7, 84, 4) // "send"
 
     },
-    "apak::SvUniversalPacket\0signalUpdated\0"
+    "apak::SvGammaOpaImitator\0signalUpdated\0"
     "\0modus::SvSignal*\0signal\0signalChanged\0"
-    "start\0parse\0modus::BUFF*\0buffer"
+    "start\0send"
 };
 #undef QT_MOC_LITERAL
 
-static const uint qt_meta_data_apak__SvUniversalPacket[] = {
+static const uint qt_meta_data_apak__SvGammaOpaImitator[] = {
 
  // content:
        7,       // revision
@@ -64,27 +62,27 @@ static const uint qt_meta_data_apak__SvUniversalPacket[] = {
        1,    1,   34,    2, 0x0a /* Public */,
        5,    1,   37,    2, 0x0a /* Public */,
        6,    0,   40,    2, 0x0a /* Public */,
-       7,    1,   41,    2, 0x08 /* Private */,
+       7,    0,   41,    2, 0x08 /* Private */,
 
  // slots: parameters
     QMetaType::Void, 0x80000000 | 3,    4,
     QMetaType::Void, 0x80000000 | 3,    4,
     QMetaType::Void,
-    QMetaType::Void, 0x80000000 | 8,    9,
+    QMetaType::Void,
 
        0        // eod
 };
 
-void apak::SvUniversalPacket::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+void apak::SvGammaOpaImitator::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
-        SvUniversalPacket *_t = static_cast<SvUniversalPacket *>(_o);
+        SvGammaOpaImitator *_t = static_cast<SvGammaOpaImitator *>(_o);
         Q_UNUSED(_t)
         switch (_id) {
         case 0: _t->signalUpdated((*reinterpret_cast< modus::SvSignal*(*)>(_a[1]))); break;
         case 1: _t->signalChanged((*reinterpret_cast< modus::SvSignal*(*)>(_a[1]))); break;
         case 2: _t->start(); break;
-        case 3: _t->parse((*reinterpret_cast< modus::BUFF*(*)>(_a[1]))); break;
+        case 3: _t->send(); break;
         default: ;
         }
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
@@ -108,26 +106,26 @@ void apak::SvUniversalPacket::qt_static_metacall(QObject *_o, QMetaObject::Call 
     }
 }
 
-const QMetaObject apak::SvUniversalPacket::staticMetaObject = {
-    { &modus::SvAbstractProtocol::staticMetaObject, qt_meta_stringdata_apak__SvUniversalPacket.data,
-      qt_meta_data_apak__SvUniversalPacket,  qt_static_metacall, Q_NULLPTR, Q_NULLPTR}
+const QMetaObject apak::SvGammaOpaImitator::staticMetaObject = {
+    { &modus::SvAbstractProtocol::staticMetaObject, qt_meta_stringdata_apak__SvGammaOpaImitator.data,
+      qt_meta_data_apak__SvGammaOpaImitator,  qt_static_metacall, Q_NULLPTR, Q_NULLPTR}
 };
 
 
-const QMetaObject *apak::SvUniversalPacket::metaObject() const
+const QMetaObject *apak::SvGammaOpaImitator::metaObject() const
 {
     return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
-void *apak::SvUniversalPacket::qt_metacast(const char *_clname)
+void *apak::SvGammaOpaImitator::qt_metacast(const char *_clname)
 {
     if (!_clname) return Q_NULLPTR;
-    if (!strcmp(_clname, qt_meta_stringdata_apak__SvUniversalPacket.stringdata0))
-        return static_cast<void*>(const_cast< SvUniversalPacket*>(this));
+    if (!strcmp(_clname, qt_meta_stringdata_apak__SvGammaOpaImitator.stringdata0))
+        return static_cast<void*>(const_cast< SvGammaOpaImitator*>(this));
     return modus::SvAbstractProtocol::qt_metacast(_clname);
 }
 
-int apak::SvUniversalPacket::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+int apak::SvGammaOpaImitator::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = modus::SvAbstractProtocol::qt_metacall(_c, _id, _a);
     if (_id < 0)

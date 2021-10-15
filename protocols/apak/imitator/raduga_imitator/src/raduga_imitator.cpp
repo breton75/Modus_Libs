@@ -1,4 +1,4 @@
-﻿#include "apak_raduga_sim.h"
+﻿#include "raduga_imitator.h"
 
 raduga::SvRaduga::SvRaduga():
   modus::SvAbstractProtocol()
@@ -30,51 +30,60 @@ bool raduga::SvRaduga::configure(modus::DeviceConfig *config, modus::IOBuffer *i
   }
 }
 
-void raduga::SvRaduga::disposeInputSignal (modus::SvSignal* signal)
-{
-  Q_UNUSED(signal);
-}
-
-void raduga::SvRaduga::disposeOutputSignal (modus::SvSignal* signal)
+bool raduga::SvRaduga::bindSignal(modus::SvSignal* signal, modus::SignalBinding binding)
 {
   try {
 
-    bool ok;
-    quint16 itype = signal->config()->type.toUInt(&ok, 0);
+    bool r = modus::SvAbstractProtocol::bindSignal(signal, binding);
 
-    if(ok && output_signal_collections.contains(itype))
-      output_signal_collections.value(itype)->addSignal(signal, p_config->bufsize);
+    if(r) {
 
-    else {
+      if(binding.mode == modus::Master) {
 
-      emit message(QString("Сигнал %1: Неопознанный тип данных \"%2\"").arg(signal->config()->name).arg(signal->config()->tag),
-                   sv::log::llError, sv::log::mtError);
+        bool ok;
+        quint16 itype = signal->config()->type.toUInt(&ok, 0);
 
+        if(ok && output_signal_collections.contains(itype))
+          output_signal_collections.value(itype)->addSignal(signal, p_config->bufsize);
+
+        else {
+
+          emit message(QString("Сигнал %1: Неопознанный тип данных \"%2\"").arg(signal->config()->name).arg(signal->config()->tag),
+                       sv::log::llError, sv::log::mtError);
+
+        }
+
+      }
     }
+
+    return r;
   }
 
   catch(SvException& e) {
-    throw e;
+    p_last_error = e.error;
+    return false;
   }
 }
 
-void raduga::SvRaduga::run()
+void raduga::SvRaduga::start()
 {
-  p_is_active = bool(p_config) && bool(p_io_buffer);
+  if(!(bool(p_config) && bool(p_io_buffer))) {
 
-  while(p_is_active) {
-
-    p_io_buffer->output->mutex.lock();
-    putout();
-    p_io_buffer->output->mutex.unlock();
-
-    msleep(m_params.interval);
+    emit message(QString("Panic! Невозможно запустить модуль %1. Обратитесь к разработчику").arg((p_config ? p_config->name : "Unknown")), llerr, mterr);
+    return;
 
   }
+
+  QTimer* m_timer = new QTimer;
+  connect(m_timer, &QTimer::timeout, this, &SvRaduga::putout);
+  m_timer->start(m_params.interval);
+
+
 }
 
 void raduga::SvRaduga::putout()
 {
+  if(!p_is_active)
 //  qDebug() << "putout" << m_params.packid;
   p_io_buffer->output->offset = 0;
 

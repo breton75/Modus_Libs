@@ -1,16 +1,16 @@
 /****************************************************************************
-** Meta object code from reading C++ file 'hmi.h'
+** Meta object code from reading C++ file 'raduga_imitator.h'
 **
 ** Created by: The Qt Meta Object Compiler version 67 (Qt 5.5.1)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
-#include "../../../hmi_panel/src/hmi.h"
+#include "../../../apak/imitator/raduga_imitator/src/raduga_imitator.h"
 #include <QtCore/qbytearray.h>
 #include <QtCore/qmetatype.h>
 #if !defined(Q_MOC_OUTPUT_REVISION)
-#error "The header file 'hmi.h' doesn't include <QObject>."
+#error "The header file 'raduga_imitator.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 67
 #error "This file was generated using the moc from 5.5.1. It"
 #error "cannot be used with the include files from this version of Qt."
@@ -18,34 +18,34 @@
 #endif
 
 QT_BEGIN_MOC_NAMESPACE
-struct qt_meta_stringdata_apak__SvHMI_t {
+struct qt_meta_stringdata_raduga__SvRaduga_t {
     QByteArrayData data[8];
-    char stringdata0[78];
+    char stringdata0[83];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
-    qptrdiff(offsetof(qt_meta_stringdata_apak__SvHMI_t, stringdata0) + ofs \
+    qptrdiff(offsetof(qt_meta_stringdata_raduga__SvRaduga_t, stringdata0) + ofs \
         - idx * sizeof(QByteArrayData)) \
     )
-static const qt_meta_stringdata_apak__SvHMI_t qt_meta_stringdata_apak__SvHMI = {
+static const qt_meta_stringdata_raduga__SvRaduga_t qt_meta_stringdata_raduga__SvRaduga = {
     {
-QT_MOC_LITERAL(0, 0, 11), // "apak::SvHMI"
-QT_MOC_LITERAL(1, 12, 5), // "start"
-QT_MOC_LITERAL(2, 18, 0), // ""
-QT_MOC_LITERAL(3, 19, 13), // "signalUpdated"
-QT_MOC_LITERAL(4, 33, 16), // "modus::SvSignal*"
-QT_MOC_LITERAL(5, 50, 6), // "signal"
-QT_MOC_LITERAL(6, 57, 13), // "signalChanged"
-QT_MOC_LITERAL(7, 71, 6) // "putout"
+QT_MOC_LITERAL(0, 0, 16), // "raduga::SvRaduga"
+QT_MOC_LITERAL(1, 17, 5), // "start"
+QT_MOC_LITERAL(2, 23, 0), // ""
+QT_MOC_LITERAL(3, 24, 13), // "signalUpdated"
+QT_MOC_LITERAL(4, 38, 16), // "modus::SvSignal*"
+QT_MOC_LITERAL(5, 55, 6), // "signal"
+QT_MOC_LITERAL(6, 62, 13), // "signalChanged"
+QT_MOC_LITERAL(7, 76, 6) // "putout"
 
     },
-    "apak::SvHMI\0start\0\0signalUpdated\0"
+    "raduga::SvRaduga\0start\0\0signalUpdated\0"
     "modus::SvSignal*\0signal\0signalChanged\0"
     "putout"
 };
 #undef QT_MOC_LITERAL
 
-static const uint qt_meta_data_apak__SvHMI[] = {
+static const uint qt_meta_data_raduga__SvRaduga[] = {
 
  // content:
        7,       // revision
@@ -73,10 +73,10 @@ static const uint qt_meta_data_apak__SvHMI[] = {
        0        // eod
 };
 
-void apak::SvHMI::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+void raduga::SvRaduga::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
-        SvHMI *_t = static_cast<SvHMI *>(_o);
+        SvRaduga *_t = static_cast<SvRaduga *>(_o);
         Q_UNUSED(_t)
         switch (_id) {
         case 0: _t->start(); break;
@@ -106,26 +106,26 @@ void apak::SvHMI::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id,
     }
 }
 
-const QMetaObject apak::SvHMI::staticMetaObject = {
-    { &modus::SvAbstractProtocol::staticMetaObject, qt_meta_stringdata_apak__SvHMI.data,
-      qt_meta_data_apak__SvHMI,  qt_static_metacall, Q_NULLPTR, Q_NULLPTR}
+const QMetaObject raduga::SvRaduga::staticMetaObject = {
+    { &modus::SvAbstractProtocol::staticMetaObject, qt_meta_stringdata_raduga__SvRaduga.data,
+      qt_meta_data_raduga__SvRaduga,  qt_static_metacall, Q_NULLPTR, Q_NULLPTR}
 };
 
 
-const QMetaObject *apak::SvHMI::metaObject() const
+const QMetaObject *raduga::SvRaduga::metaObject() const
 {
     return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
-void *apak::SvHMI::qt_metacast(const char *_clname)
+void *raduga::SvRaduga::qt_metacast(const char *_clname)
 {
     if (!_clname) return Q_NULLPTR;
-    if (!strcmp(_clname, qt_meta_stringdata_apak__SvHMI.stringdata0))
-        return static_cast<void*>(const_cast< SvHMI*>(this));
+    if (!strcmp(_clname, qt_meta_stringdata_raduga__SvRaduga.stringdata0))
+        return static_cast<void*>(const_cast< SvRaduga*>(this));
     return modus::SvAbstractProtocol::qt_metacast(_clname);
 }
 
-int apak::SvHMI::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+int raduga::SvRaduga::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = modus::SvAbstractProtocol::qt_metacall(_c, _id, _a);
     if (_id < 0)
