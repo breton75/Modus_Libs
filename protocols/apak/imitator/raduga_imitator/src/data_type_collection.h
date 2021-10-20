@@ -25,7 +25,7 @@ namespace raduga {
   public:
     explicit DataTypeCollection();
 
-    void addSignal(modus::SvSignal* signal, quint16 bufsize); // throw (SvException);
+    void addSignal(modus::SvSignal* signal, modus::SignalBinding binding, quint16 bufsize); // throw (SvException);
 
     void updateSignals(const raduga::DATA* data = nullptr);
 

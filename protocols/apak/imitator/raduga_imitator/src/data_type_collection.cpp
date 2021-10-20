@@ -6,11 +6,12 @@ raduga::DataTypeCollection::DataTypeCollection():
 
 }
 
-void raduga::DataTypeCollection::addSignal(modus::SvSignal* signal, quint16 bufsize)
+void raduga::DataTypeCollection::addSignal(modus::SvSignal* signal, modus::SignalBinding binding, quint16 bufsize)
 {
   try
   {
-    raduga::SignalParams p = raduga::SignalParams::fromJson(signal->config()->params);
+
+    raduga::SignalParams p = raduga::SignalParams::fromJson(binding.params);
 
     if(p.byte >= bufsize)
       throw SvException(QString("Номер байта %1 выходит за границы буфера (%2)").arg(p.byte).arg(bufsize));
@@ -49,7 +50,8 @@ void raduga::DataTypeCollection::updateOutput(const modus::BUFF* data)
       case raduga::TIP::Discrete:
       case raduga::TIP::Ustavka:
       {
-        quint8 v = quint8(data->data[data->offset + s.params.byte]) & ~(1 << s.params.offset);
+        quint8 v = quint8(data->data[s.params.byte]) & ~(((1 << s.params.len) - 1) << s.params.offset);
+//        quint8 v = quint8(data->data[data->offset + s.params.byte]) & ~(1 << s.params.offset);
   //      v &= ~(((1 << s.params.len) - 1) << s.params.offset); // если больше 1го бита
 
         if(s.signal->value().isValid() && !s.signal->value().isNull()) {
@@ -60,7 +62,9 @@ void raduga::DataTypeCollection::updateOutput(const modus::BUFF* data)
             v |= (signal_value << s.params.offset);
 
         }
-        data->data[data->offset + s.params.byte] = v;
+
+//        data->data[data->offset + s.params.byte] = v;
+        data->data[s.params.byte] = v;
 
 //        if(s.params.byte == 236)
 //          qDebug() << int(data->data[offset + s.params.byte]) << v << offset << s.params.byte;

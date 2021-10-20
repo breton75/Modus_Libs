@@ -15,6 +15,17 @@
 #define TYPE_9  9
 #define TYPE_53 53
 
+#define TYPE_11 11
+#define TYPE_12 12
+#define TYPE_13 13
+#define TYPE_14 14
+#define TYPE_15 15
+#define TYPE_16 16
+#define TYPE_17 17
+#define TYPE_18 18
+#define TYPE_19 19
+#define TYPE_20 20
+
 #define P_RADUGA_BYTE   "byte"
 #define P_RADUGA_OFFSET "offset"
 #define P_RADUGA_LEN    "len"
@@ -216,7 +227,7 @@ namespace raduga {
     virtual ~SvAbstractSignalCollection()
     {  }
 
-    virtual void addSignal(modus::SvSignal* signal, quint16 bufsize) = 0;
+    virtual void addSignal(modus::SvSignal* signal, modus::SignalBinding binding, quint16 bufsize) = 0;
 
     virtual void updateSignals(const raduga::DATA* data = nullptr) = 0;
 

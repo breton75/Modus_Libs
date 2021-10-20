@@ -9,6 +9,19 @@ raduga::SvRaduga::SvRaduga():
   output_signal_collections.insert(TYPE_5,  &type5_output_signals);
   output_signal_collections.insert(TYPE_9,  &type9_output_signals);
   output_signal_collections.insert(TYPE_53, &type53_output_signals);
+
+  output_signal_collections.insert(TYPE_11, &type11_output_signals);
+  output_signal_collections.insert(TYPE_12, &type12_output_signals);
+  output_signal_collections.insert(TYPE_13, &type13_output_signals);
+  output_signal_collections.insert(TYPE_14, &type14_output_signals);
+  output_signal_collections.insert(TYPE_15, &type15_output_signals);
+  output_signal_collections.insert(TYPE_16, &type16_output_signals);
+
+  output_signal_collections.insert(TYPE_17, &type17_output_signals);
+  output_signal_collections.insert(TYPE_18, &type18_output_signals);
+  output_signal_collections.insert(TYPE_19, &type19_output_signals);
+  output_signal_collections.insert(TYPE_20, &type20_output_signals);
+
 }
 
 bool raduga::SvRaduga::configure(modus::DeviceConfig *config, modus::IOBuffer *iobuffer)
@@ -40,11 +53,16 @@ bool raduga::SvRaduga::bindSignal(modus::SvSignal* signal, modus::SignalBinding 
 
       if(binding.mode == modus::Master) {
 
+
+      }
+      else {
+
         bool ok;
+
         quint16 itype = signal->config()->type.toUInt(&ok, 0);
 
         if(ok && output_signal_collections.contains(itype))
-          output_signal_collections.value(itype)->addSignal(signal, p_config->bufsize);
+          output_signal_collections.value(itype)->addSignal(signal, binding, p_config->bufsize);
 
         else {
 
@@ -52,7 +70,6 @@ bool raduga::SvRaduga::bindSignal(modus::SvSignal* signal, modus::SignalBinding 
                        sv::log::llError, sv::log::mtError);
 
         }
-
       }
     }
 
@@ -83,7 +100,10 @@ void raduga::SvRaduga::start()
 
 void raduga::SvRaduga::putout()
 {
-  if(!p_is_active)
+//  qDebug() << p_signals.count();
+//  if(!p_signals.count())
+//    return;
+
 //  qDebug() << "putout" << m_params.packid;
   p_io_buffer->output->offset = 0;
 
@@ -137,11 +157,86 @@ void raduga::SvRaduga::putout()
 
       break;
 
+    case 111:
+
+      output_signal_collections.value(TYPE_11)->updateOutput(p_io_buffer->output);
+      p_io_buffer->output->offset += 40;
+
+      break;
+
+    case 112:
+
+      output_signal_collections.value(TYPE_12)->updateOutput(p_io_buffer->output);
+      p_io_buffer->output->offset += 105;
+
+      break;
+
+    case 113:
+
+      output_signal_collections.value(TYPE_13)->updateOutput(p_io_buffer->output);
+      p_io_buffer->output->offset += 122;
+
+      break;
+
+    case 114:
+
+      output_signal_collections.value(TYPE_14)->updateOutput(p_io_buffer->output);
+      p_io_buffer->output->offset += 30;
+
+      break;
+
+    case 115:
+
+      output_signal_collections.value(TYPE_15)->updateOutput(p_io_buffer->output);
+      p_io_buffer->output->offset += 336;
+
+      break;
+
+    case 116:
+
+      output_signal_collections.value(TYPE_16)->updateOutput(p_io_buffer->output);
+      p_io_buffer->output->offset += 37;
+
+      break;
+
+    case 117:
+
+      output_signal_collections.value(TYPE_17)->updateOutput(p_io_buffer->output);
+      p_io_buffer->output->offset += 37;
+
+      break;
+
+    case 118:
+
+      output_signal_collections.value(TYPE_18)->updateOutput(p_io_buffer->output);
+      p_io_buffer->output->offset += 49;
+
+      break;
+
+    case 119:
+
+      output_signal_collections.value(TYPE_19)->updateOutput(p_io_buffer->output);
+      p_io_buffer->output->offset += 49;
+
+      break;
+
+    case 120:
+
+      output_signal_collections.value(TYPE_20)->updateOutput(p_io_buffer->output);
+      p_io_buffer->output->offset += 240;
+
+      break;
+
   }
 
-  quint16 crc = CRC::MODBUS_CRC16((quint8*)&p_io_buffer->output->data[m_hsz], p_io_buffer->output->offset - m_hsz);
-  memcpy(&p_io_buffer->output->data[p_io_buffer->output->offset], &crc, sizeof(qint16));
-  p_io_buffer->output->offset += 2;
+  if(p_io_buffer->output->offset > m_hsz) {
+
+    quint16 crc = CRC::MODBUS_CRC16((quint8*)&p_io_buffer->output->data[m_hsz], p_io_buffer->output->offset - m_hsz);
+    memcpy(&p_io_buffer->output->data[p_io_buffer->output->offset], &crc, sizeof(qint16));
+    p_io_buffer->output->offset += 2;
+
+    emit p_io_buffer->readyWrite(p_io_buffer->output);
+  }
 
 }
 

@@ -117,6 +117,18 @@ private:
   raduga::DataTypeCollection type9_output_signals;
   raduga::DataTypeCollection type53_output_signals;
 
+  raduga::DataTypeCollection type11_output_signals;
+  raduga::DataTypeCollection type12_output_signals;
+  raduga::DataTypeCollection type13_output_signals;
+  raduga::DataTypeCollection type14_output_signals;
+  raduga::DataTypeCollection type15_output_signals;
+  raduga::DataTypeCollection type16_output_signals;
+
+  raduga::DataTypeCollection type17_output_signals;
+  raduga::DataTypeCollection type18_output_signals;
+  raduga::DataTypeCollection type19_output_signals;
+  raduga::DataTypeCollection type20_output_signals;
+
   QMap<quint16, raduga::SvAbstractSignalCollection*> output_signal_collections;
 
 private slots:
