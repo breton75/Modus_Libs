@@ -42,22 +42,22 @@ bool apak::SvUniversalPacket::bindSignal(modus::SvSignal* signal, modus::SignalB
 
       if(binding.mode == modus::Master) {
 
-        if(signal->config()->type.toLower() == "data") {
+        if(signal->config()->type.toLower() == TYPE_DATA) {
 
           if(m_data_signal) {
 
-            p_last_error = TOO_MUCH(p_config->name, "data");
+            p_last_error = TOO_MUCH(p_config->name, TYPE_DATA);
             return false;
           }
 
           m_data_signal = signal;
 
         }
-        else if(signal->config()->type.toLower() == "state") {
+        else if(signal->config()->type.toLower() == TYPE_STAT) {
 
           if(m_state_signal) {
 
-            p_last_error = TOO_MUCH(p_config->name, "state");
+            p_last_error = TOO_MUCH(p_config->name, TYPE_STAT);
             return false;
           }
 

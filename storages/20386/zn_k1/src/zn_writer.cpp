@@ -37,11 +37,11 @@ bool zn1::ZNWriter::bindSignal(modus::SvSignal* signal, modus::SignalBinding bin
 
     if(binding.mode == modus::Master) {
 
-      if(signal->config()->type.toLower() == "state") {
+      if(signal->config()->type.toLower() == TYPE_STAT) {
 
         if(m_state_signal) {
 
-          p_last_error = TOO_MUCH(p_config->name, "state") + QString("\n%1").arg(signal->config()->name);
+          p_last_error = TOO_MUCH(p_config->name, TYPE_STAT);
 //          qDebug() << QString("Second: %1").arg(signal->config()->name);
           return false;
         }

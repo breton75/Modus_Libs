@@ -5,6 +5,8 @@
 
 #include "zn_writer_global.h"
 
+#include "../../../../APAK/global_defs.h"
+
 #include "../../../../../svlib/Network/Tcp/Client/1.0/sv_tcp_client.h"
 #include "../../../../../svlib/SvException/svexception.h"
 #include "../../../../../svlib/SvCRC/1.1/sv_crc.h"

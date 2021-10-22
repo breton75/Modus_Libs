@@ -113,6 +113,9 @@ void apak::SvHMI::putout()
 
     }
 
+    if(registr == 1 && (value & 0xFF) == 0xFE)
+      value |= 0xFF;
+
     valueByRegister.insert(registr, value);
 
   }

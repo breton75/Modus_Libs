@@ -6,6 +6,8 @@
 
 #include "upz_global.h"
 
+#include "../../../../../APAK/global_defs.h"
+
 #include "../../../../../../Modus/global/device/protocol/sv_abstract_protocol.h"
 #include "../../../../../../Modus/global/signal/sv_signal.h"
 
@@ -14,6 +16,7 @@
 #include "../../../../../../svlib/SvAbstractLogger/1.2/sv_abstract_logger.h"
 #include "../../../../../../svlib/SvException/1.1/sv_exception.h"
 #include "../../../../../../svlib/SvCRC/1.0/sv_crc.h"
+
 
 extern "C" {
 

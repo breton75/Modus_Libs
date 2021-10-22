@@ -42,17 +42,17 @@ bool apak::SvUPZ::bindSignal(modus::SvSignal* signal, modus::SignalBinding bindi
 
       if(binding.mode == modus::Master) {
 
-        if(signal->config()->type.toLower() == "state") {
+        if(signal->config()->type.toLower() == TYPE_STAT) {
 
           if(m_state_signal)
-            throw SvException(TOO_MUCH(p_config->name, "state"));
+            throw SvException(TOO_MUCH(p_config->name, TYPE_STAT));
 
           else
             m_state_signal = signal;
 
         }
         else if(m_data_signal) {
-          throw SvException(TOO_MUCH(p_config->name, "data"));
+          throw SvException(TOO_MUCH(p_config->name, TYPE_DATA));
 
         }
         else {
@@ -111,8 +111,10 @@ void apak::SvUPZ::parse(modus::BUFF* buffer)
         emit message(QString("signal %1 updated").arg(m_data_signal->config()->name), sv::log::llDebug, sv::log::mtParse);
       }
 
-      if(m_state_signal)
+      if(m_state_signal) {
         m_state_signal->setValue(int(1));
+        emit message(QString("signal %1 updated").arg(m_state_signal->config()->name), sv::log::llDebug, sv::log::mtParse);
+      }
 
       buffer->reset();
 

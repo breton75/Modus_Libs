@@ -6,6 +6,8 @@
 
 #include "universal_packet_global.h"
 
+#include "../../../../../APAK/global_defs.h"
+
 #include "../../../../../../Modus/global/device/protocol/sv_abstract_protocol.h"
 #include "../../../../../../Modus/global/signal/sv_signal.h"
 
