@@ -101,6 +101,11 @@ void apak::SvMoxa::parse(modus::BUFF* buffer)
 {
   if(p_is_active) {
 
+
+    01020000000601041000000C
+
+
+
 //    p_io_buffer->confirm->mutex.lock();     // если нужен ответ квитирование
     buffer->mutex.lock();
 qDebug() << buffer->ready() << m_data_signal;

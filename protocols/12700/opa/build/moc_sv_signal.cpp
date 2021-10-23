@@ -19,8 +19,8 @@
 
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_modus__SvSignal_t {
-    QByteArrayData data[15];
-    char stringdata0[108];
+    QByteArrayData data[14];
+    char stringdata0[100];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -35,20 +35,19 @@ QT_MOC_LITERAL(2, 24, 0), // ""
 QT_MOC_LITERAL(3, 25, 9), // "SvSignal*"
 QT_MOC_LITERAL(4, 35, 6), // "signal"
 QT_MOC_LITERAL(5, 42, 7), // "updated"
-QT_MOC_LITERAL(6, 50, 7), // "timeout"
+QT_MOC_LITERAL(6, 50, 7), // "expired"
 QT_MOC_LITERAL(7, 58, 7), // "message"
 QT_MOC_LITERAL(8, 66, 3), // "msg"
 QT_MOC_LITERAL(9, 70, 5), // "level"
 QT_MOC_LITERAL(10, 76, 4), // "type"
 QT_MOC_LITERAL(11, 81, 8), // "setValue"
 QT_MOC_LITERAL(12, 90, 5), // "value"
-QT_MOC_LITERAL(13, 96, 3), // "log"
-QT_MOC_LITERAL(14, 100, 7) // "Timeout"
+QT_MOC_LITERAL(13, 96, 3) // "log"
 
     },
     "modus::SvSignal\0changed\0\0SvSignal*\0"
-    "signal\0updated\0timeout\0message\0msg\0"
-    "level\0type\0setValue\0value\0log\0Timeout"
+    "signal\0updated\0expired\0message\0msg\0"
+    "level\0type\0setValue\0value\0log"
 };
 #undef QT_MOC_LITERAL
 
@@ -58,7 +57,7 @@ static const uint qt_meta_data_modus__SvSignal[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-      11,   14, // methods
+      10,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -66,19 +65,18 @@ static const uint qt_meta_data_modus__SvSignal[] = {
        6,       // signalCount
 
  // signals: name, argc, parameters, tag, flags
-       1,    1,   69,    2, 0x06 /* Public */,
-       5,    1,   72,    2, 0x06 /* Public */,
-       6,    1,   75,    2, 0x06 /* Public */,
-       7,    3,   78,    2, 0x06 /* Public */,
-       7,    2,   85,    2, 0x26 /* Public | MethodCloned */,
-       7,    1,   90,    2, 0x26 /* Public | MethodCloned */,
+       1,    1,   64,    2, 0x06 /* Public */,
+       5,    1,   67,    2, 0x06 /* Public */,
+       6,    1,   70,    2, 0x06 /* Public */,
+       7,    3,   73,    2, 0x06 /* Public */,
+       7,    2,   80,    2, 0x26 /* Public | MethodCloned */,
+       7,    1,   85,    2, 0x26 /* Public | MethodCloned */,
 
  // slots: name, argc, parameters, tag, flags
-      11,    1,   93,    2, 0x0a /* Public */,
-      13,    3,   96,    2, 0x0a /* Public */,
-      13,    2,  103,    2, 0x2a /* Public | MethodCloned */,
-      13,    1,  108,    2, 0x2a /* Public | MethodCloned */,
-      14,    0,  111,    2, 0x08 /* Private */,
+      11,    1,   88,    2, 0x0a /* Public */,
+      13,    3,   91,    2, 0x0a /* Public */,
+      13,    2,   98,    2, 0x2a /* Public | MethodCloned */,
+      13,    1,  103,    2, 0x2a /* Public | MethodCloned */,
 
  // signals: parameters
     QMetaType::Void, 0x80000000 | 3,    4,
@@ -93,7 +91,6 @@ static const uint qt_meta_data_modus__SvSignal[] = {
     QMetaType::Void, QMetaType::QString, QMetaType::Int, QMetaType::Int,    8,    9,   10,
     QMetaType::Void, QMetaType::QString, QMetaType::Int,    8,    9,
     QMetaType::Void, QMetaType::QString,    8,
-    QMetaType::Void,
 
        0        // eod
 };
@@ -106,7 +103,7 @@ void modus::SvSignal::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int 
         switch (_id) {
         case 0: _t->changed((*reinterpret_cast< SvSignal*(*)>(_a[1]))); break;
         case 1: _t->updated((*reinterpret_cast< SvSignal*(*)>(_a[1]))); break;
-        case 2: _t->timeout((*reinterpret_cast< SvSignal*(*)>(_a[1]))); break;
+        case 2: _t->expired((*reinterpret_cast< SvSignal*(*)>(_a[1]))); break;
         case 3: _t->message((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2])),(*reinterpret_cast< int(*)>(_a[3]))); break;
         case 4: _t->message((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
         case 5: _t->message((*reinterpret_cast< const QString(*)>(_a[1]))); break;
@@ -114,7 +111,6 @@ void modus::SvSignal::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int 
         case 7: _t->log((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2])),(*reinterpret_cast< int(*)>(_a[3]))); break;
         case 8: _t->log((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
         case 9: _t->log((*reinterpret_cast< const QString(*)>(_a[1]))); break;
-        case 10: _t->Timeout(); break;
         default: ;
         }
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
@@ -159,7 +155,7 @@ void modus::SvSignal::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int 
         }
         {
             typedef void (SvSignal::*_t)(SvSignal * );
-            if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&SvSignal::timeout)) {
+            if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&SvSignal::expired)) {
                 *result = 2;
             }
         }
@@ -197,13 +193,13 @@ int modus::SvSignal::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 11)
+        if (_id < 10)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 11;
+        _id -= 10;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 11)
+        if (_id < 10)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 11;
+        _id -= 10;
     }
     return _id;
 }
@@ -223,7 +219,7 @@ void modus::SvSignal::updated(SvSignal * _t1)
 }
 
 // SIGNAL 2
-void modus::SvSignal::timeout(SvSignal * _t1)
+void modus::SvSignal::expired(SvSignal * _t1)
 {
     void *_a[] = { Q_NULLPTR, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
     QMetaObject::activate(this, &staticMetaObject, 2, _a);
