@@ -19,13 +19,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    sv_tcp.cpp
+    sv_tcp.cpp \
+    sv_tcp_client.cpp
 
 HEADERS += \
     ../../../../Modus/global/device/interface/sv_abstract_interface.h \
-    ifc_tcp_global.h \
     sv_tcp.h \
-    tcp_defs.h
+    tcp_defs.h \
+    ifc_tcp_global.h \
+    sv_tcp_client.h
 
 # Default rules for deployment.
 unix {

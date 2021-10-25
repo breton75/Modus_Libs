@@ -11,7 +11,7 @@ bool SvTcp::configure(modus::DeviceConfig* config, modus::IOBuffer*iobuffer)
     p_config = config;
     p_io_buffer = iobuffer;
 
-    m_params = TcpParams::fromJsonString(p_config->interface.params);
+    m_params = tcp::Params::fromJsonString(p_config->interface.params);
 
     return true;
 
@@ -27,32 +27,62 @@ bool SvTcp::start()
 {
   try {
 
-    m_socket = new QTcpSocket();
+    if(m_params.mode == P_MODE_CLIENT) {
 
-    if(!m_params.ifc.isEmpty()) {
+      m_client = new tcp::Client(m_params.host, m_params.port, m_params.fmt);
 
-      QNetworkInterface ifc = QNetworkInterface::interfaceFromName(m_params.ifc);
-      if(!ifc.isValid())
-        throw SvException(QString("Wrong ifc name: %1").arg(m_params.ifc));
+      if(!connectToServer())
+        throw SvException(p_last_error);
 
-      if(ifc.addressEntries().count() == 0)
-        throw SvException(QString("Wrong ifc name: %1").arg(m_params.ifc));
+      connect(m_client,     &tcp::Client::message,        this, &SvTcp::message     );
+      connect(m_client,     &tcp::Client::readyRead,      this, &SvTcp::read        );
+      connect(m_client,     &tcp::Client::connected,      this, &SvTcp::connected   );
+      connect(m_client,     &tcp::Client::disconnected,   this, &SvTcp::disconnected);
+      connect(p_io_buffer,  &modus::IOBuffer::readyWrite, this, &SvTcp::write       );
 
-      /* For TCP sockets, this function may be used to specify
-       * which interface to use for an outgoing connection,
-       * which is useful in case of multiple network interfaces */
-    //  socket->bind(ifc.addressEntries().at(0).ip());
+      m_gap_timer.setInterval(m_params.grain_gap);
+      m_gap_timer.setSingleShot(true);
+      connect(&m_gap_timer, &QTimer::timeout, this, &SvTcp::newData);
 
-      if(!m_socket->bind(ifc.addressEntries().at(0).ip(), m_params.recv_port, QAbstractSocket::DontShareAddress))
-        throw SvException(m_socket->errorString());
+      return true;
+
     }
-    else
-      if(!m_socket->bind(QHostAddress::Any, m_params.recv_port, QAbstractSocket::DontShareAddress))
-        throw SvException(m_socket->errorString());
+    else {
 
+      throw SvException(QString("Режим работы \"%1\" не поддерживается").arg(m_params.mode));
 
-    connect(m_socket, &QTcpSocket::readyRead, this, &SvTcp::read);
-    connect(p_io_buffer, &modus::IOBuffer::readyWrite, this, &SvTcp::write);
+    }
+
+  } catch (SvException& e) {
+
+    p_last_error = e.error;
+    return false;
+
+  }
+}
+
+void SvTcp::socketError(QAbstractSocket::SocketError err)
+{
+  emit message(tcp::SocketErrors.value(err, QString("Неизвестная ошибка подключения")), lldbg, mterr);
+}
+
+void SvTcp::stateChanged(QAbstractSocket::SocketState state)
+{
+  emit message(tcp::SocketStates.value(state, QString("Неизвестное состояние подключения")), sv::log::llDebug, sv::log::mtConnection);
+}
+
+bool SvTcp::connectToServer()
+{
+  try {
+
+    if (m_client->state() != QAbstractSocket::ConnectedState) {
+
+      m_client->connectToHost(m_params.host, m_params.port);
+
+      if(!m_client->waitForConnected(m_params.timeout))
+        throw SvException(m_client->errorString());
+
+    }
 
     return true;
 
@@ -66,61 +96,85 @@ bool SvTcp::start()
 
 void SvTcp::read()
 {
-//  disconnect(m_socket, &QTcpSocket::readyRead, this, &SvTcp::read);
-    p_io_buffer->input->mutex.lock();
+  m_gap_timer.stop();
 
-    if(p_io_buffer->input->offset + m_socket->bytesAvailable() > p_config->bufsize)
-      p_io_buffer->input->reset();
+  p_io_buffer->input->mutex.lock();
 
-//    /* ... the rest of the datagram will be lost ... */
-    qint64 readed = m_socket->readDatagram(&p_io_buffer->input->data[p_io_buffer->input->offset], p_config->bufsize - p_io_buffer->input->offset);
-    emit message(QString(QByteArray((const char*)&p_io_buffer->input->data[p_io_buffer->input->offset], readed).toHex()), sv::log::llDebug, sv::log::mtReceive);
+  if(p_io_buffer->input->offset + m_client->bytesAvailable() > p_config->bufsize)
+    p_io_buffer->input->reset();
 
-    p_io_buffer->input->offset = readed;
+  qint64 readed = m_client->read(&p_io_buffer->input->data[p_io_buffer->input->offset], p_config->bufsize - p_io_buffer->input->offset);
 
-    while(m_socket->waitForReadyRead(m_params.grain_gap)) {
+  emit_message(QByteArray((const char*)&p_io_buffer->input->data[p_io_buffer->input->offset], readed), sv::log::llDebug, sv::log::mtReceive);
 
-      while(m_socket->hasPendingDatagrams()) {
-//        if(m_socket->pendingDatagramSize() <= 0)
-//          continue;
+  !!!! p_io_buffer->input->offset += readed;
 
-        if(p_io_buffer->input->offset + m_socket->bytesAvailable() > p_config->bufsize)
-          p_io_buffer->input->reset();
+  p_io_buffer->input->mutex.unlock();
 
-        /* ... the rest of the datagram will be lost ... */
-        qint64 readed2 = m_socket->readDatagram(&p_io_buffer->input->data[p_io_buffer->input->offset], p_config->bufsize - p_io_buffer->input->offset);
-
-//qDebug() << QString(QByteArray((const char*)&p_io_buffer->input->data[p_io_buffer->input->offset], readed).toHex());
-        emit message(QString(QByteArray((const char*)&p_io_buffer->input->data[p_io_buffer->input->offset], readed2).toHex()), sv::log::llDebug, sv::log::mtReceive);
-        p_io_buffer->input->offset += readed2;
-
-      }
-    }
-
-    p_io_buffer->input->mutex.unlock();
-
-    emit p_io_buffer->dataReaded(p_io_buffer->input);
+  m_gap_timer.start(m_params.grain_gap);
 
 }
 
+void SvTcp::newData()
+{
+  emit p_io_buffer->dataReaded(p_io_buffer->input);
+}
 
 void SvTcp::write(modus::BUFF* buffer)
 {
-  QMutexLocker(&(buffer->mutex));
-
   if(!buffer->ready())
     return;
 
-  bool written = m_socket->writeDatagram(&buffer->data[0], buffer->offset, m_params.host, m_params.send_port) > 0;
-  m_socket->flush();
+  if(m_client->state() != QAbstractSocket::ConnectedState) {
+
+    if(!connectToServer) {
+
+      emit message(p_last_error, sv::log::llError, sv::log::mtError);
+      emit error();
+
+      return;
+    }
+  }
+
+  buffer->mutex.lock();
+
+  bool written = m_client->write((const char*)&buffer->data[0], buffer->offset) > 0;
+  m_client->flush();
 
   if(written)
     emit message(QString(QByteArray((const char*)&buffer->data[0], buffer->offset).toHex()), sv::log::llDebug, sv::log::mtSend);
 
   buffer->reset();
 
+  buffer->mutex.unlock();
+
 }
 
+void SvTcp::emit_message(const QByteArray& bytes, sv::log::Level level, sv::log::MessageTypes type)
+{
+  QString msg = "";
+
+  //! The append() function is typically very fast
+  switch (m_params.fmt) {
+    case tcp::HEX:
+      msg.append(bytes.toHex());
+      break;
+
+    case tcp::ASCII:
+      msg.append(bytes);
+      break;
+
+    case tcp::ASCII:
+      msg = QString("%1 байт").arg(bytes.length());
+      break;
+
+    default:
+      break;
+  }
+
+  emit message(msg, level, type);
+
+}
 
 /** ********** EXPORT ************ **/
 modus::SvAbstractInterface* create()
