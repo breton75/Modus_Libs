@@ -1,5 +1,5 @@
-﻿#ifndef RADUGA_PROTOCOL_PARAMS
-#define RADUGA_PROTOCOL_PARAMS
+﻿#ifndef HMI_PROTOCOL_PARAMS
+#define HMI_PROTOCOL_PARAMS
 
 #include <QString>
 #include <QtCore>
@@ -11,17 +11,18 @@
 #include "../../../../../../Modus/global/global_defs.h"
 //#include "../../../../../Modus/global/device/device_defs.h"
 
-#define P_ABONENT  "abonent"
+#define P_START_REGISTER  "start_register"
+#define P_REGISTER_COUNT  "register_count"
 
-namespace apak {
+namespace moxa {
 
-  struct ProtocolParams {
+  struct Params {
 
-    quint16 packid         = 0;
-    quint16 abonent        = 0;
-    quint16 parse_interval = 1000;
+    quint16 start_register = 0x1000;
+    quint16 register_count = 10;
+    quint16 interval       = 1000;
 
-    static ProtocolParams fromJson(const QString& json_string) //throw (SvException)
+    static Params fromJson(const QString& json_string) //throw (SvException)
     {
       QJsonParseError err;
       QJsonDocument jd = QJsonDocument::fromJson(json_string.toUtf8(), &err);
@@ -39,55 +40,62 @@ namespace apak {
       }
     }
 
-    static ProtocolParams fromJsonObject(const QJsonObject &object) //throw (SvException)
+    static Params fromJsonObject(const QJsonObject &object) //throw (SvException)
     {
-      ProtocolParams p;
+      Params p;
       QString P;
 
-      P = P_PACKID;
+      P = P_START_REGISTER;
       if(object.contains(P)) {
 
-        if(object.value(P).toInt(-1) < 0)
+        if(!object.value(P).isString())
           throw SvException(QString(IMPERMISSIBLE_VALUE)
                             .arg(P)
                             .arg(object.value(P).toVariant().toString())
-                            .arg("Идентификатор пакета должен быть задан двухбайтным целым числом"));
+                            .arg("Начальный регистр должен быть задан в виде строки двухбайтным числом в формате hex: \"0x0000\""));
 
-        p.packid = object.value(P).toInt();
+        bool ok;
+        p.start_register = object.value(P).toString().toUInt(&ok, 0);
 
+        if(!ok)
+          throw SvException(QString(IMPERMISSIBLE_VALUE)
+                            .arg(P)
+                            .arg(object.value(P).toVariant().toString())
+                            .arg("Номер регистра должен быть задан в виде строки двухбайтным числом в формате hex: \"0x0000\""));
       }
       else
-        throw SvException(QString(MISSING_PARAM).arg(P));
+        throw SvException(QString(MISSING_PARAM_DESC).arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact))).arg(P));
 
-      P = P_ABONENT;
+
+      P = P_REGISTER_COUNT;
       if(object.contains(P)) {
 
         if(object.value(P).toInt(-1) < 0)
           throw SvException(QString(IMPERMISSIBLE_VALUE)
                                  .arg(P)
                                  .arg(object.value(P).toVariant().toString())
-                                 .arg("Идентификатор абонента должен быть задан двухбайтным целым числом"));
+                                 .arg("Количество запрашиваемых регистров, должно быть задано целым числом"));
 
-        p.abonent = object.value(P).toInt();
+        p.register_count = object.value(P).toInt();
 
       }
       else
-        throw SvException(QString(MISSING_PARAM).arg(P));
+        throw SvException(QString(MISSING_PARAM_DESC).arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact))).arg(P));
 
-      P = P_PARSE_INTERVAL;
+      P = P_INTERVAL;
       if(object.contains(P)) {
 
         if(object.value(P).toInt(-1) < 0)
           throw SvException(QString(IMPERMISSIBLE_VALUE)
                             .arg(P)
                             .arg(object.value(P).toVariant().toString())
-                            .arg("Интервал разбора данных должен быть задан двухбайтным целым числом в миллисекундах"));
+                            .arg("Интервал запроса должен быть задан целым числом в миллисекундах"));
 
-        p.parse_interval = object.value(P).toInt();
+        p.interval = object.value(P).toInt();
 
       }
       else
-        p.parse_interval = 1000;
+        p.interval = 1000;
 
       return p;
 
@@ -105,9 +113,9 @@ namespace apak {
     {
       QJsonObject j;
 
-      j.insert(P_PACKID,          QJsonValue(packid).toString());
-      j.insert(P_ABONENT,         QJsonValue(abonent).toInt());
-      j.insert(P_PARSE_INTERVAL,  QJsonValue(parse_interval).toInt());
+      j.insert(P_START_REGISTER,  QJsonValue(start_register).toString());
+      j.insert(P_REGISTER_COUNT,  QJsonValue(register_count).toInt());
+      j.insert(P_INTERVAL,        QJsonValue(interval).toInt());
 
       return j;
 
@@ -115,5 +123,5 @@ namespace apak {
   };
 }
 
-#endif // RADUGA_PROTOCOL_PARAMS
+#endif // HMI_PROTOCOL_PARAMS
 

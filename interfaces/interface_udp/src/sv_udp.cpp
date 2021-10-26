@@ -134,7 +134,7 @@ void SvUdp::write(modus::BUFF* buffer)
 {
   QMutexLocker(&(buffer->mutex));
 
-  if(!buffer->ready())
+  if(!buffer->isready())
     return;
 
   bool written = m_socket->writeDatagram(&buffer->data[0], buffer->offset, m_params.host, m_params.send_port) > 0;

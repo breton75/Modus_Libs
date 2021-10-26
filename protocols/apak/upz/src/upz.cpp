@@ -103,7 +103,7 @@ void apak::SvUPZ::parse(modus::BUFF* buffer)
 
     buffer->mutex.lock();
 
-    if(buffer->ready()) {
+    if(buffer->isready()) {
 
       if(m_data_signal) {
 

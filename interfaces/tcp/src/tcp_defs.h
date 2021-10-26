@@ -89,7 +89,7 @@ namespace tcp {
                                                                     {"any",       QHostAddress::Any},
                                                                     {"broadcast", QHostAddress::Broadcast}};
 
-  const QMap<QString, QHostAddress::SpecialAddress> LogFormats = {{"hex", HEX}, {"ascii", ASCII}, {"datalen", DATALEN}};
+  const QMap<QString, LogFormat> LogFormats = {{"hex", HEX}, {"ascii", ASCII}, {"datalen", DATALEN}};
 
   /** структура для хранения параметров udp **/
   struct Params {
@@ -129,21 +129,13 @@ namespace tcp {
 
         p.mode = object.value(P).toString(P_MODE_CLIENT).toLower();
 
-        switch (qHash(p.mode)) {
-
-          case qHash(P_MODE_CLIENT):
-
-            break;
-
-          default:
-            throw SvException(QString(IMPERMISSIBLE_VALUE)
-                               .arg(P).arg(object.value(P).toVariant().toString())
-                               .arg(QString("Режим \"%1\" не поддерживается").arg(p.mode)));
-            break;
-        }
+        if(p.mode != P_MODE_CLIENT)
+          throw SvException(QString(IMPERMISSIBLE_VALUE)
+                             .arg(P).arg(object.value(P).toVariant().toString())
+                             .arg(QString("Режим \"%1\" не поддерживается").arg(p.mode)));
       }
       else
-        p.mode = "client";
+        p.mode = P_MODE_CLIENT;
 
       /* ifc */
       P = P_TCP_IFC;
@@ -162,7 +154,7 @@ namespace tcp {
 
         else
           throw SvException(QString(IMPERMISSIBLE_VALUE)
-                             .arg(P).arg(QJsonDocument(object).toJson(QJsonDocument::Compact))
+                             .arg(P).arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact)))
                              .arg("Допускаются ip адреса в формате 192.168.1.1, а также \"localhost\", \"any\", \"broadcast\""));
       }
       else
@@ -174,7 +166,7 @@ namespace tcp {
       {
         if(object.value(P).toInt(-1) < 1)
           throw SvException(QString(IMPERMISSIBLE_VALUE)
-                             .arg(P).arg(QJsonDocument(object).toJson(QJsonDocument::Compact))
+                             .arg(P).arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact)))
                              .arg("Номер порта должен быть задан целым положительным числом в диапазоне [1..65535]"));
 
         p.port = object.value(P).toInt(DEFAULT_PORT);
@@ -182,7 +174,7 @@ namespace tcp {
       }
       else
          throw SvException(QString(MISSING_PARAM_DESC)
-                           .arg(QJsonDocument(object).toJson(QJsonDocument::Compact)).arg(P));
+                           .arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact))).arg(P));
 
 
       /* timeout */
@@ -191,7 +183,7 @@ namespace tcp {
       {
         if(object.value(P).toInt(-1) < 1)
           throw SvException(QString(IMPERMISSIBLE_VALUE)
-                             .arg(P).arg(QJsonDocument(object).toJson(QJsonDocument::Compact))
+                             .arg(P).arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact)))
                              .arg("Таймаут подключения должен быть задан целым положительным числом в миллисекундах"));
 
         p.timeout = object.value(P).toInt(DEFAULT_TIMEOUT);
@@ -206,14 +198,14 @@ namespace tcp {
 
         if(!object.value(P).isString())
           throw SvException(QString(IMPERMISSIBLE_VALUE)
-                            .arg(P).arg(QJsonDocument(object).toJson(QJsonDocument::Compact))
+                            .arg(P).arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact)))
                             .arg(QString("Формат вывода данных должен быть задан строковым значением [\"hex\"|\"ascii\"|\"datalen\"]")));
 
         QString fmt = object.value(P).toString(P_TCP_FMT).toLower();
 
         if(!LogFormats.contains(fmt))
           throw SvException(QString(IMPERMISSIBLE_VALUE)
-                            .arg(P).arg(QJsonDocument(object).toJson(QJsonDocument::Compact))
+                            .arg(P).arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact)))
                             .arg(QString("Не поддерживаемый формат вывода данных. Допустимые значения: [\"hex\"|\"ascii\"|\"datalen\"]")));
 
         p.fmt = LogFormats.value(fmt);
@@ -229,7 +221,7 @@ namespace tcp {
         if(object.value(P).toInt(-1) < 1)
           throw SvException(QString(IMPERMISSIBLE_VALUE)
                             .arg(P)
-                            .arg(QJsonDocument(object).toJson(QJsonDocument::Compact))
+                            .arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact)))
                             .arg("Интервал ожидания частей пакета не может быть меньше 1 мсек."));
 
         p.grain_gap = object.value(P).toInt(DEFAULT_GRAIN_GAP);

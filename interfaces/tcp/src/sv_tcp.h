@@ -6,7 +6,7 @@
 
 #include "ifc_tcp_global.h"
 #include "tcp_defs.h"
-#include "sv_tcp_client.h"
+//#include "sv_tcp_client.h"
 
 #include "../../../../Modus/global/device/interface/sv_abstract_interface.h"
 
@@ -27,24 +27,26 @@ public:
   virtual bool configure(modus::DeviceConfig* config, modus::IOBuffer*iobuffer) override;
 
 public slots:
-  bool connectToServer();
-
   bool start() override;
   void read() override;
   void write(modus::BUFF* buffer) override;
 
 private:
   QTcpSocket*   m_client = nullptr;
-  QTcpSocket*   m_server = nullptr;
+//  QTcpSocket*   m_server = nullptr;
   tcp::Params   m_params;
 
-  QTimer m_gap_timer;
+  QTimer*        m_gap_timer;
 
   void datalog(const QByteArray& bytes, QString& message);
 
 private slots:
   void socketError(QAbstractSocket::SocketError err);
   void stateChanged(QAbstractSocket::SocketState state);
+
+  bool connectToServer();
+  void newData();
+  void emit_message(const QByteArray& bytes, sv::log::Level level, sv::log::MessageTypes type);
 
 };
 

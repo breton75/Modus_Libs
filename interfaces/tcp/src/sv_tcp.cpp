@@ -29,20 +29,19 @@ bool SvTcp::start()
 
     if(m_params.mode == P_MODE_CLIENT) {
 
-      m_client = new tcp::Client(m_params.host, m_params.port, m_params.fmt);
+      m_client = new QTcpSocket; // tcp::Client(m_params.host, m_params.port, m_params.fmt);
 
-      if(!connectToServer())
-        throw SvException(p_last_error);
+      connectToServer();
 
-      connect(m_client,     &tcp::Client::message,        this, &SvTcp::message     );
-      connect(m_client,     &tcp::Client::readyRead,      this, &SvTcp::read        );
-      connect(m_client,     &tcp::Client::connected,      this, &SvTcp::connected   );
-      connect(m_client,     &tcp::Client::disconnected,   this, &SvTcp::disconnected);
+      connect(m_client,     &QTcpSocket::readyRead,       this, &SvTcp::read        );
+      connect(m_client,     &QTcpSocket::connected,       this, &SvTcp::connected   );
+      connect(m_client,     &QTcpSocket::disconnected,    this, &SvTcp::disconnected);
       connect(p_io_buffer,  &modus::IOBuffer::readyWrite, this, &SvTcp::write       );
 
-      m_gap_timer.setInterval(m_params.grain_gap);
-      m_gap_timer.setSingleShot(true);
-      connect(&m_gap_timer, &QTimer::timeout, this, &SvTcp::newData);
+      m_gap_timer = new QTimer;
+      m_gap_timer->setInterval(m_params.grain_gap);
+      m_gap_timer->setSingleShot(true);
+      connect(m_gap_timer, &QTimer::timeout, this, &SvTcp::newData);
 
       return true;
 
@@ -82,6 +81,8 @@ bool SvTcp::connectToServer()
       if(!m_client->waitForConnected(m_params.timeout))
         throw SvException(m_client->errorString());
 
+      emit message(QString("Успешное подключение к серверу"), lldbg, mtscc);
+
     }
 
     return true;
@@ -89,6 +90,7 @@ bool SvTcp::connectToServer()
   } catch (SvException& e) {
 
     p_last_error = e.error;
+    emit message(QString("Ошибка подключения к серверу: %1").arg(p_last_error), llerr, mterr);
     return false;
 
   }
@@ -96,7 +98,10 @@ bool SvTcp::connectToServer()
 
 void SvTcp::read()
 {
-  m_gap_timer.stop();
+  m_gap_timer->stop();
+
+  if(p_io_buffer->input->isReady())
+    p_io_buffer->input->reset();
 
   p_io_buffer->input->mutex.lock();
 
@@ -107,34 +112,29 @@ void SvTcp::read()
 
   emit_message(QByteArray((const char*)&p_io_buffer->input->data[p_io_buffer->input->offset], readed), sv::log::llDebug, sv::log::mtReceive);
 
-  !!!! p_io_buffer->input->offset += readed;
+  p_io_buffer->input->offset += readed;
 
   p_io_buffer->input->mutex.unlock();
 
-  m_gap_timer.start(m_params.grain_gap);
+  m_gap_timer->start(m_params.grain_gap);
 
 }
 
 void SvTcp::newData()
 {
+  QMutexLocker(&p_io_buffer->input->mutex);
+
+  p_io_buffer->input->setReady(true);
   emit p_io_buffer->dataReaded(p_io_buffer->input);
 }
 
 void SvTcp::write(modus::BUFF* buffer)
 {
-  if(!buffer->ready())
+  if(!buffer->isReady())
     return;
 
-  if(m_client->state() != QAbstractSocket::ConnectedState) {
-
-    if(!connectToServer) {
-
-      emit message(p_last_error, sv::log::llError, sv::log::mtError);
-      emit error();
-
-      return;
-    }
-  }
+  if(!connectToServer())
+    return;
 
   buffer->mutex.lock();
 
@@ -164,11 +164,12 @@ void SvTcp::emit_message(const QByteArray& bytes, sv::log::Level level, sv::log:
       msg.append(bytes);
       break;
 
-    case tcp::ASCII:
+    case tcp::DATALEN:
       msg = QString("%1 байт").arg(bytes.length());
       break;
 
     default:
+      return;
       break;
   }
 

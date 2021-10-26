@@ -88,56 +88,82 @@ void apak::SvMoxa::signalChanged(modus::SvSignal* signal)
 
 void apak::SvMoxa::start()
 {
-//  QTimer* m_timer = new QTimer;
-//  connect(m_timer, &QTimer::timeout, this, &SvGammaOpaImitator::parse);
-//  m_timer->start(m_params.parse_interval);
+  if(!(bool(p_config) && bool(p_io_buffer))) {
 
-  connect(p_io_buffer, &modus::IOBuffer::dataReaded, this, &SvMoxa::parse);
+    emit message(QString("Panic! Устройство %1 не проинициализировано").arg(p_config->name), sv::log::llError, sv::log::mtError);
+    return false;
+  }
 
-  p_is_active = bool(p_config) && bool(p_io_buffer);
+  QTimer* m_timer = new QTimer;
+  connect(m_timer, &QTimer::timeout, this, &apak::SvMoxa::sendRequest);
+  m_timer->start(m_params.interval);
+
+  connect(p_io_buffer, &modus::IOBuffer::dataReaded, this, &apak::SvMoxa::parse);
+
+}
+
+void apak::SvMoxa::sendRequest()
+{
+  p_io_buffer->output->mutex.lock();
+
+//  0102 0000 0006 01 04 1000 000C
+
+  QByteArray request = QByteArray::fromHex(QString("0101000000060104"));
+  QDataStream s(&request, QIODevice::ReadWrite);
+  s << m_params.start_register << m_params.register_count;
+
+  quint16 crc = crc::crc16ccitt(ba);
+  request.append(crc & 0xFF).append(crc >> 8);
+
+  memcpy(p_io_buffer->output->data, request.data(), request.length());
+
+  p_io_buffer->output->setReady(true);
+  emit p_io_buffer->readyWrite(p_io_buffer->output);
+
+  p_io_buffer->output->mutex.unlock();
 }
 
 void apak::SvMoxa::parse(modus::BUFF* buffer)
 {
-  if(p_is_active) {
+  buffer->mutex.lock();
 
+  if(buffer->isReady()) {
 
-    01020000000601041000000C
+    QByteArray ba(buffer->data, buffer->offset);
+    QDataStream st(ba);
+    MOXAReplay r;
 
+    st >> r.id >> r.proto >> r.msglen >> r.address >> r.func >> r.bytecnt;
 
+    QList<quint16> registers;
 
-//    p_io_buffer->confirm->mutex.lock();     // если нужен ответ квитирование
-    buffer->mutex.lock();
-qDebug() << buffer->ready() << m_data_signal;
-    if(buffer->ready()) {
+    for(quint16 reg = m_params.start_register; reg < r.bytecnt / 2; reg++) {
 
-      if(m_data_signal) {
-
-        m_data_signal->setValue(QVariant(QByteArray(buffer->data, buffer->offset)));
-        qDebug() << m_data_signal->value();
-        emit message(QString("signal %1 updated").arg(m_data_signal->config()->name), sv::log::llDebug, sv::log::mtParse);
-
-      }
-
-      if(m_state_signal)
-        m_state_signal->setValue(int(1));
-
-      buffer->reset();
-    }
-    else {
-
-      checkupSignals();
+!!!
 
     }
 
-    buffer->mutex.unlock();
-//    p_io_buffer->confirm->mutex.unlock();   // если нужен ответ квитирование
+    if(m_data_signal) {
 
-//    p_io_buffer->output->mutex.lock();
-//    putout();
-//    p_io_buffer->output->mutex.unlock();
+      m_data_signal->setValue(QVariant(QByteArray(buffer->data, buffer->offset)));
+
+      emit message(QString("signal %1 updated").arg(m_data_signal->config()->name), sv::log::llDebug, sv::log::mtParse);
+
+    }
+
+    if(m_state_signal)
+      m_state_signal->setValue(int(1));
+
+    buffer->reset();
+  }
+  else {
+
+    checkupSignals();
 
   }
+
+  buffer->mutex.unlock();
+
 }
 
 /** ********** EXPORT ************ **/

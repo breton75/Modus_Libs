@@ -25,6 +25,15 @@ extern "C" {
 
 }
 
+struct MOXAReplay {
+  quint16 id;       // Идентификатор транзакции
+  quint16 proto;    // Идентификатор протокола	00	Идентификатор протокола
+  quint16 msglen;   // Длина сообщения	00	Длина сообщения
+  quint8  address;  // Адрес устройства	01	Адрес устройства
+  quint8  func;     // Функциональный код	04	Функциональный код
+  quint8  bytecnt;  // Адрес первого регистра Hi байт	04	Количество байт далее
+};
+
 namespace apak {
 
   class SvMoxa: public modus::SvAbstractProtocol
@@ -39,7 +48,7 @@ namespace apak {
     bool bindSignal(modus::SvSignal* signal, modus::SignalBinding binding) override;
 
   private:
-    apak::ProtocolParams  m_params;
+    moxa::Params          m_params;
 
     modus::SvSignal*      m_data_signal;
     modus::SvSignal*      m_state_signal;
@@ -51,6 +60,7 @@ namespace apak {
 
   private slots:
     void parse(modus::BUFF* buffer);
+    void sendRequest();
 
   };
 }
