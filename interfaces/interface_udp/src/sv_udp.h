@@ -7,6 +7,7 @@
 #include "ifc_udp_global.h"
 #include "udp_defs.h"
 
+#include "../../../../Modus_Libs/APAK/global_apak_defs.h"
 #include "../../../../Modus/global/device/interface/sv_abstract_interface.h"
 
 extern "C" {
@@ -34,9 +35,12 @@ private:
   QUdpSocket*   m_socket = nullptr;
   UdpParams     m_params;
 
+  QTimer*       m_gap_timer;
 
-//private slots:
-//  void read();
+private slots:
+  void newData();
+  void emit_message(const QByteArray& bytes, sv::log::Level level, sv::log::MessageTypes type);
+
 
 };
 

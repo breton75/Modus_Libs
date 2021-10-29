@@ -49,6 +49,8 @@ bool apak::SvHMI::bindSignal(modus::SvSignal *signal, modus::SignalBinding bindi
         hmi::SignalParams params = hmi::SignalParams::fromJson(binding.params);
         m_params_by_signals.insert(signal, params);
 
+//        qDebug()<< signal->config()->name <<
+
         if(!m_signals_by_registers.contains(params.registr))
           m_signals_by_registers.insert(params.registr, QList<modus::SvSignal*>());
 
@@ -113,8 +115,8 @@ void apak::SvHMI::putout()
 
     }
 
-    if(registr == 1 && (value & 0xFF) == 0xFE)
-      value |= 0xFF;
+//    if(registr == 1 && (value & 0xFF) == 0xFE)
+//      value |= 0xFF;
 
     valueByRegister.insert(registr, value);
 
@@ -139,8 +141,8 @@ void apak::SvHMI::putout()
 
   p_io_buffer->output->mutex.lock();
 
-  memcpy(&(p_io_buffer->output->data[0]), data.data(), data.length());
-  p_io_buffer->output->offset = data.length();
+  p_io_buffer->output->setData(data.data(), data.length());
+  p_io_buffer->output->setReady(true);
 
   p_io_buffer->output->mutex.unlock();
 

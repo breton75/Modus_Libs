@@ -78,7 +78,7 @@ bool SvTcp::connectToServer()
 
       m_client->connectToHost(m_params.host, m_params.port);
 
-      if(!m_client->waitForConnected(m_params.timeout))
+      if(!m_client->waitForConnected(m_params.connect_timeout))
         throw SvException(m_client->errorString());
 
       emit message(QString("Успешное подключение к серверу"), lldbg, mtscc);
@@ -142,7 +142,7 @@ void SvTcp::write(modus::BUFF* buffer)
   m_client->flush();
 
   if(written)
-    emit message(QString(QByteArray((const char*)&buffer->data[0], buffer->offset).toHex()), sv::log::llDebug, sv::log::mtSend);
+    emit_message(QByteArray((const char*)&buffer->data[0], buffer->offset), sv::log::llDebug, sv::log::mtSend);
 
   buffer->reset();
 
@@ -156,16 +156,16 @@ void SvTcp::emit_message(const QByteArray& bytes, sv::log::Level level, sv::log:
 
   //! The append() function is typically very fast
   switch (m_params.fmt) {
-    case tcp::HEX:
+    case apak::HEX:
       msg.append(bytes.toHex());
       break;
 
-    case tcp::ASCII:
+    case apak::ASCII:
       msg.append(bytes);
       break;
 
-    case tcp::DATALEN:
-      msg = QString("%1 байт").arg(bytes.length());
+    case apak::DATALEN:
+      msg = QString("%1 байт %2").arg(bytes.length()).arg(type == sv::log::mtSend ? "отправлено" : type == sv::log::mtReceive ? "принято" : "");
       break;
 
     default:

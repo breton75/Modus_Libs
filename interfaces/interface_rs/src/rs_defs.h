@@ -21,6 +21,7 @@
 
 #include "../../../../svlib/SvException/svexception.h"
 #include "../../../../Modus/global/global_defs.h"
+#include "../../../../Modus_Libs/APAK/global_apak_defs.h"
 
 // имена параметров для RS
 #define P_SERIAL_BAUDRATE "baudrate"
@@ -29,6 +30,7 @@
 #define P_SERIAL_PARITY   "parity"
 #define P_SERIAL_STOPBITS "stopbits"
 #define P_SERIAL_FLOWCTRL "flowcontrol"
+#define P_SERIAL_FMT      "fmt"
 
 
 const QList<int> Baudrates = {75, 115, 134, 150, 300, 600, 1200, 1800, 2400, 4800, 7200, 9600, 14400, 19200, 38400, 57600, 115200, 128000};
@@ -67,6 +69,7 @@ struct SerialParams {
   QSerialPort::Parity       parity      =     QSerialPort::NoParity;
   QSerialPort::StopBits     stopbits    =     QSerialPort::OneStop;
   QSerialPort::FlowControl  flowcontrol =     QSerialPort::NoFlowControl;
+  quint16                   fmt         =     apak::HEX;
   quint16                   grain_gap   =     DEFAULT_GRAIN_GAP;
 
   bool isValid = true;
@@ -178,6 +181,28 @@ struct SerialParams {
     }
     else
       p.flowcontrol = static_cast<QSerialPort::FlowControl>(DEFAULT_FLOWCONTROL);
+
+    /* log fmt */
+    P = P_SERIAL_FMT;
+    if(object.contains(P)) {
+
+      if(!object.value(P).isString())
+        throw SvException(QString(IMPERMISSIBLE_VALUE)
+                          .arg(P).arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact)))
+                          .arg(QString("Формат вывода данных должен быть задан строковым значением [\"hex\"|\"ascii\"|\"datalen\"]")));
+
+      QString fmt = object.value(P).toString("hex").toLower();
+
+      if(!apak::LogFormats.contains(fmt))
+        throw SvException(QString(IMPERMISSIBLE_VALUE)
+                          .arg(P).arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact)))
+                          .arg(QString("Не поддерживаемый формат вывода данных. Допустимые значения: [\"hex\"|\"ascii\"|\"datalen\"]")));
+
+      p.fmt = apak::LogFormats.value(fmt);
+
+    }
+    else
+      p.fmt = apak::HEX;
 
     /* grain gap*/
     P = P_GRAIN_GAP;

@@ -6,14 +6,15 @@
 
 #include "moxa_global.h"
 
+#include "../../../../../../Modus_Libs/APAK/global_apak_defs.h"
 #include "../../../../../../Modus/global/device/protocol/sv_abstract_protocol.h"
 #include "../../../../../../Modus/global/signal/sv_signal.h"
 
-#include "protocol_params.h"
+#include "params.h"
 
 #include "../../../../../../svlib/SvAbstractLogger/1.2/sv_abstract_logger.h"
 #include "../../../../../../svlib/SvException/1.1/sv_exception.h"
-#include "../../../../../../svlib/SvCRC/1.0/sv_crc.h"
+#include "../../../../../../svlib/SvCRC/1.1/sv_crc.h"
 
 extern "C" {
 
@@ -24,6 +25,8 @@ extern "C" {
 //    VIRTUAL_DEVICESHARED_EXPORT QList<QString> availableInterfaces();
 
 }
+
+const char REQUEST[8] = {0x01, 0x02, 0x00, 0x00, 0x00, 0x06, 0x01, 0x04};
 
 struct MOXAReplay {
   quint16 id;       // Идентификатор транзакции
@@ -48,10 +51,8 @@ namespace apak {
     bool bindSignal(modus::SvSignal* signal, modus::SignalBinding binding) override;
 
   private:
-    moxa::Params          m_params;
-
-    modus::SvSignal*      m_data_signal;
-    modus::SvSignal*      m_state_signal;
+    moxa::ProtocolParams  m_params;
+    QMap<quint16, modus::SvSignal*> m_master_signals_by_registers;
 
   public slots:
     void signalUpdated(modus::SvSignal* signal) override;

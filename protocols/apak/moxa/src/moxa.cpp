@@ -1,9 +1,7 @@
 ﻿#include "moxa.h"
 
 apak::SvMoxa::SvMoxa():
-  modus::SvAbstractProtocol(),
-  m_data_signal(nullptr),
-  m_state_signal(nullptr)
+  modus::SvAbstractProtocol()
 {
 
 }
@@ -20,7 +18,7 @@ bool apak::SvMoxa::configure(modus::DeviceConfig *config, modus::IOBuffer *iobuf
     p_config = config;
     p_io_buffer = iobuffer;
 
-//    m_params = apak::ProtocolParams::fromJson(p_config->protocol.params);
+    m_params = moxa::ProtocolParams::fromJson(p_config->protocol.params);
 
     return true;
 
@@ -38,30 +36,16 @@ bool apak::SvMoxa::bindSignal(modus::SvSignal* signal, modus::SignalBinding bind
 
     bool r = modus::SvAbstractProtocol::bindSignal(signal, binding);
 
+    moxa::SignalParams params = moxa::SignalParams::fromJson(binding.params);
+
     if(r) {
 
       if(binding.mode == modus::Master) {
 
-        if(signal->config()->type.toLower() == "data") {
+        if(signal->config()->type.toLower() == TYPE_STAT) {
 
-          if(m_data_signal) {
-
-            p_last_error = TOO_MUCH(p_config->name, "data");
-            return false;
-          }
-
-          m_data_signal = signal;
-
-        }
-        else if(signal->config()->type.toLower() == "state") {
-
-          if(m_state_signal) {
-
-            p_last_error = TOO_MUCH(p_config->name, "state");
-            return false;
-          }
-
-          m_state_signal = signal;
+          if(!m_master_signals_by_registers.contains(params.registr))
+            m_master_signals_by_registers.insert(params.registr, signal);
 
         }
       }
@@ -91,7 +75,7 @@ void apak::SvMoxa::start()
   if(!(bool(p_config) && bool(p_io_buffer))) {
 
     emit message(QString("Panic! Устройство %1 не проинициализировано").arg(p_config->name), sv::log::llError, sv::log::mtError);
-    return false;
+    return;
   }
 
   QTimer* m_timer = new QTimer;
@@ -108,14 +92,15 @@ void apak::SvMoxa::sendRequest()
 
 //  0102 0000 0006 01 04 1000 000C
 
-  QByteArray request = QByteArray::fromHex(QString("0101000000060104"));
+  QByteArray request;
   QDataStream s(&request, QIODevice::ReadWrite);
+  s.writeRawData(&REQUEST[0], sizeof(REQUEST));
   s << m_params.start_register << m_params.register_count;
 
-  quint16 crc = crc::crc16ccitt(ba);
+  quint16 crc = crc::crc16ccitt(request);
   request.append(crc & 0xFF).append(crc >> 8);
 
-  memcpy(p_io_buffer->output->data, request.data(), request.length());
+  p_io_buffer->output->setData(request);
 
   p_io_buffer->output->setReady(true);
   emit p_io_buffer->readyWrite(p_io_buffer->output);
@@ -135,30 +120,22 @@ void apak::SvMoxa::parse(modus::BUFF* buffer)
 
     st >> r.id >> r.proto >> r.msglen >> r.address >> r.func >> r.bytecnt;
 
-    QList<quint16> registers;
+    quint16 regdata;
+    int cnt = 0;
+    for(quint16 reg = m_params.start_register; reg < m_params.start_register + r.bytecnt / 2; reg++) {
 
-    for(quint16 reg = m_params.start_register; reg < r.bytecnt / 2; reg++) {
+      st >> regdata;
 
-!!!
+      if(m_master_signals_by_registers.contains(reg)) {
 
+        m_master_signals_by_registers[reg]->setValue(QVariant(regdata));
+        cnt++;
+      }
     }
 
-    if(m_data_signal) {
-
-      m_data_signal->setValue(QVariant(QByteArray(buffer->data, buffer->offset)));
-
-      emit message(QString("signal %1 updated").arg(m_data_signal->config()->name), sv::log::llDebug, sv::log::mtParse);
-
-    }
-
-    if(m_state_signal)
-      m_state_signal->setValue(int(1));
+    emit message(QString("Пакет обработан, %1 сигналов обновлено").arg(cnt), sv::log::llDebug, sv::log::mtParse);
 
     buffer->reset();
-  }
-  else {
-
-    checkupSignals();
 
   }
 

@@ -28,7 +28,7 @@ HEADERS += \
     moxa_global.h \
     ../../../../../Modus/global/signal/sv_signal.h \
     moxa.h \
-    protocol_params.h
+    params.h
 
 # Default rules for deployment.
 unix {

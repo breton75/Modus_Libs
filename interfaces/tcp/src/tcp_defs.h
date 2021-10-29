@@ -13,12 +13,14 @@
 
 #include "../../../../svlib/SvException/svexception.h"
 #include "../../../../Modus/global/global_defs.h"
+#include "../../../../Modus_Libs/APAK/global_apak_defs.h"
 
 #define P_TCP_MODE                  "mode"
 #define P_TCP_IFC                   "ifc"
 #define P_TCP_HOST                  "host"
 #define P_TCP_PORT                  "port" // для клиента - порт подключения, для сервера - порт, который надо слушать
 #define P_TCP_FMT                   "fmt"
+#define P_CONNECT_TIMEOUT           "connect_timeout"
 
 #define P_MODE_CLIENT               "client"
 #define P_MODE_SERVER               "server"
@@ -77,19 +79,11 @@ namespace tcp {
     OutDataAsHex  = 0x8,
   };
 
-  enum LogFormat {
-    HEX,
-    ASCII,
-    DATALEN
-  };
-
   #define DEFAULT_FLAGS tcp::LogInData | tcp::LogOutData
 
   const QMap<QString, QHostAddress::SpecialAddress> SpecialHosts = {{"localhost", QHostAddress::LocalHost},
                                                                     {"any",       QHostAddress::Any},
                                                                     {"broadcast", QHostAddress::Broadcast}};
-
-  const QMap<QString, LogFormat> LogFormats = {{"hex", HEX}, {"ascii", ASCII}, {"datalen", DATALEN}};
 
   /** структура для хранения параметров udp **/
   struct Params {
@@ -98,8 +92,8 @@ namespace tcp {
     QString      ifc              = "";
     QHostAddress host             = QHostAddress::Any;
     quint16      port             = DEFAULT_PORT;
-    quint16      timeout          = DEFAULT_TIMEOUT;
-    quint16      fmt              = HEX;
+    quint16      connect_timeout  = DEFAULT_TIMEOUT;
+    quint16      fmt              = apak::HEX;
     quint16      grain_gap        = DEFAULT_GRAIN_GAP;
 
     static Params fromJsonString(const QString& json_string) //throw (SvException)
@@ -177,8 +171,8 @@ namespace tcp {
                            .arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact))).arg(P));
 
 
-      /* timeout */
-      P = P_TIMEOUT;
+      /* connect_timeout */
+      P = P_CONNECT_TIMEOUT;
       if(object.contains(P))
       {
         if(object.value(P).toInt(-1) < 1)
@@ -186,11 +180,11 @@ namespace tcp {
                              .arg(P).arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact)))
                              .arg("Таймаут подключения должен быть задан целым положительным числом в миллисекундах"));
 
-        p.timeout = object.value(P).toInt(DEFAULT_TIMEOUT);
+        p.connect_timeout = object.value(P).toInt(DEFAULT_TIMEOUT);
 
       }
       else
-        p.timeout = DEFAULT_TIMEOUT;
+        p.connect_timeout = DEFAULT_TIMEOUT;
 
       /* log fmt */
       P = P_TCP_FMT;
@@ -201,18 +195,18 @@ namespace tcp {
                             .arg(P).arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact)))
                             .arg(QString("Формат вывода данных должен быть задан строковым значением [\"hex\"|\"ascii\"|\"datalen\"]")));
 
-        QString fmt = object.value(P).toString(P_TCP_FMT).toLower();
+        QString fmt = object.value(P).toString("hex").toLower();
 
-        if(!LogFormats.contains(fmt))
+        if(!apak::LogFormats.contains(fmt))
           throw SvException(QString(IMPERMISSIBLE_VALUE)
                             .arg(P).arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact)))
                             .arg(QString("Не поддерживаемый формат вывода данных. Допустимые значения: [\"hex\"|\"ascii\"|\"datalen\"]")));
 
-        p.fmt = LogFormats.value(fmt);
+        p.fmt = apak::LogFormats.value(fmt);
 
       }
       else
-        p.fmt = HEX;
+        p.fmt = apak::HEX;
 
       /* grain gap*/
       P = P_GRAIN_GAP;
@@ -246,11 +240,11 @@ namespace tcp {
     {
       QJsonObject j;
 
-      j.insert(P_TCP_IFC,   QJsonValue(ifc).toString());
-      j.insert(P_TCP_HOST,  QJsonValue(host.toString()).toString());
-      j.insert(P_TCP_PORT,  QJsonValue(static_cast<int>(port)).toInt());
-      j.insert(P_TIMEOUT,   QJsonValue(static_cast<int>(timeout)).toInt());
-      j.insert(P_TCP_FMT,   QJsonValue(static_cast<int>(fmt)).toInt());
+      j.insert(P_TCP_IFC,         QJsonValue(ifc).toString());
+      j.insert(P_TCP_HOST,        QJsonValue(host.toString()).toString());
+      j.insert(P_TCP_PORT,        QJsonValue(static_cast<int>(port)).toInt());
+      j.insert(P_CONNECT_TIMEOUT, QJsonValue(static_cast<int>(connect_timeout)).toInt());
+      j.insert(P_TCP_FMT,         QJsonValue(static_cast<int>(fmt)).toInt());
 
       return j;
 

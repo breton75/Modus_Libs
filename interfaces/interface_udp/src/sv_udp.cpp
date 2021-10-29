@@ -77,8 +77,13 @@ bool SvUdp::start()
         throw SvException(m_socket->errorString());
 
 
-    connect(m_socket, &QUdpSocket::readyRead, this, &SvUdp::read);
-    connect(p_io_buffer, &modus::IOBuffer::readyWrite, this, &SvUdp::write);
+    connect(m_socket,     &QUdpSocket::readyRead,       this, &SvUdp::read);
+    connect(p_io_buffer,  &modus::IOBuffer::readyWrite, this, &SvUdp::write);
+
+    m_gap_timer = new QTimer;
+    m_gap_timer->setInterval(m_params.grain_gap);
+    m_gap_timer->setSingleShot(true);
+    connect(m_gap_timer, &QTimer::timeout, this, &SvUdp::newData);
 
     return true;
 
@@ -92,61 +97,84 @@ bool SvUdp::start()
 
 void SvUdp::read()
 {
-//  disconnect(m_socket, &QUdpSocket::readyRead, this, &SvUdp::read);
-    p_io_buffer->input->mutex.lock();
+  m_gap_timer->stop();
 
-    if(p_io_buffer->input->offset + m_socket->bytesAvailable() > p_config->bufsize)
-      p_io_buffer->input->reset();
+  if(p_io_buffer->input->isReady())
+    p_io_buffer->input->reset();
+
+  p_io_buffer->input->mutex.lock();
+
+  if(p_io_buffer->input->offset + m_socket->bytesAvailable() > p_config->bufsize)
+    p_io_buffer->input->reset();
 
 //    /* ... the rest of the datagram will be lost ... */
-    qint64 readed = m_socket->readDatagram(&p_io_buffer->input->data[p_io_buffer->input->offset], p_config->bufsize - p_io_buffer->input->offset);
-    emit message(QString(QByteArray((const char*)&p_io_buffer->input->data[p_io_buffer->input->offset], readed).toHex()), sv::log::llDebug, sv::log::mtReceive);
+  qint64 readed = m_socket->readDatagram(&p_io_buffer->input->data[p_io_buffer->input->offset], p_config->bufsize - p_io_buffer->input->offset);
 
-    p_io_buffer->input->offset = readed;
+  emit_message(QByteArray((const char*)&p_io_buffer->input->data[p_io_buffer->input->offset], readed), sv::log::llDebug, sv::log::mtReceive);
 
-    while(m_socket->waitForReadyRead(m_params.grain_gap)) {
+  p_io_buffer->input->offset += readed;
 
-      while(m_socket->hasPendingDatagrams()) {
-//        if(m_socket->pendingDatagramSize() <= 0)
-//          continue;
+  p_io_buffer->input->mutex.unlock();
 
-        if(p_io_buffer->input->offset + m_socket->bytesAvailable() > p_config->bufsize)
-          p_io_buffer->input->reset();
-
-        /* ... the rest of the datagram will be lost ... */
-        qint64 readed2 = m_socket->readDatagram(&p_io_buffer->input->data[p_io_buffer->input->offset], p_config->bufsize - p_io_buffer->input->offset);
-
-//qDebug() << QString(QByteArray((const char*)&p_io_buffer->input->data[p_io_buffer->input->offset], readed).toHex());
-        emit message(QString(QByteArray((const char*)&p_io_buffer->input->data[p_io_buffer->input->offset], readed2).toHex()), sv::log::llDebug, sv::log::mtReceive);
-        p_io_buffer->input->offset += readed2;
-
-      }
-    }
-
-    p_io_buffer->input->mutex.unlock();
-
-    emit p_io_buffer->dataReaded(p_io_buffer->input);
+  m_gap_timer->start(m_params.grain_gap);
 
 }
 
+void SvUdp::newData()
+{
+  QMutexLocker(&p_io_buffer->input->mutex);
+
+  p_io_buffer->input->setReady(true);
+  emit p_io_buffer->dataReaded(p_io_buffer->input);
+}
 
 void SvUdp::write(modus::BUFF* buffer)
 {
-  QMutexLocker(&(buffer->mutex));
+  if(!buffer->isReady())
+    return;
 
-  if(!buffer->isready())
+  buffer->mutex.lock();
+
+  if(!buffer->isReady())
     return;
 
   bool written = m_socket->writeDatagram(&buffer->data[0], buffer->offset, m_params.host, m_params.send_port) > 0;
   m_socket->flush();
 
   if(written)
-    emit message(QString(QByteArray((const char*)&buffer->data[0], buffer->offset).toHex()), sv::log::llDebug, sv::log::mtSend);
+    emit_message(QByteArray((const char*)&buffer->data[0], buffer->offset), sv::log::llDebug, sv::log::mtSend);
 
   buffer->reset();
 
+  buffer->mutex.unlock();
 }
 
+void SvUdp::emit_message(const QByteArray& bytes, sv::log::Level level, sv::log::MessageTypes type)
+{
+  QString msg = "";
+
+  //! The append() function is typically very fast
+  switch (m_params.fmt) {
+    case apak::HEX:
+      msg.append(bytes.toHex());
+      break;
+
+    case apak::ASCII:
+      msg.append(bytes);
+      break;
+
+    case apak::DATALEN:
+      msg = QString("%1 байт %2").arg(bytes.length()).arg(type == sv::log::mtSend ? "отправлено" : type == sv::log::mtReceive ? "принято" : "");
+      break;
+
+    default:
+      return;
+      break;
+  }
+
+  emit message(msg, level, type);
+
+}
 
 /** ********** EXPORT ************ **/
 modus::SvAbstractInterface* create()

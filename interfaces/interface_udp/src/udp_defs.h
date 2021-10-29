@@ -13,11 +13,13 @@
 
 #include "../../../../svlib/SvException/svexception.h"
 #include "../../../../Modus/global/global_defs.h"
+#include "../../../../Modus_Libs/APAK/global_apak_defs.h"
 
 #define P_UDP_IFC                   "ifc"
 #define P_UDP_HOST                  "host"
 #define P_UDP_RECV_PORT             "recv_port"
 #define P_UDP_SEND_PORT             "send_port"
+#define P_UDP_FMT                   "fmt"
 
 #define DEFAULT_RECV_PORT 6001
 #define DEFAULT_SEND_PORT 5001
@@ -33,6 +35,7 @@ struct UdpParams {
   QHostAddress host             = QHostAddress::Any;
   quint16      recv_port        = DEFAULT_RECV_PORT;
   quint16      send_port        = DEFAULT_SEND_PORT;
+  quint16      fmt              = apak::HEX;
   quint16      grain_gap        = DEFAULT_GRAIN_GAP;
 
   static UdpParams fromJsonString(const QString& json_string) //throw (SvException)
@@ -110,6 +113,28 @@ struct UdpParams {
     else
       p.send_port = DEFAULT_SEND_PORT;
 
+    /* log fmt */
+    P = P_UDP_FMT;
+    if(object.contains(P)) {
+
+      if(!object.value(P).isString())
+        throw SvException(QString(IMPERMISSIBLE_VALUE)
+                          .arg(P).arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact)))
+                          .arg(QString("Формат вывода данных должен быть задан строковым значением [\"hex\"|\"ascii\"|\"datalen\"]")));
+
+      QString fmt = object.value(P).toString("hex").toLower();
+
+      if(!apak::LogFormats.contains(fmt))
+        throw SvException(QString(IMPERMISSIBLE_VALUE)
+                          .arg(P).arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact)))
+                          .arg(QString("Не поддерживаемый формат вывода данных. Допустимые значения: [\"hex\"|\"ascii\"|\"datalen\"]")));
+
+      p.fmt = apak::LogFormats.value(fmt);
+
+    }
+    else
+      p.fmt = apak::HEX;
+
     /* grain gap*/
     P = P_GRAIN_GAP;
     if(object.contains(P)) {
@@ -123,7 +148,8 @@ struct UdpParams {
       p.grain_gap = object.value(P).toInt(DEFAULT_GRAIN_GAP);
 
     }
-    else p.grain_gap = quint16(DEFAULT_GRAIN_GAP);
+    else
+      p.grain_gap = quint16(DEFAULT_GRAIN_GAP);
 
 
     return p;
