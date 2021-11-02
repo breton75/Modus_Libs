@@ -36,7 +36,7 @@ bool apak::SvMoxa::bindSignal(modus::SvSignal* signal, modus::SignalBinding bind
 
     bool r = modus::SvAbstractProtocol::bindSignal(signal, binding);
 
-    moxa::SignalParams params = moxa::SignalParams::fromJson(binding.params);
+    moxa::SignalParams params = moxa::SignalParams::fromJsonString(binding.params);
 
     if(r) {
 

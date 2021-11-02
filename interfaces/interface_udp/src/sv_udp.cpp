@@ -135,9 +135,6 @@ void SvUdp::write(modus::BUFF* buffer)
 
   buffer->mutex.lock();
 
-  if(!buffer->isReady())
-    return;
-
   bool written = m_socket->writeDatagram(&buffer->data[0], buffer->offset, m_params.host, m_params.send_port) > 0;
   m_socket->flush();
 

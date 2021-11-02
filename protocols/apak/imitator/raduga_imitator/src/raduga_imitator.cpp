@@ -235,6 +235,7 @@ void raduga::SvRaduga::putout()
     memcpy(&p_io_buffer->output->data[p_io_buffer->output->offset], &crc, sizeof(qint16));
     p_io_buffer->output->offset += 2;
 
+    p_io_buffer->output->setReady(true);
     emit p_io_buffer->readyWrite(p_io_buffer->output);
   }
 

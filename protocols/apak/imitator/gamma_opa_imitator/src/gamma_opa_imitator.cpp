@@ -149,6 +149,8 @@ void apak::SvGammaOpaImitator::send()
 
     emit message(QString(send_data), lldbg, sv::log::mtNew);
 
+    p_io_buffer->output->setReady(true);
+
     p_io_buffer->output->mutex.unlock();
 
     emit p_io_buffer->readyWrite(p_io_buffer->output);
