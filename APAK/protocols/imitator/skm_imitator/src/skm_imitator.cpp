@@ -121,7 +121,7 @@ void apak::SvSkmImitator::send()
         vin_stream << vin;
         vin_stream << static_cast<quint8>(factors_data.length());
 
-        vin_data.append(factors_data);
+        vin_stream.writeRawData(factors_data.data(), factors_data.length());
 
         vin_count++;
 
@@ -136,19 +136,22 @@ void apak::SvSkmImitator::send()
     h2stream << quint32(vin_data.length()); // Размер данных (см. таблицу 3)
     h2stream << quint8(vin_count);          // Количество камер в пакете
 
+    send_data.clear(); //!
+
     QDataStream send_stream(&send_data, QIODevice::WriteOnly);
-    send_stream.setByteOrder(QDataStream::LittleEndian);
 
-    send_data.append(QByteArray::fromHex(QString("12345678").toUtf8()));
-    send_data.append(header2);
-    send_data.append(vin_data);
+    send_stream << quint8(0x12) << quint8(0x34) << quint8(0x56) << quint8(0x78);
+    send_stream.writeRawData(header2.data(), header2.length());
+    send_stream.writeRawData(vin_data.data(), vin_data.length());
 
-    send_stream << crc::crc16ccitt(send_data);
+    quint16 crc = crc::crc16ccitt(send_data);
+    send_stream << quint8(crc & 0xFF) << quint8(crc >> 8);
 
     p_io_buffer->output->mutex.lock();
+    p_io_buffer->output->setData(send_data);
 
-    memcpy(&p_io_buffer->output->data[0], send_data.data(), send_data.length());
-    p_io_buffer->output->offset = send_data.length();
+//    memcpy(&p_io_buffer->output->data[0], send_data.data(), send_data.length());
+//    p_io_buffer->output->offset = send_data.length();
 
     emit message(QString(send_data), lldbg, sv::log::mtNew);
 

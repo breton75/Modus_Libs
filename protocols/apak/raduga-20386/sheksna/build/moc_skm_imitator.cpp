@@ -1,16 +1,16 @@
 /****************************************************************************
-** Meta object code from reading C++ file 'upz.h'
+** Meta object code from reading C++ file 'skm_imitator.h'
 **
 ** Created by: The Qt Meta Object Compiler version 67 (Qt 5.5.1)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
-#include "../../../upz/src/upz.h"
+#include "../../../../../APAK/protocols/imitator/skm_imitator/src/skm_imitator.h"
 #include <QtCore/qbytearray.h>
 #include <QtCore/qmetatype.h>
 #if !defined(Q_MOC_OUTPUT_REVISION)
-#error "The header file 'upz.h' doesn't include <QObject>."
+#error "The header file 'skm_imitator.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 67
 #error "This file was generated using the moc from 5.5.1. It"
 #error "cannot be used with the include files from this version of Qt."
@@ -18,36 +18,34 @@
 #endif
 
 QT_BEGIN_MOC_NAMESPACE
-struct qt_meta_stringdata_apak__SvUPZ_t {
-    QByteArrayData data[10];
-    char stringdata0[97];
+struct qt_meta_stringdata_apak__SvSkmImitator_t {
+    QByteArrayData data[8];
+    char stringdata0[84];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
-    qptrdiff(offsetof(qt_meta_stringdata_apak__SvUPZ_t, stringdata0) + ofs \
+    qptrdiff(offsetof(qt_meta_stringdata_apak__SvSkmImitator_t, stringdata0) + ofs \
         - idx * sizeof(QByteArrayData)) \
     )
-static const qt_meta_stringdata_apak__SvUPZ_t qt_meta_stringdata_apak__SvUPZ = {
+static const qt_meta_stringdata_apak__SvSkmImitator_t qt_meta_stringdata_apak__SvSkmImitator = {
     {
-QT_MOC_LITERAL(0, 0, 11), // "apak::SvUPZ"
-QT_MOC_LITERAL(1, 12, 13), // "signalUpdated"
-QT_MOC_LITERAL(2, 26, 0), // ""
-QT_MOC_LITERAL(3, 27, 16), // "modus::SvSignal*"
-QT_MOC_LITERAL(4, 44, 6), // "signal"
-QT_MOC_LITERAL(5, 51, 13), // "signalChanged"
-QT_MOC_LITERAL(6, 65, 5), // "start"
-QT_MOC_LITERAL(7, 71, 5), // "parse"
-QT_MOC_LITERAL(8, 77, 12), // "modus::BUFF*"
-QT_MOC_LITERAL(9, 90, 6) // "buffer"
+QT_MOC_LITERAL(0, 0, 19), // "apak::SvSkmImitator"
+QT_MOC_LITERAL(1, 20, 13), // "signalUpdated"
+QT_MOC_LITERAL(2, 34, 0), // ""
+QT_MOC_LITERAL(3, 35, 16), // "modus::SvSignal*"
+QT_MOC_LITERAL(4, 52, 6), // "signal"
+QT_MOC_LITERAL(5, 59, 13), // "signalChanged"
+QT_MOC_LITERAL(6, 73, 5), // "start"
+QT_MOC_LITERAL(7, 79, 4) // "send"
 
     },
-    "apak::SvUPZ\0signalUpdated\0\0modus::SvSignal*\0"
-    "signal\0signalChanged\0start\0parse\0"
-    "modus::BUFF*\0buffer"
+    "apak::SvSkmImitator\0signalUpdated\0\0"
+    "modus::SvSignal*\0signal\0signalChanged\0"
+    "start\0send"
 };
 #undef QT_MOC_LITERAL
 
-static const uint qt_meta_data_apak__SvUPZ[] = {
+static const uint qt_meta_data_apak__SvSkmImitator[] = {
 
  // content:
        7,       // revision
@@ -64,27 +62,27 @@ static const uint qt_meta_data_apak__SvUPZ[] = {
        1,    1,   34,    2, 0x0a /* Public */,
        5,    1,   37,    2, 0x0a /* Public */,
        6,    0,   40,    2, 0x0a /* Public */,
-       7,    1,   41,    2, 0x08 /* Private */,
+       7,    0,   41,    2, 0x08 /* Private */,
 
  // slots: parameters
     QMetaType::Void, 0x80000000 | 3,    4,
     QMetaType::Void, 0x80000000 | 3,    4,
     QMetaType::Void,
-    QMetaType::Void, 0x80000000 | 8,    9,
+    QMetaType::Void,
 
        0        // eod
 };
 
-void apak::SvUPZ::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+void apak::SvSkmImitator::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
-        SvUPZ *_t = static_cast<SvUPZ *>(_o);
+        SvSkmImitator *_t = static_cast<SvSkmImitator *>(_o);
         Q_UNUSED(_t)
         switch (_id) {
         case 0: _t->signalUpdated((*reinterpret_cast< modus::SvSignal*(*)>(_a[1]))); break;
         case 1: _t->signalChanged((*reinterpret_cast< modus::SvSignal*(*)>(_a[1]))); break;
         case 2: _t->start(); break;
-        case 3: _t->parse((*reinterpret_cast< modus::BUFF*(*)>(_a[1]))); break;
+        case 3: _t->send(); break;
         default: ;
         }
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
@@ -108,26 +106,26 @@ void apak::SvUPZ::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id,
     }
 }
 
-const QMetaObject apak::SvUPZ::staticMetaObject = {
-    { &modus::SvAbstractProtocol::staticMetaObject, qt_meta_stringdata_apak__SvUPZ.data,
-      qt_meta_data_apak__SvUPZ,  qt_static_metacall, Q_NULLPTR, Q_NULLPTR}
+const QMetaObject apak::SvSkmImitator::staticMetaObject = {
+    { &modus::SvAbstractProtocol::staticMetaObject, qt_meta_stringdata_apak__SvSkmImitator.data,
+      qt_meta_data_apak__SvSkmImitator,  qt_static_metacall, Q_NULLPTR, Q_NULLPTR}
 };
 
 
-const QMetaObject *apak::SvUPZ::metaObject() const
+const QMetaObject *apak::SvSkmImitator::metaObject() const
 {
     return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
-void *apak::SvUPZ::qt_metacast(const char *_clname)
+void *apak::SvSkmImitator::qt_metacast(const char *_clname)
 {
     if (!_clname) return Q_NULLPTR;
-    if (!strcmp(_clname, qt_meta_stringdata_apak__SvUPZ.stringdata0))
-        return static_cast<void*>(const_cast< SvUPZ*>(this));
+    if (!strcmp(_clname, qt_meta_stringdata_apak__SvSkmImitator.stringdata0))
+        return static_cast<void*>(const_cast< SvSkmImitator*>(this));
     return modus::SvAbstractProtocol::qt_metacast(_clname);
 }
 
-int apak::SvUPZ::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+int apak::SvSkmImitator::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = modus::SvAbstractProtocol::qt_metacall(_c, _id, _a);
     if (_id < 0)
