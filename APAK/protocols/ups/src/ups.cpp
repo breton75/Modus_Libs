@@ -87,7 +87,7 @@ void apak::SvUPS::start()
   m_timer->start(m_params.interval);
 
   connect(p_io_buffer, &modus::IOBuffer::dataReaded, this, &apak::SvUPS::parse);
-  connect(this, &SvUPS::nextRequest, this, &apak::SvUPS::request, Qt::QueuedConnection);
+  connect(this, &SvUPS::nextRequest, this, &apak::SvUPS::request, Qt::QueuedConnection); //! Queued
 
   p_is_active = bool(p_config) && bool(p_io_buffer);
 }
@@ -127,7 +127,6 @@ void apak::SvUPS::request()
   p_io_buffer->output->mutex.lock();
 
   p_io_buffer->output->setData(data);
-  p_io_buffer->output->setReady(true);
 
   emit p_io_buffer->readyWrite(p_io_buffer->output);
 
