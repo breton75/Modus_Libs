@@ -1,16 +1,16 @@
 /****************************************************************************
-** Meta object code from reading C++ file 'skm_imitator.h'
+** Meta object code from reading C++ file 'gamma_opa_imitator.h'
 **
 ** Created by: The Qt Meta Object Compiler version 67 (Qt 5.5.1)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
-#include "../../../../../APAK/protocols/imitator/skm_imitator/src/skm_imitator.h"
+#include "../../../../../APAK/protocols/imitator/gamma_opa_imitator/src/gamma_opa_imitator.h"
 #include <QtCore/qbytearray.h>
 #include <QtCore/qmetatype.h>
 #if !defined(Q_MOC_OUTPUT_REVISION)
-#error "The header file 'skm_imitator.h' doesn't include <QObject>."
+#error "The header file 'gamma_opa_imitator.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 67
 #error "This file was generated using the moc from 5.5.1. It"
 #error "cannot be used with the include files from this version of Qt."
@@ -18,34 +18,34 @@
 #endif
 
 QT_BEGIN_MOC_NAMESPACE
-struct qt_meta_stringdata_apak__SvSkmImitator_t {
+struct qt_meta_stringdata_apak__SvGammaOpaImitator_t {
     QByteArrayData data[8];
-    char stringdata0[84];
+    char stringdata0[89];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
-    qptrdiff(offsetof(qt_meta_stringdata_apak__SvSkmImitator_t, stringdata0) + ofs \
+    qptrdiff(offsetof(qt_meta_stringdata_apak__SvGammaOpaImitator_t, stringdata0) + ofs \
         - idx * sizeof(QByteArrayData)) \
     )
-static const qt_meta_stringdata_apak__SvSkmImitator_t qt_meta_stringdata_apak__SvSkmImitator = {
+static const qt_meta_stringdata_apak__SvGammaOpaImitator_t qt_meta_stringdata_apak__SvGammaOpaImitator = {
     {
-QT_MOC_LITERAL(0, 0, 19), // "apak::SvSkmImitator"
-QT_MOC_LITERAL(1, 20, 13), // "signalUpdated"
-QT_MOC_LITERAL(2, 34, 0), // ""
-QT_MOC_LITERAL(3, 35, 16), // "modus::SvSignal*"
-QT_MOC_LITERAL(4, 52, 6), // "signal"
-QT_MOC_LITERAL(5, 59, 13), // "signalChanged"
-QT_MOC_LITERAL(6, 73, 5), // "start"
-QT_MOC_LITERAL(7, 79, 4) // "send"
+QT_MOC_LITERAL(0, 0, 24), // "apak::SvGammaOpaImitator"
+QT_MOC_LITERAL(1, 25, 13), // "signalUpdated"
+QT_MOC_LITERAL(2, 39, 0), // ""
+QT_MOC_LITERAL(3, 40, 16), // "modus::SvSignal*"
+QT_MOC_LITERAL(4, 57, 6), // "signal"
+QT_MOC_LITERAL(5, 64, 13), // "signalChanged"
+QT_MOC_LITERAL(6, 78, 5), // "start"
+QT_MOC_LITERAL(7, 84, 4) // "send"
 
     },
-    "apak::SvSkmImitator\0signalUpdated\0\0"
-    "modus::SvSignal*\0signal\0signalChanged\0"
+    "apak::SvGammaOpaImitator\0signalUpdated\0"
+    "\0modus::SvSignal*\0signal\0signalChanged\0"
     "start\0send"
 };
 #undef QT_MOC_LITERAL
 
-static const uint qt_meta_data_apak__SvSkmImitator[] = {
+static const uint qt_meta_data_apak__SvGammaOpaImitator[] = {
 
  // content:
        7,       // revision
@@ -73,10 +73,10 @@ static const uint qt_meta_data_apak__SvSkmImitator[] = {
        0        // eod
 };
 
-void apak::SvSkmImitator::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+void apak::SvGammaOpaImitator::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
-        SvSkmImitator *_t = static_cast<SvSkmImitator *>(_o);
+        SvGammaOpaImitator *_t = static_cast<SvGammaOpaImitator *>(_o);
         Q_UNUSED(_t)
         switch (_id) {
         case 0: _t->signalUpdated((*reinterpret_cast< modus::SvSignal*(*)>(_a[1]))); break;
@@ -106,26 +106,26 @@ void apak::SvSkmImitator::qt_static_metacall(QObject *_o, QMetaObject::Call _c, 
     }
 }
 
-const QMetaObject apak::SvSkmImitator::staticMetaObject = {
-    { &modus::SvAbstractProtocol::staticMetaObject, qt_meta_stringdata_apak__SvSkmImitator.data,
-      qt_meta_data_apak__SvSkmImitator,  qt_static_metacall, Q_NULLPTR, Q_NULLPTR}
+const QMetaObject apak::SvGammaOpaImitator::staticMetaObject = {
+    { &modus::SvAbstractProtocol::staticMetaObject, qt_meta_stringdata_apak__SvGammaOpaImitator.data,
+      qt_meta_data_apak__SvGammaOpaImitator,  qt_static_metacall, Q_NULLPTR, Q_NULLPTR}
 };
 
 
-const QMetaObject *apak::SvSkmImitator::metaObject() const
+const QMetaObject *apak::SvGammaOpaImitator::metaObject() const
 {
     return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
-void *apak::SvSkmImitator::qt_metacast(const char *_clname)
+void *apak::SvGammaOpaImitator::qt_metacast(const char *_clname)
 {
     if (!_clname) return Q_NULLPTR;
-    if (!strcmp(_clname, qt_meta_stringdata_apak__SvSkmImitator.stringdata0))
-        return static_cast<void*>(const_cast< SvSkmImitator*>(this));
+    if (!strcmp(_clname, qt_meta_stringdata_apak__SvGammaOpaImitator.stringdata0))
+        return static_cast<void*>(const_cast< SvGammaOpaImitator*>(this));
     return modus::SvAbstractProtocol::qt_metacast(_clname);
 }
 
-int apak::SvSkmImitator::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+int apak::SvGammaOpaImitator::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = modus::SvAbstractProtocol::qt_metacall(_c, _id, _a);
     if (_id < 0)
