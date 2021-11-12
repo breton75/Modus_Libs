@@ -118,21 +118,30 @@ void apak::SvUPS::queued_request()
 
     m_i_have_got_answer = false;
 
+    emit message(QString("wait for answer"), lldbg, mtdat);
+
     //! ждем ответ
     qint64 start_time = QDateTime::currentMSecsSinceEpoch();
-    while(!m_i_have_got_answer || (start_time + m_params.interval < QDateTime::currentMSecsSinceEpoch())) {
+    while(!m_i_have_got_answer || (start_time + m_params.interval > QDateTime::currentMSecsSinceEpoch())) {
       qApp->processEvents();
       thread()->msleep(1);
     }
+    emit message(QString("got answer. isReady = %1").arg(p_io_buffer->input->isReady()), lldbg, mtdat);
 
     if(!p_io_buffer->input->isReady())
       continue;
 
+    p_io_buffer->input->mutex.lock();
     QByteArray indata(p_io_buffer->input->data, p_io_buffer->input->offset);
+    p_io_buffer->input->mutex.unlock();
+
     QDataStream instream(indata);
     apak::UPSData upsdata;
 
     instream >> upsdata.address >> upsdata.func >> upsdata.bytecnt >> upsdata.value >> upsdata.crc;
+
+    emit message(QString("parsed. address: %1, func: %2, bytecnt: %3, value: %4, crc:%5")
+                 .arg(upsdata.address).arg(upsdata.func).arg(upsdata.bytecnt).arg(upsdata.value).arg(upsdata.crc), lldbg, mtdat);
 
     for(modus::SvSignal* signal: m_signals_by_registers.value(registr, QList<modus::SvSignal*>())) {
 
