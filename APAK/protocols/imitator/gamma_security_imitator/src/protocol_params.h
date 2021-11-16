@@ -11,11 +11,14 @@
 #include "../../../../../../Modus/global/global_defs.h"
 //#include "../../../../../Modus/global/device/device_defs.h"
 
+#define P_ALARM_NAME "alarm_name"
+
 namespace apak {
 
   struct ProtocolParams {
 
     quint16 send_interval = 1000;
+    QString alarm_name    = "FireAlarm";
 
     static ProtocolParams fromJson(const QString& json_string) //throw (SvException)
     {
@@ -55,6 +58,15 @@ namespace apak {
       else
         p.send_interval = 1000;
 
+      P = P_ALARM_NAME;
+      if(object.contains(P)) {
+
+        p.alarm_name = object.value(P).toString("FireAlarm");
+
+      }
+      else
+        p.alarm_name = "FireAlarm";
+
       return p;
 
     }
@@ -72,6 +84,7 @@ namespace apak {
       QJsonObject j;
 
       j.insert(P_SEND_INTERVAL,   QJsonValue(send_interval).toInt());
+      j.insert(P_ALARM_NAME,      QJsonValue(alarm_name).toString());
 
       return j;
 

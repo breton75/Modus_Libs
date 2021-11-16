@@ -4,7 +4,7 @@ DEFINES += GAMMA_SECURITY_IMITATOR_LIBRARY
 
 CONFIG += c++11 plugin
 
-TARGET = /home/user/Modus/lib/protocols/apak_gamma_security_imitator
+TARGET = /home/user/Modus/lib/protocols/apak_gamma_imitator
 TEMPLATE = lib
 
 # The following define makes your compiler emit warnings if you use

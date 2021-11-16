@@ -116,7 +116,7 @@ void apak::SvGammaSecurityImitator::send()
 
     QList<QString> sl = QString(m_send_signal->value().toByteArray()).split("<CR><LF>");
 
-    QString stat = QString("$PPAS,SystemStatus,").append((sl.count() ? "SecurityAlarm" : "Norm")).append("*<CRC>") ;
+    QString stat = QString("$PPAS,SystemStatus,").append((sl.count() ? m_params.alarm_name : "Norm")).append("*<CRC>") ;
 
     sendmsg(stat);
 
