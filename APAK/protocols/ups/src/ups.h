@@ -4,6 +4,7 @@
 #include <QMutex>
 #include <QMutexLocker>
 
+#include "../../../../../APAK/global_apak_defs.h"
 #include "ups_global.h"
 
 #include "../../../../../../Modus/global/device/protocol/sv_abstract_protocol.h"
@@ -60,6 +61,9 @@ namespace apak {
 
     QMap<modus::SvSignal*, ups::SignalParams> m_params_by_signals;
     QMap<quint16, QList<modus::SvSignal*>> m_signals_by_registers;
+
+    modus::SvSignal*  m_state_signal;
+    ups::SignalParams m_state_params;
 
     bool    m_i_have_got_answer;
 

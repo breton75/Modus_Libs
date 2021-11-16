@@ -1,7 +1,8 @@
 ﻿#include "ups.h"
 
 apak::SvUPS::SvUPS():
-  modus::SvAbstractProtocol()
+  modus::SvAbstractProtocol(),
+  m_state_signal(nullptr)
 {
 
 }
@@ -43,12 +44,31 @@ bool apak::SvUPS::bindSignal(modus::SvSignal *signal, modus::SignalBinding bindi
         //! параметры params для каждого свои! для master'a свои, а для bindings - свои
         ups::SignalParams params = ups::SignalParams::fromJson(binding.params);
 
-        m_params_by_signals.insert(signal, params);
+        if(signal->config()->type == TYPE_DATA) {
 
-        if(!m_signals_by_registers.contains(params.registr))
-          m_signals_by_registers.insert(params.registr, QList<modus::SvSignal*>());
+          m_params_by_signals.insert(signal, params);
 
-        m_signals_by_registers[params.registr].append(signal);
+          if(!m_signals_by_registers.contains(params.registr))
+            m_signals_by_registers.insert(params.registr, QList<modus::SvSignal*>());
+
+          m_signals_by_registers[params.registr].append(signal);
+
+        }
+        else if(signal->config()->type == TYPE_STAT) {
+
+          if(m_state_signal)
+            throw SvException(TOO_MUCH(p_config->name, TYPE_STAT));
+
+          else {
+
+            m_state_signal = signal;
+            m_state_params = params;
+
+          }
+        }
+        else
+          throw SvException(QString("Неверный тип \"%1\" для сигнала \"%2\"").arg(signal->config()->type).arg(signal->config()->name));
+
 
       }
       else {

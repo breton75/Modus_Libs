@@ -6,17 +6,17 @@
 
 #include "raduga_imitator_global.h"
 
-#include "../../../../../Modus/global/device/protocol/sv_abstract_protocol.h"
-#include "../../../../../Modus/global/signal/sv_signal.h"
+#include "../../../../../../Modus/global/device/protocol/sv_abstract_protocol.h"
+#include "../../../../../../Modus/global/signal/sv_signal.h"
 
 #include "protocol_params.h"
 #include "raduga_defs.h"
 
 #include "data_type_collection.h"
 
-#include "../../../../../svlib/SvAbstractLogger/svabstractlogger.h"
-#include "../../../../../svlib/SvException/svexception.h"
-#include "../../../../../svlib/SvCRC/1.0/sv_crc.h"
+#include "../../../../../../svlib/SvAbstractLogger/svabstractlogger.h"
+#include "../../../../../../svlib/SvException/svexception.h"
+#include "../../../../../../svlib/SvCRC/1.0/sv_crc.h"
 
 extern "C" {
 
