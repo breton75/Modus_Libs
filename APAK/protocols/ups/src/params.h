@@ -188,7 +188,7 @@ namespace ups {
                             .arg("Номер регистра должен быть задан в виде строки двухбайтным числом в формате hex: \"0x0000\""));
       }
       else
-        throw SvException(QString(MISSING_PARAM).arg(P) + QString("\n%1").arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact))));
+        throw SvException(QString(MISSING_PARAM_DESC).arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact))).arg(P));
 
       P = P_OFFSET;
       if(object.contains(P)) {
@@ -203,7 +203,7 @@ namespace ups {
 
       }
       else
-        throw SvException(QString(MISSING_PARAM).arg(P));
+        throw SvException(QString(MISSING_PARAM_DESC).arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact))).arg(P));
 
       P = P_LEN;
       if(object.contains(P)) {
@@ -218,7 +218,7 @@ namespace ups {
 
       }
       else
-        throw SvException(QString(MISSING_PARAM).arg(P));
+        throw SvException(QString(MISSING_PARAM_DESC).arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact))).arg(P));
 
       return p;
 

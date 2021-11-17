@@ -41,10 +41,10 @@ bool apak::SvUPS::bindSignal(modus::SvSignal *signal, modus::SignalBinding bindi
 
       if(binding.mode == modus::Master) {
 
-        //! параметры params для каждого свои! для master'a свои, а для bindings - свои
-        ups::SignalParams params = ups::SignalParams::fromJson(binding.params);
+        if(signal->config()->type.toLower() == TYPE_DATA) {
 
-        if(signal->config()->type == TYPE_DATA) {
+          //! параметры params для каждого свои! для master'a свои, а для bindings - свои
+          ups::SignalParams params = ups::SignalParams::fromJson(binding.params);
 
           m_params_by_signals.insert(signal, params);
 
@@ -54,7 +54,7 @@ bool apak::SvUPS::bindSignal(modus::SvSignal *signal, modus::SignalBinding bindi
           m_signals_by_registers[params.registr].append(signal);
 
         }
-        else if(signal->config()->type == TYPE_STAT) {
+        else if(signal->config()->type.toLower() == TYPE_STAT) {
 
           if(m_state_signal)
             throw SvException(TOO_MUCH(p_config->name, TYPE_STAT));
@@ -62,7 +62,7 @@ bool apak::SvUPS::bindSignal(modus::SvSignal *signal, modus::SignalBinding bindi
           else {
 
             m_state_signal = signal;
-            m_state_params = params;
+//            m_state_params = params;
 
           }
         }
@@ -141,33 +141,39 @@ void apak::SvUPS::queued_request()
     emit message(QString("wait for answer"), lldbg, mtdat);
 
     //! ждем ответ
-    qint64 start_time = QDateTime::currentMSecsSinceEpoch();
-    while(!m_i_have_got_answer || (start_time + m_params.interval > QDateTime::currentMSecsSinceEpoch())) {
+    qint64 check_time = QDateTime::currentMSecsSinceEpoch() + m_params.interval;
+    while(!m_i_have_got_answer && (check_time > QDateTime::currentMSecsSinceEpoch())) {
       qApp->processEvents();
       thread()->msleep(1);
     }
-    emit message(QString("got answer. isReady = %1").arg(p_io_buffer->input->isReady()), lldbg, mtdat);
 
-    if(!p_io_buffer->input->isReady())
-      continue;
+    if(m_i_have_got_answer) {
 
-    p_io_buffer->input->mutex.lock();
-    QByteArray indata(p_io_buffer->input->data, p_io_buffer->input->offset);
-    p_io_buffer->input->mutex.unlock();
+      emit message(QString("got answer. isReady = %1").arg(p_io_buffer->input->isReady()), lldbg, mtdat);
 
-    QDataStream instream(indata);
-    apak::UPSData upsdata;
+      if(!p_io_buffer->input->isReady())
+        continue;
 
-    instream >> upsdata.address >> upsdata.func >> upsdata.bytecnt >> upsdata.value >> upsdata.crc;
+      p_io_buffer->input->mutex.lock();
+      QByteArray indata(p_io_buffer->input->data, p_io_buffer->input->offset);
+      p_io_buffer->input->mutex.unlock();
 
-    emit message(QString("parsed. address: %1, func: %2, bytecnt: %3, value: %4, crc:%5")
-                 .arg(upsdata.address).arg(upsdata.func).arg(upsdata.bytecnt).arg(upsdata.value).arg(upsdata.crc), lldbg, mtdat);
+      m_state_signal->setValue(QVariant(1));
 
-    for(modus::SvSignal* signal: m_signals_by_registers.value(registr, QList<modus::SvSignal*>())) {
+      QDataStream instream(indata);
+      apak::UPSData upsdata;
 
-      ups::SignalParams p = m_params_by_signals.value(signal, ups::SignalParams());
+      instream >> upsdata.address >> upsdata.func >> upsdata.bytecnt >> upsdata.value >> upsdata.crc;
 
-      signal->setValue(QVariant((upsdata.value >> p.offset) & ((1 << p.len) - 1)));
+      emit message(QString("parsed. address: %1, func: %2, bytecnt: %3, value: %4, crc:%5")
+                   .arg(upsdata.address).arg(upsdata.func).arg(upsdata.bytecnt).arg(upsdata.value).arg(upsdata.crc), lldbg, mtdat);
+
+      for(modus::SvSignal* signal: m_signals_by_registers.value(registr, QList<modus::SvSignal*>())) {
+
+        ups::SignalParams p = m_params_by_signals.value(signal, ups::SignalParams());
+
+        signal->setValue(QVariant((upsdata.value >> p.offset) & ((1 << p.len) - 1)));
+      }
     }
   }
 }

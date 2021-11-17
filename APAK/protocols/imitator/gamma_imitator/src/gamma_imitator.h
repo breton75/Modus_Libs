@@ -1,15 +1,15 @@
-﻿#ifndef HMI_H
-#define HMI_H
+﻿#ifndef GAMMA_IMITATOR_H
+#define GAMMA_IMITATOR_H
 
 #include <QMutex>
 #include <QMutexLocker>
 
-#include "hmi_global.h"
+#include "gamma_imitator_global.h"
 
 #include "../../../../../../Modus/global/device/protocol/sv_abstract_protocol.h"
 #include "../../../../../../Modus/global/signal/sv_signal.h"
 
-#include "params.h"
+#include "protocol_params.h"
 
 #include "../../../../../../svlib/SvAbstractLogger/1.2/sv_abstract_logger.h"
 #include "../../../../../../svlib/SvException/1.1/sv_exception.h"
@@ -17,7 +17,7 @@
 
 extern "C" {
 
-    HMI_EXPORT modus::SvAbstractProtocol* create();
+    GAMMA_IMITATOR_EXPORT modus::SvAbstractProtocol* create();
 
 //    VIRTUAL_DEVICESHARED_EXPORT QString defaultDeviceParams();
 //    VIRTUAL_DEVICESHARED_EXPORT QString defaultIfcParams(const QString& ifc);
@@ -27,38 +27,37 @@ extern "C" {
 
 namespace apak {
 
-  class SvHMI: public modus::SvAbstractProtocol
+  class SvGammaImitator: public modus::SvAbstractProtocol
   {
     Q_OBJECT
 
   public:
-    SvHMI();
-    ~SvHMI();
+    SvGammaImitator();
+    ~SvGammaImitator();
 
     bool configure(modus::DeviceConfig* config, modus::IOBuffer *iobuffer) override;
-
-    bool bindSignal(modus::SvSignal *signal, modus::SignalBinding binding) override;
-
-  public slots:
-    void start() override;
-
-    void signalUpdated(modus::SvSignal* signal) override;
-    void signalChanged(modus::SvSignal* signal) override;
+    bool bindSignal(modus::SvSignal* signal, modus::SignalBinding binding) override;
 
   private:
-    hmi::ProtocolParams                       m_params;
+    apak::ProtocolParams  m_params;
 
-    QMap<modus::SvSignal*, hmi::SignalParams> m_input_signals;
-    QMap<modus::SvSignal*, hmi::SignalParams> m_params_by_signals;
-    QMap<quint16, QList<modus::SvSignal*>> m_signals_by_registers;
+    modus::SvSignal*      m_send_signal;
 
-    quint16 m_max_register;
+    QByteArray send_data;
+
+    QTimer* m_timer;
+    QSemaphore sem;
+
+  public slots:
+    void signalUpdated(modus::SvSignal* signal) override;
+    void signalChanged(modus::SvSignal* signal) override;
+    void start() override;
 
   private slots:
-    void putout();
+    void send();
 
   };
 }
 
 
-#endif // UNIVERSAL_PACK_H
+#endif // GAMMA_IMITATOR_H

@@ -1,6 +1,6 @@
 QT -= gui
 
-DEFINES += GAMMA_SECURITY_IMITATOR_LIBRARY
+DEFINES += GAMMA_IMITATOR_LIBRARY
 
 CONFIG += c++11 plugin
 
@@ -20,15 +20,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     ../../../../../../Modus/global/signal/sv_signal.cpp \
-    gamma_security_imitator.cpp
+    gamma_imitator.cpp
 
 HEADERS += \
     ../../../../../../Modus/global/device/protocol/sv_abstract_protocol.h \
     ../../../../../../Modus/global/global_defs.h \
-    gamma_security_imitator_global.h \
     ../../../../../../Modus/global/signal/sv_signal.h \
-    gamma_security_imitator.h \
-    protocol_params.h
+    protocol_params.h \
+    gamma_imitator_global.h \
+    gamma_imitator.h
 
 # Default rules for deployment.
 unix {

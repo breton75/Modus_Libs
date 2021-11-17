@@ -36,6 +36,8 @@ bool apak::SvHMI::bindSignal(modus::SvSignal *signal, modus::SignalBinding bindi
 
     bool r = modus::SvAbstractProtocol::bindSignal(signal, binding);
 
+    m_max_register = 0;
+
     if(r) {
 
       if(binding.mode == modus::Master) {
@@ -55,6 +57,9 @@ bool apak::SvHMI::bindSignal(modus::SvSignal *signal, modus::SignalBinding bindi
           m_signals_by_registers.insert(params.registr, QList<modus::SvSignal*>());
 
         m_signals_by_registers[params.registr].append(signal);
+
+        if(params.registr > m_max_register)
+          m_max_register = params.registr;
 
       }
     }
@@ -95,30 +100,36 @@ void apak::SvHMI::putout()
 {
   QMap<quint16, quint16> valueByRegister;
 
-  for(quint16 registr: m_signals_by_registers.keys()) {
+  for(quint16 registr = 0x0000; registr <= m_max_register; registr++) {
 
-    quint16 value = 0;
+    if(m_signals_by_registers.contains(registr)) {
 
-    for(modus::SvSignal* signal: m_signals_by_registers.value(registr)) {
+      quint16 value = 0;
 
-      bool ok;
-      quint16 signal_value = signal->value().toUInt(&ok);
-      if(!ok)
-        continue;
+      for(modus::SvSignal* signal: m_signals_by_registers.value(registr)) {
 
-      hmi::SignalParams params = m_params_by_signals.value(signal);
+        bool ok;
+        quint16 signal_value = signal->value().toUInt(&ok);
+        if(!ok)
+          continue;
 
-      quint16 mask = ((1 << params.len) - 1) << params.offset; // даже если больше 1го бита
-      value |= mask & (signal_value << params.offset);
+        hmi::SignalParams params = m_params_by_signals.value(signal);
 
-//      qDebug() << "mask" << mask << "value" << value << signal->config()->name << signal->value();
+        quint16 mask = ((1 << params.len) - 1) << params.offset; // даже если больше 1го бита
+        value |= mask & (signal_value << params.offset);
+
+  //      qDebug() << "mask" << mask << "value" << value << signal->config()->name << signal->value();
+
+      }
+
+  //    if(registr == 1 && (value & 0xFF) == 0xFE)
+  //      value |= 0xFF;
+
+      valueByRegister.insert(registr, value);
 
     }
-
-//    if(registr == 1 && (value & 0xFF) == 0xFE)
-//      value |= 0xFF;
-
-    valueByRegister.insert(registr, value);
+    else
+      valueByRegister.insert(registr, 0x0000);
 
   }
 

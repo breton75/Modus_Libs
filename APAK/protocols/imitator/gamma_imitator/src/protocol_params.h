@@ -1,5 +1,5 @@
-﻿#ifndef GAMMA_OPA_IMITATOR_PARAMS
-#define GAMMA_OPA_IMITATOR_PARAMS
+﻿#ifndef GAMMA_IMITATOR_PARAMS
+#define GAMMA_IMITATOR_PARAMS
 
 #include <QString>
 #include <QtCore>
@@ -92,5 +92,5 @@ namespace apak {
   };
 }
 
-#endif // GAMMA_OPA_IMITATOR_PARAMS
+#endif // GAMMA_IMITATOR_PARAMS
 
