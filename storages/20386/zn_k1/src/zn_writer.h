@@ -250,23 +250,19 @@ namespace zn1 {
     QString     protocolIdentifier;
     QByteArray  data;
 
-    QByteArray toByteArray()
+    void makeByteArray(QByteArray& ba)
     {
-      QByteArray result = QByteArray();
-
       if((dateTime <= 0) || protocolIdentifier.isNull() || protocolIdentifier.isEmpty())
-        return result;
+        return;
 
-      QDataStream stream(&result, QIODevice::WriteOnly);
+      QDataStream stream(&ba, QIODevice::WriteOnly);
       stream.setByteOrder(QDataStream::LittleEndian);
 
       stream << dateTime << static_cast<quint16>(protocolIdentifier.length());
       stream.writeRawData(protocolIdentifier.toStdString().c_str(), protocolIdentifier.length());
       stream << static_cast<quint16>(data.length());
 
-      result.append(data);
-
-      return result;
+      stream.writeRawData(data.data(), data.length());
 
     }
   };
@@ -316,6 +312,11 @@ namespace zn1 {
       return result;
     }
 
+    void makeByteArray(QByteArray& ba)
+    {
+      ba.append(m_header.toByteArray(m_data.length())).append(m_data);
+    }
+
     quint32 length()
     {
       return quint32(m_header.length() + m_data.length());
@@ -346,8 +347,7 @@ namespace zn1 {
         c(c), a(a), w(w)
       {}
 
-//      quint8 state() { return quint8(c + (a << 1) + (w << 2)); }
-      quint8 state() { return c & a & w; }
+      quint16 state() { return quint16(c + ((a * c) << 1) + ((w * a * c) << 2)); }
 
       quint8 c;
       quint8 a;
@@ -366,7 +366,7 @@ namespace zn1 {
 
     sv::tcp::Client*  m_socket;
     zn1::Params       m_params;
-    bool              m_authorized;
+//    bool              m_authorized;
 
     modus::SvSignal* m_state_signal;
 
@@ -376,7 +376,7 @@ namespace zn1 {
 //    QTimer* m_timer = nullptr;
 
 //    void setState(int doChangeFlags, const QString& writeState = STATE_OK, const QString& authorization = STATE_OK, const QString& connectionState = STATE_OK);
-    void setState(int writeState, int authorization, int connectionState);
+//    void setState(int writeState, int authorization, int connectionState);
 
 //  private slots:
 //    void checkupSignals();

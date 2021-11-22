@@ -35,9 +35,13 @@
 #define TAG_AUTHORIZATION         "a"
 #define TAG_WRITE_STATE           "w"
 
-#define STATE_FAIL_NO_CONNECTION  "No Connection"
-#define STATE_FAIL_NO_AUTHORITY   "No Authorization"
-#define STATE_FAIL_NO_WRITING     "No Writing"
+#define STATE_NO_CONNECTION       0
+#define STATE_NO_AUTHORITY        0
+#define STATE_NO_WRITING          0
+
+#define STATE_CONNECTION_OK       1
+#define STATE_AUTHORITY_OK        1
+#define STATE_WRITING_OK          1
 
 #define STATE_OK                  "OK"
 
