@@ -51,9 +51,25 @@ bool zn1::ZNWriter::bindSignal(modus::SvSignal* signal, modus::SignalBinding bin
         }
       }
     }
+    else {
+
+      try {
+
+        zn1::SignalParams params = zn1::SignalParams::fromJson(binding.params);
+
+        m_signal_params.insert(signal, params);
+
+      }
+      catch(SvException& e) {
+
+        p_last_error = e.error;
+        return false;
+
+      }
+    }
   }
 
-  return  true;
+  return r;
 
 }
 
@@ -255,6 +271,9 @@ void zn1::ZNWriter::signalUpdated(modus::SvSignal* signal)
 {
 //  emit message(QString("1. m_mutex.lock(). bunches.count(): %1").arg(bunches.count()), sv::log::llDebug, sv::log::mtDebug1);
 
+  if(signal->value().isNull() || !signal->value().isValid())
+    return;
+
   if(bunches.isEmpty() || (bunches.last()->state() != Bunch::Underway)) {
 
     if(bunches.count() >= int(m_params.queue_len))
@@ -268,15 +287,21 @@ void zn1::ZNWriter::signalUpdated(modus::SvSignal* signal)
 
   if(bunches.last()->state() == Bunch::Underway)
   {
-    QByteArray r = QByteArray();
-    Record p(signal->lastUpdate().toMSecsSinceEpoch(), signal->config()->tag, signal->value().toByteArray());
+    if(m_signal_params.contains(signal)) {
 
-    p.makeByteArray(r);
+      zn1::SignalParams signal_params = m_signal_params.value(signal);
 
-    bunches.last()->appendRecord(r);
+      if(signal_params.zn_marker.isEmpty())
+        emit message(QString("Для сигнала \"%1\" не задан идентфикатор записи \"zn_marker\"").arg(signal->config()->name), lldbg, mterr);
 
-    emit message(QString("%1 bytes appended to bunch. Bunch size: %2, records: %3")
-                 .arg(r.length()).arg(bunches.last()->length()).arg(bunches.last()->recordCount()), sv::log::llDebug2, sv::log::mtDebug);
+      Record p(signal->lastUpdate().toMSecsSinceEpoch(), signal_params.zn_marker, signal->value().toByteArray());
+
+      bunches.last()->appendRecord(p);
+
+      emit message(QString("%1 bytes appended to bunch. Bunch size: %2, records: %3")
+                   .arg(p.length()).arg(bunches.last()->length()).arg(bunches.last()->recordCount()), lldbg2, mtdbg);
+
+    }
   }
 
   if(bunches.last()->length() >= m_params.write_buf) {

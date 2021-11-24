@@ -15,6 +15,7 @@
 #include "../../../../../Modus/global/dbus/sv_dbus.h"
 
 #include "zn_writer_defs.h"
+#include "params.h"
 
 extern "C" {
 
@@ -228,43 +229,45 @@ namespace zn1 {
 
   };
 
-  struct Record
+  class Record
   {
+  public:
     Record():
-      dateTime(0),
-      protocolIdentifier(QString()),
-      data(QByteArray())
+      m_date_time(0),
+      m_zn_marker(QString()),
+      m_record_data(QByteArray())
     {
 
     }
 
-    Record(qint64  dateTime, const QString& protocolIdentifier, const QByteArray& data):
-      dateTime(dateTime),
-      protocolIdentifier(protocolIdentifier),
-      data(data)
+    Record(qint64  dateTime, const QString& zn_marker, const QByteArray& data):
+      m_date_time(dateTime),
+      m_zn_marker(zn_marker)
     {
-
-    }
-
-    qint64      dateTime;
-    QString     protocolIdentifier;
-    QByteArray  data;
-
-    void makeByteArray(QByteArray& ba)
-    {
-      if((dateTime <= 0) || protocolIdentifier.isNull() || protocolIdentifier.isEmpty())
-        return;
-
-      QDataStream stream(&ba, QIODevice::WriteOnly);
+      QDataStream stream(&m_record_data, QIODevice::WriteOnly);
       stream.setByteOrder(QDataStream::LittleEndian);
 
-      stream << dateTime << static_cast<quint16>(protocolIdentifier.length());
-      stream.writeRawData(protocolIdentifier.toStdString().c_str(), protocolIdentifier.length());
+      stream << dateTime << static_cast<quint16>(zn_marker.length());
+      stream.writeRawData(zn_marker.toStdString().c_str(), zn_marker.length());
       stream << static_cast<quint16>(data.length());
-
       stream.writeRawData(data.data(), data.length());
-
     }
+
+    const QByteArray& recordData()
+    {
+      return m_record_data;
+    }
+
+    int length()
+    {
+      return m_record_data.length();
+    }
+
+  private:
+    qint64      m_date_time;
+    QString     m_zn_marker;
+    QByteArray  m_record_data;
+
   };
 
   class Bunch
@@ -297,9 +300,9 @@ namespace zn1 {
       m_state = state;
     }
 
-    void appendRecord(const QByteArray& record)
+    void appendRecord(Record* record)
     {
-      m_data.append(record);
+      m_data.append(record->recordData());
       m_record_count++;
     }
 
@@ -370,7 +373,7 @@ namespace zn1 {
 
     modus::SvSignal* m_state_signal;
 
-//    QMap<QString, modus::SvSignal*> m_zn_state;
+    QMap<modus::SvSignal*, zn1::SignalParams> m_signal_params;
     ZNstate m_zn_state;
 
 //    QTimer* m_timer = nullptr;

@@ -24,7 +24,8 @@ HEADERS +=\
     zn_writer_defs.h \
     zn_writer_global.h \
     ../../../../../Modus/global/storage/sv_abstract_storage.h \
-    ../../../../../svlib/Network/Tcp/Client/1.0/sv_tcp_client.h
+    ../../../../../svlib/Network/Tcp/Client/1.0/sv_tcp_client.h \
+    params.h
 
 unix {
     target.path = /usr/lib
