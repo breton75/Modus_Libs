@@ -50,9 +50,11 @@ namespace apak {
 
     QMap<modus::SvSignal*, hmi::SignalParams> m_input_signals;
     QMap<modus::SvSignal*, hmi::SignalParams> m_params_by_signals;
-    QMap<quint16, QList<modus::SvSignal*>> m_signals_by_registers;
+//    QMap<quint8, modus::SvSignal*> m_signals_by_byte_number;
 
-    quint16 m_max_register;
+    std::map<uint8_t, modus::SvSignal*> m_signals_by_byte_number;
+
+    quint16 m_max_byte;
 
   private slots:
     void putout();

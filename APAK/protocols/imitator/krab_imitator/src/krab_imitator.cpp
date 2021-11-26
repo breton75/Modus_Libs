@@ -36,7 +36,7 @@ bool apak::SvKrabImitator::bindSignal(modus::SvSignal *signal, modus::SignalBind
 
     bool r = modus::SvAbstractProtocol::bindSignal(signal, binding);
 
-    m_max_register = 0;
+    m_max_byte = 0;
 
     if(r) {
 
@@ -51,15 +51,11 @@ bool apak::SvKrabImitator::bindSignal(modus::SvSignal *signal, modus::SignalBind
         hmi::SignalParams params = hmi::SignalParams::fromJson(binding.params);
         m_params_by_signals.insert(signal, params);
 
-//        qDebug()<< signal->config()->name <<
+        std::pair<uint8_t, modus::SvSignal*> pair(params.byte, signal);
+        m_signals_by_byte_number.insert(pair);
 
-        if(!m_signals_by_registers.contains(params.registr))
-          m_signals_by_registers.insert(params.registr, QList<modus::SvSignal*>());
-
-        m_signals_by_registers[params.registr].append(signal);
-
-        if(params.registr > m_max_register)
-          m_max_register = params.registr;
+        if(params.byte > m_max_byte)
+          m_max_byte = params.byte;
 
       }
     }
@@ -98,62 +94,43 @@ void apak::SvKrabImitator::start()
 
 void apak::SvKrabImitator::putout()
 {
-  QMap<quint16, quint16> valueByRegister;
+  std::vector<uint8_t> values;
+  values.reserve(m_max_byte + 1);
 
-  for(quint16 registr = 0x0000; registr <= m_max_register; registr++) {
+  for(const auto& p: m_signals_by_byte_number) {
 
-    if(m_signals_by_registers.contains(registr)) {
+    bool ok;
+    uint8_t signal_value = p.second->value().toUInt(&ok);
+    if(!ok)
+      signal_value = 0;
 
-      quint16 value = 0;
-
-      for(modus::SvSignal* signal: m_signals_by_registers.value(registr)) {
-
-        bool ok;
-        quint16 signal_value = signal->value().toUInt(&ok);
-        if(!ok)
-          continue;
-
-        hmi::SignalParams params = m_params_by_signals.value(signal);
-
-        quint16 mask = ((1 << params.len) - 1) << params.offset; // даже если больше 1го бита
-        value |= mask & (signal_value << params.offset);
-
-  //      qDebug() << "mask" << mask << "value" << value << signal->config()->name << signal->value();
-
-      }
-
-  //    if(registr == 1 && (value & 0xFF) == 0xFE)
-  //      value |= 0xFF;
-
-      valueByRegister.insert(registr, value);
-
-    }
-    else
-      valueByRegister.insert(registr, 0x0000);
+    values.insert(values.end(),signal_value);
 
   }
 
   QByteArray data;
   QDataStream stream(&data, QIODevice::WriteOnly);
 
-  stream << quint8(m_params.address)                                      // Адрес устройства
-         << quint8(m_params.func_code)                                    // Функциональный код. у нас 0x10
-         << valueByRegister.firstKey()                                    // Адрес первого регистра
-         << quint16(valueByRegister.count())                              // Количество регистров
-         << quint8 (valueByRegister.count() * m_params.register_len);     // Количество байт
+  stream << quint8(m_params.address)              // Адрес устройства
+         << quint8(m_params.func_code)            // Функциональный код. у нас 0x10
+         << 0x0000                                // Адрес первого регистра
+//         << quint16(values.capacity())          // Количество регистров
+         << quint8 (values.capacity());           // Количество байт
 
-  //! With QMap, the items are always sorted by key.
-  for(quint16 registr: valueByRegister.keys())
-    stream << quint16(valueByRegister.value(registr));                    // данные
+  int i = 0;
+  qDebug() << values.size();
+  for(auto v: values) {
+//    qDebug() << v << i++;
+    stream << v;                                  // данные
+  }
 
   quint16 crc = CRC::MODBUS_CRC16((const quint8*)data.data(), data.length()); // Контрольная сумма CRC
-  data.append(quint8(crc & 0xFF));
-  data.append(quint8(crc >> 8));
+  stream << quint8(crc & 0xFF);
+  stream << quint8(crc >> 8);
 
   p_io_buffer->output->mutex.lock();
 
-  p_io_buffer->output->setData(data.data(), data.length());
-  p_io_buffer->output->setReady(true);
+  p_io_buffer->output->setData(data);
 
   p_io_buffer->output->mutex.unlock();
 

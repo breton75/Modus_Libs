@@ -1,5 +1,5 @@
-﻿#ifndef HMI_PROTOCOL_PARAMS
-#define HMI_PROTOCOL_PARAMS
+﻿#ifndef KRAB_PROTOCOL_PARAMS
+#define KRAB_PROTOCOL_PARAMS
 
 #include <QString>
 #include <QtCore>
@@ -13,23 +13,22 @@
 
 #define P_ADDRESS       "address"
 #define P_FUNC_CODE     "func_code"
-#define P_REGISTER      "register"
-#define P_OFFSET        "offset"
-#define P_LEN           "len"
 #define P_REGISTER_LEN  "register_len"
 
-#define HMI_DEFAULT_FUNC_CODE     0x10
-#define HMI_DEFAULT_SEND_INTERVAL 1000
-#define HMI_DEFAULT_REGISTER_LEN  2
+#define P_BYTE          "byte"
+
+#define KRAB_DEFAULT_FUNC_CODE     0x10
+#define KRAB_DEFAULT_SEND_INTERVAL 1000
+#define KRAB_DEFAULT_REGISTER_LEN  2
 
 namespace hmi {
 
   struct ProtocolParams {
 
     quint8  address       = 0;
-    quint8  func_code     = HMI_DEFAULT_FUNC_CODE;
-    quint16 interval      = HMI_DEFAULT_SEND_INTERVAL;
-    quint8  register_len  = HMI_DEFAULT_REGISTER_LEN;
+    quint8  func_code     = KRAB_DEFAULT_FUNC_CODE;
+    quint16 interval      = KRAB_DEFAULT_SEND_INTERVAL;
+    quint8  register_len  = KRAB_DEFAULT_REGISTER_LEN;
 
     static ProtocolParams fromJson(const QString& json_string) //throw (SvException)
     {
@@ -78,11 +77,11 @@ namespace hmi {
                             .arg(object.value(P).toVariant().toString())
                             .arg("Код функции Modbus должен быть задан целым числом"));
 
-        p.func_code = object.value(P).toInt(HMI_DEFAULT_FUNC_CODE);
+        p.func_code = object.value(P).toInt(KRAB_DEFAULT_FUNC_CODE);
 
       }
       else
-        p.func_code = HMI_DEFAULT_FUNC_CODE;
+        p.func_code = KRAB_DEFAULT_FUNC_CODE;
 
       P = P_INTERVAL;
       if(object.contains(P)) {
@@ -93,11 +92,11 @@ namespace hmi {
                             .arg(object.value(P).toVariant().toString())
                             .arg("Интервал обновления данных должен быть задан целым числом в миллисекундах"));
 
-        p.interval = object.value(P).toInt(HMI_DEFAULT_SEND_INTERVAL);
+        p.interval = object.value(P).toInt(KRAB_DEFAULT_SEND_INTERVAL);
 
       }
       else
-        p.interval = HMI_DEFAULT_SEND_INTERVAL;
+        p.interval = KRAB_DEFAULT_SEND_INTERVAL;
 
 
       P = P_REGISTER_LEN;
@@ -109,11 +108,11 @@ namespace hmi {
                             .arg(object.value(P).toVariant().toString())
                             .arg("Длина регистра должна быть задана целым числом в байтах"));
 
-        p.register_len = object.value(P).toInt(HMI_DEFAULT_REGISTER_LEN);
+        p.register_len = object.value(P).toInt(KRAB_DEFAULT_REGISTER_LEN);
 
       }
       else
-        p.register_len = HMI_DEFAULT_REGISTER_LEN;
+        p.register_len = KRAB_DEFAULT_REGISTER_LEN;
 
       return p;
 
@@ -142,9 +141,7 @@ namespace hmi {
 
   struct SignalParams {
 
-    quint16 registr       = 0;
-    quint16 offset        = 0;
-    quint16 len           = 0;
+    quint16 byte       = 0;
 
     static SignalParams fromJson(const QString& json_string) //throw (SvException)
     {
@@ -169,52 +166,16 @@ namespace hmi {
       SignalParams p;
       QString P;
 
-      P = P_REGISTER;
-      if(object.contains(P)) {
-
-        if(!(object.value(P).isString() && object.value(P).toString().startsWith("0x")))
-          throw SvException(QString(IMPERMISSIBLE_VALUE)
-                            .arg(P)
-                            .arg(object.value(P).toVariant().toString())
-                            .arg("Номер регистра должен быть задан в виде строки двухбайтным числом в формате hex: \"0x0000\""));
-
-        bool ok;
-        p.registr = object.value(P).toString().toUInt(&ok, 0);
-
-        if(!ok)
-          throw SvException(QString(IMPERMISSIBLE_VALUE)
-                            .arg(P)
-                            .arg(object.value(P).toVariant().toString())
-                            .arg("Номер регистра должен быть задан в виде строки двухбайтным числом в формате hex: \"0x0000\""));
-      }
-      else
-        throw SvException(QString(MISSING_PARAM_DESC).arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact))).arg(P));
-
-      P = P_OFFSET;
+      P = P_BYTE;
       if(object.contains(P)) {
 
         if(object.value(P).toInt(-1) < 0)
           throw SvException(QString(IMPERMISSIBLE_VALUE)
                                  .arg(P)
                                  .arg(object.value(P).toVariant().toString())
-                                 .arg("Смещение должно быть задан целым числом"));
+                                 .arg("Номер байта должен быть задан целым числом"));
 
-        p.offset = object.value(P).toInt();
-
-      }
-      else
-        throw SvException(QString(MISSING_PARAM_DESC).arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact))).arg(P));
-
-      P = P_LEN;
-      if(object.contains(P)) {
-
-        if(object.value(P).toInt(-1) < 0)
-          throw SvException(QString(IMPERMISSIBLE_VALUE)
-                            .arg(P)
-                            .arg(object.value(P).toVariant().toString())
-                            .arg("Длина данных должна быть задана целым числом"));
-
-        p.len = object.value(P).toInt();
+        p.byte = object.value(P).toInt();
 
       }
       else
@@ -236,9 +197,7 @@ namespace hmi {
     {
       QJsonObject j;
 
-      j.insert(P_REGISTER,  QJsonValue(registr).toInt());
-      j.insert(P_OFFSET,    QJsonValue(offset).toInt());
-      j.insert(P_LEN,       QJsonValue(len).toInt());
+      j.insert(P_BYTE,  QJsonValue(byte).toInt());
 
       return j;
 
@@ -246,5 +205,5 @@ namespace hmi {
   };
 }
 
-#endif // HMI_PROTOCOL_PARAMS
+#endif // KRAB_PROTOCOL_PARAMS
 
