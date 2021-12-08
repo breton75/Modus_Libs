@@ -208,11 +208,12 @@ namespace zn1 {
 
     QByteArray toByteArray(quint32 dataLength)
     {
-      QByteArray result(&marker[0], sizeof(marker));
+      QByteArray result{}; //(&marker[0], sizeof(marker));
 
       QDataStream stream(&result, QIODevice::WriteOnly);
       stream.setByteOrder(QDataStream::LittleEndian);
 
+      stream.writeRawData(&marker[0], sizeof(marker));
       stream << coarseDateTime
              << dataLength;
 
