@@ -108,7 +108,7 @@ void zn1::ZNWriter::start()
 
 void zn1::ZNWriter::write()
 {
-  Q_ASSERT_X(!m_socket, "zn1::ZNWriter::write", "m_socket is not defined!");
+  Q_ASSERT_X(m_socket, "zn1::ZNWriter::write", "m_socket is not defined!");
 
   { //! 1. физическое подключение к хосту
 
@@ -202,25 +202,34 @@ void zn1::ZNWriter::write()
         // если попали сюда, значит есть подключение и авторизация. можно писать данные
         if(!bunches.isEmpty()) {
 
-          QByteArray data = QByteArray();
-
-
+//          QByteArray data = QByteArray::;
+          // вычисляем длину пакета для записи
+          quint32 pack_length = 0;
           foreach (Bunch* b, bunches)
-            b->makeByteArray(data);
+            pack_length += b->length();
 
           QByteArray pack = QByteArray();
           QDataStream stream(&pack, QIODevice::WriteOnly);
           stream.setByteOrder(QDataStream::LittleEndian);
 
-          stream << quint32(data.length())
+          stream << quint32(pack_length)
                  << quint16(CMD_WRITE);
 
-          stream.writeRawData(data.data(), data.length());
+
+          foreach (Bunch* b, bunches)
+            b->appendToStream(&stream);
+
+//          stream.writeRawData(data.data(), data.length());
 
           m_socket->write(pack);
 
-          emit message(QString("Запись %1 байт в зону %2").arg(data.length()).arg(m_params.zone),
+          emit message(QString("Запись %1 байт в зону %2").arg(pack.length()).arg(m_params.zone),
                        sv::log::llDebug2, sv::log::mtDebug);
+
+          emit message(QString("%1 ...").arg(QString(pack.left(64).toHex())),
+                       sv::log::llDebug, sv::log::mtDebug);
+
+
 
           if(!m_socket->waitForReadyRead(m_params.interval))
             throw SvException(QString("Ошибка записи данных в  защищенный накопитель. Нет ответа."));
@@ -296,7 +305,7 @@ void zn1::ZNWriter::signalUpdated(modus::SvSignal* signal)
 
       Record p(signal->lastUpdate().toMSecsSinceEpoch(), signal_params.zn_marker, signal->value().toByteArray());
 
-      bunches.last()->appendRecord(p);
+      bunches.last()->appendRecord(&p);
 
       emit message(QString("%1 bytes appended to bunch. Bunch size: %2, records: %3")
                    .arg(p.length()).arg(bunches.last()->length()).arg(bunches.last()->recordCount()), lldbg2, mtdbg);

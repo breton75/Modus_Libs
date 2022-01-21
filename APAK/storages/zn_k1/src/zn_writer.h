@@ -214,6 +214,7 @@ namespace zn1 {
       stream.setByteOrder(QDataStream::LittleEndian);
 
       stream.writeRawData(&marker[0], sizeof(marker));
+
       stream << coarseDateTime
              << dataLength;
 
@@ -248,9 +249,13 @@ namespace zn1 {
       QDataStream stream(&m_record_data, QIODevice::WriteOnly);
       stream.setByteOrder(QDataStream::LittleEndian);
 
-      stream << dateTime << static_cast<quint16>(zn_marker.length());
+      stream << dateTime
+             << static_cast<quint16>(zn_marker.length());
+
       stream.writeRawData(zn_marker.toStdString().c_str(), zn_marker.length());
+
       stream << static_cast<quint16>(data.length());
+
       stream.writeRawData(data.data(), data.length());
     }
 
@@ -314,6 +319,12 @@ namespace zn1 {
       result.append(m_header.toByteArray(m_data.length())).append(m_data);
 
       return result;
+    }
+
+    void appendToStream(QDataStream* const stream)
+    {
+      stream->writeRawData(m_header.toByteArray(m_data.length()).data(), int(m_header.length()));
+      stream->writeRawData(m_data, int(m_data.length()));
     }
 
     void makeByteArray(QByteArray& ba)
