@@ -198,7 +198,8 @@ DIST          = /opt/Qt5.5.1/5.5/gcc_64/mkspecs/features/spec_pre.prf \
 		/home/user/c++/Modus_Libs/APAK/storages/zn_k1/src/zn_writer_global.h \
 		/home/user/c++/Modus/global/storage/sv_abstract_storage.h \
 		/home/user/c++/svlib/Network/Tcp/Client/1.0/sv_tcp_client.h \
-		/home/user/c++/Modus_Libs/APAK/storages/zn_k1/src/params.h /home/user/c++/Modus_Libs/APAK/storages/zn_k1/src/zn_writer.cpp \
+		/home/user/c++/Modus_Libs/APAK/storages/zn_k1/src/params.h \
+		/home/user/c++/Modus_Libs/APAK/storages/zn_k1/src/zn_global.h /home/user/c++/Modus_Libs/APAK/storages/zn_k1/src/zn_writer.cpp \
 		/home/user/c++/svlib/Network/Tcp/Client/1.0/sv_tcp_client.cpp
 QMAKE_TARGET  = zn_writer
 DESTDIR       = /home/user/Modus/lib/storages/#avoid trailing-slash linebreak
@@ -531,7 +532,7 @@ dist: distdir FORCE
 distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
-	$(COPY_FILE) --parents /home/user/c++/Modus_Libs/APAK/storages/zn_k1/src/zn_writer.h /home/user/c++/Modus_Libs/APAK/storages/zn_k1/src/zn_writer_defs.h /home/user/c++/Modus_Libs/APAK/storages/zn_k1/src/zn_writer_global.h /home/user/c++/Modus/global/storage/sv_abstract_storage.h /home/user/c++/svlib/Network/Tcp/Client/1.0/sv_tcp_client.h /home/user/c++/Modus_Libs/APAK/storages/zn_k1/src/params.h $(DISTDIR)/
+	$(COPY_FILE) --parents /home/user/c++/Modus_Libs/APAK/storages/zn_k1/src/zn_writer.h /home/user/c++/Modus_Libs/APAK/storages/zn_k1/src/zn_writer_defs.h /home/user/c++/Modus_Libs/APAK/storages/zn_k1/src/zn_writer_global.h /home/user/c++/Modus/global/storage/sv_abstract_storage.h /home/user/c++/svlib/Network/Tcp/Client/1.0/sv_tcp_client.h /home/user/c++/Modus_Libs/APAK/storages/zn_k1/src/params.h /home/user/c++/Modus_Libs/APAK/storages/zn_k1/src/zn_global.h $(DISTDIR)/
 	$(COPY_FILE) --parents /home/user/c++/Modus_Libs/APAK/storages/zn_k1/src/zn_writer.cpp /home/user/c++/svlib/Network/Tcp/Client/1.0/sv_tcp_client.cpp $(DISTDIR)/
 
 

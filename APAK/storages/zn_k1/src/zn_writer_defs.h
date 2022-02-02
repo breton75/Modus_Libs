@@ -14,37 +14,7 @@
 #include "../../../../../svlib/SvException/svexception.h"
 #include "../../../../../Modus/global/global_defs.h"
 
-#define P_HOST                    "host"
-#define P_PORT                    "port"
-#define P_ZONE                    "zone"
-#define P_PASS                    "pass"
-#define P_QUEUE_LEN               "queue_len"
-#define P_WRITE_BUF               "write_buf"
-
-#define DEFAULT_PORT              10000
-#define DEFAULT_INTERVAL          1000
-#define DEFAULT_QUEUE_LEN         1000
-#define DEFAULT_WRITE_BUFFER_LEN  102400  // bytes. 100 kB
-
-#define CMD_CONNECT               200
-#define CMD_ANSWER                100
-#define CMD_WRITE                 501
-#define ACC_CODE_WRITE            2
-
-#define TAG_CONNECTION_STATE      "c"
-#define TAG_AUTHORIZATION         "a"
-#define TAG_WRITE_STATE           "w"
-
-#define STATE_NO_CONNECTION       0
-#define STATE_NO_AUTHORITY        0
-#define STATE_NO_WRITING          0
-
-#define STATE_CONNECTION_OK       1
-#define STATE_AUTHORITY_OK        1
-#define STATE_WRITING_OK          1
-
-#define STATE_OK                  "OK"
-
+#include "zn_global.h"
 
 namespace zn1 {
 
@@ -213,6 +183,73 @@ namespace zn1 {
 
     }
   };
+
+
+  struct SignalParams {
+
+    QString zn_marker = "";
+
+    static SignalParams fromJson(const QString& json_string) //throw (SvException)
+    {
+      QJsonParseError err;
+      QJsonDocument jd = QJsonDocument::fromJson(json_string.toUtf8(), &err);
+
+      if(err.error != QJsonParseError::NoError)
+        throw SvException(err.errorString());
+
+      try {
+
+        return fromJsonObject(jd.object());
+
+      }
+      catch(SvException& e) {
+        throw e;
+      }
+    }
+
+    static SignalParams fromJsonObject(const QJsonObject &object) //throw (SvException)
+    {
+      SignalParams p;
+      QString P;
+
+      P = P_ZN_MARKER;
+      if(object.contains(P)) {
+
+        if(!object.value(P).isString())
+          throw SvException(QString(IMPERMISSIBLE_VALUE)
+                            .arg(P)
+                            .arg(object.value(P).toVariant().toString())
+                            .arg("Маркер записи должен быть задан строкой."));
+
+        p.zn_marker = object.value(P).toString();
+
+      }
+      else
+        throw SvException(QString(MISSING_PARAM_DESC).arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact))).arg(P));
+
+      return p;
+
+    }
+
+    QString toString(QJsonDocument::JsonFormat format = QJsonDocument::Indented) const
+    {
+      QJsonDocument jd;
+      jd.setObject(toJsonObject());
+
+      return QString(jd.toJson(format));
+    }
+
+    QJsonObject toJsonObject() const
+    {
+      QJsonObject j;
+
+      j.insert(P_ZN_MARKER,  QJsonValue(zn_marker).toString());
+
+      return j;
+
+    }
+  };
+
 }
 
 
