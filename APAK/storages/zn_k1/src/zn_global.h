@@ -2,6 +2,7 @@
 #define ZN_GLOBAL
 
 #include <QDataStream>
+#include <QDateTime>
 
 #include "../../../../../svlib/SvCRC/1.1/sv_crc.h"
 
@@ -78,12 +79,13 @@ namespace zn1 {
   /// общие. структура записи
   const char  BunchMarker[4] = {char(0xAA), char(0xAA), char(0xAA), char(0xAA)};
 
+#pragma pack(push,1)
   struct BunchHeader {
 
-    char  marker[sizeof(zn1::BunchMarker)]; // = {char(0xAA), char(0xAA), char(0xAA), char(0xAA)}; // 0xAAAAAAAA
-    qint64      coarseDateTime;
-    quint32     dataLength;
-    quint16     crc16;
+    char    marker[sizeof(zn1::BunchMarker)];
+    qint64  coarseDateTime;
+    quint32 dataLength;
+    quint16 crc16;
 
     explicit BunchHeader():
       marker{*zn1::BunchMarker}, //[0], sizeof(ZNMarker)),
@@ -105,7 +107,7 @@ namespace zn1 {
 
     bool fromRawData(const char* data)
     {
-      QByteArray b(data, sizeof(marker) + sizeof(qint64)  + sizeof(quint16));
+      QByteArray b(data, sizeof(marker) + sizeof(coarseDateTime)  + sizeof(dataLength) + sizeof(crc16));
       QDataStream s(b);
       s.setByteOrder(QDataStream::LittleEndian); // !
 
@@ -139,37 +141,33 @@ namespace zn1 {
     }
 
   };
+#pragma pack(pop)
 
   class Record
   {
   public:
     Record():
       m_date_time(0),
-      m_zn_marker(QString()),
+      m_apak_marker(QString()),
       m_record_data(QByteArray())
     {
 
     }
 
-    Record(qint64  dateTime, const QString& zn_marker, const QByteArray& data):
+    Record(qint64  dateTime, const QString& apak_marker, const QByteArray& data):
       m_date_time(dateTime),
-      m_zn_marker(zn_marker)
+      m_apak_marker(apak_marker)
     {
       QDataStream stream(&m_record_data, QIODevice::WriteOnly);
       stream.setByteOrder(QDataStream::LittleEndian);
 
       stream << dateTime;
 
-      stream << static_cast<quint16>(zn_marker.length());
-      stream.writeRawData(zn_marker.toStdString().c_str(), zn_marker.length());
+      stream << static_cast<quint16>(apak_marker.length());
+      stream.writeRawData(apak_marker.toStdString().c_str(), apak_marker.length());
 
       stream << static_cast<quint16>(data.length());
       stream.writeRawData(data.data(), data.length());
-    }
-
-    const QByteArray& recordData()
-    {
-      return m_record_data;
     }
 
     void fromRawData(const char* data)
@@ -178,39 +176,45 @@ namespace zn1 {
       QDataStream stream(r);
       stream.setByteOrder(QDataStream::LittleEndian); // !
 
-      quint16 system_marker_length;
+      quint16 apak_marker_length;
       quint16 data_length;
 
       //!
       stream >> m_date_time;
 
-      //! system_marker
-      stream >> system_marker_length;
-      char system_marker[system_marker_length + 1];
-      memset(&system_marker[0], 0, system_marker_length + 1);
+      //! apak_marker
+      stream >> apak_marker_length;
+      char apak_marker[apak_marker_length + 1];
+      memset(&apak_marker[0], 0, apak_marker_length + 1);
 
-      stream.readRawData(&system_marker[0], system_marker_length);
+      stream.readRawData(&apak_marker[0], apak_marker_length);
 
-      m_zn_marker = QString(&system_marker[0]);
+      m_apak_marker = QString(&apak_marker[0]);
 
       //! data
       stream >> data_length;
-      char record_data[data_length];
+//      char record_data[data_length];
 
-      stream.readRawData(&record_data[0], data_length);
+      /// так должно быть максимально быстро
+      m_record_data.resize(data_length);
+      stream.readRawData(m_record_data.data(), data_length);
 
-      m_record_data = QByteArray(&record_data[0], data_length);
+//      memcpy(m_record_data.data(), &record_data[0], data_length);
 
     }
 
-    int length()
-    {
-      return m_record_data.length();
-    }
+    const QByteArray& data()        const { return m_record_data;       }
+    const QString&    marker()      const { return m_apak_marker;       }
+    uint              marker_hash()       { return qHash(m_apak_marker);}
+    qint64            dateTime()          { return m_date_time;         }
+
+//    int length() { return m_record_data.length(); }
+
+    qint64 size() { return sizeof(m_date_time) + m_apak_marker.length() + m_record_data.length(); }
 
   private:
     qint64      m_date_time;
-    QString     m_zn_marker;
+    QString     m_apak_marker;
     QByteArray  m_record_data;
 
   };
@@ -252,7 +256,7 @@ namespace zn1 {
 
     void appendRecord(Record* record)
     {
-      m_data.append(record->recordData());
+      m_data.append(record->data());
       m_record_count++;
     }
 
@@ -468,6 +472,7 @@ namespace zn1 {
   };
 
   /// чтение данных
+#pragma pack(push,1)
   struct ReadRequest
   {
     ReadRequest(quint64 start_byte, quint64 byte_count):
@@ -497,7 +502,9 @@ namespace zn1 {
     quint64 byte_count;
 
   };
+#pragma pack(pop)
 
+#pragma pack(push,1)
   struct ReadReply
   {
     ReadReply():
@@ -555,6 +562,7 @@ namespace zn1 {
     QByteArray  data;
 
   };
+#pragma pack(pop)
 
   /// запрос размера данных
   struct DataSizeRequest
@@ -682,6 +690,7 @@ namespace zn1 {
 
     bool isValid() { return !m_begin.isNull() && m_begin.isValid() && !m_end.isNull() && m_end.isValid(); }
     bool contains(QDateTime point) { return ((point >= m_begin) && (point <= m_end)); }
+    bool contains(qint64 point) const { return ((point >= m_begin.toMSecsSinceEpoch()) && (point <= m_end.toMSecsSinceEpoch())); }
 
     bool operator==(const TaskPeriod& other) { return (other.m_begin == m_begin) && (other.m_end == m_end); }
 
