@@ -146,7 +146,7 @@ void zn1::ZNWriter::write()
 
       if((m_zn_state.a != STATE_AUTHORITY_OK) && (m_zn_state.c == STATE_CONNECTION_OK)) {
 
-        zn1::AuthorizeRequest authreq(m_params.zone, m_params.pass);
+        zn1::AuthorizeRequest authreq(m_params.zone, m_params.pass, ACC_CODE_WRITE);
 
         QByteArray r = authreq.toByteArray();
 
@@ -308,7 +308,7 @@ void zn1::ZNWriter::signalUpdated(modus::SvSignal* signal)
       bunches.last()->appendRecord(&p);
 
       emit message(QString("%1 bytes appended to bunch. Bunch size: %2, records: %3")
-                   .arg(p.length()).arg(bunches.last()->length()).arg(bunches.last()->recordCount()), lldbg2, mtdbg);
+                   .arg(p.size()).arg(bunches.last()->length()).arg(bunches.last()->recordCount()), lldbg2, mtdbg);
 
     }
   }

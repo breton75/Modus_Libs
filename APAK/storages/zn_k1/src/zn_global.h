@@ -324,7 +324,7 @@ namespace zn1 {
   /// авторизация
   struct AuthorizeRequest
   {
-    AuthorizeRequest(QString zone_name = QString(), QString pass = QString(), quint16 cmd = CMD_CONNECT, quint16 access_code = ACC_CODE_WRITE):
+    AuthorizeRequest(QString zone_name, QString pass, quint16 access_code, quint16 cmd = CMD_CONNECT):
       cmd(cmd),
       zone_name(zone_name),
       pass(pass),
