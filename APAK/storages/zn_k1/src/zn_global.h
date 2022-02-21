@@ -88,21 +88,17 @@ namespace zn1 {
     quint16 crc16;
 
     explicit BunchHeader():
-      marker{*zn1::BunchMarker}, //[0], sizeof(ZNMarker)),
-      coarseDateTime(coarseDateTime),
-      dataLength(0),
-      crc16(0)
+      zn1::BunchHeader{0}
     {
 
     }
 
     explicit BunchHeader(qint64 coarseDateTime):
-      marker{*zn1::BunchMarker},
       coarseDateTime(coarseDateTime),
       dataLength(0),
       crc16(0)
     {
-
+      memcpy(&marker[0], &zn1::BunchMarker[0], sizeof(marker));
     }
 
     bool fromRawData(const char* data)
