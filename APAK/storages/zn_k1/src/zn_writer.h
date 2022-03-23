@@ -48,6 +48,7 @@ namespace zn1 {
 
   public:
     ZNWriter();
+    ~ZNWriter();
 
     bool configure(modus::StorageConfig* config) override;
     bool bindSignal(modus::SvSignal* signal, modus::SignalBinding binding) override;
@@ -59,6 +60,8 @@ namespace zn1 {
     sv::tcp::Client*  m_socket;
     zn1::Params       m_params;
 //    bool              m_authorized;
+
+//    QFile m_test_file;
 
     modus::SvSignal* m_state_signal;
 

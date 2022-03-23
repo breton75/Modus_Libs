@@ -11,6 +11,14 @@ zn1::ZNWriter::ZNWriter():
 
 }
 
+zn1::ZNWriter::~ZNWriter()
+{
+  delete m_socket;
+
+//  m_test_file.close();
+
+}
+
 bool zn1::ZNWriter::configure(modus::StorageConfig* config)
 {
   try {
@@ -84,6 +92,10 @@ void zn1::ZNWriter::start()
   m_zn_state.c = STATE_NO_CONNECTION;
   m_zn_state.a = STATE_NO_AUTHORITY;
   m_zn_state.w = STATE_NO_WRITING;
+
+//  m_test_file.setFileName("/home/user/ProjectData/APAK/ZNRecovery/test_writing.zndata");
+//  if(!m_test_file.open(QIODevice::WriteOnly))
+//    emit message(m_test_file.errorString(), sv::log::llError, sv::log::mtError);
 
 }
 
@@ -223,6 +235,8 @@ void zn1::ZNWriter::write()
 
           m_socket->write(pack);
 
+//          m_test_file.write(pack);
+
           emit message(QString("Запись %1 байт в зону %2").arg(pack.length()).arg(m_params.zone),
                        sv::log::llDebug2, sv::log::mtDebug);
 
@@ -250,12 +264,12 @@ void zn1::ZNWriter::write()
 
             else {
 
-                while(!bunches.isEmpty())
-                  delete bunches.dequeue();
+              while(!bunches.isEmpty())
+                delete bunches.dequeue();
 
-                emit message(QString("%1 байт успешно записаны в зону %2").arg(pack.length()).arg(m_params.zone), sv::log::llDebug, sv::log::mtSuccess);
+              emit message(QString("%1 байт успешно записаны в зону %2").arg(pack.length()).arg(m_params.zone), sv::log::llDebug, sv::log::mtSuccess);
 
-                m_zn_state.w = STATE_WRITING_OK;
+              m_zn_state.w = STATE_WRITING_OK;
 
             }
           }
