@@ -1481,34 +1481,141 @@ namespace zn1 {
 
       QJsonObject global = object.value(P_GLOBAL).toObject();
 
-      // params
-      {
+      // zn_data_file
+      P = P_ZN_DATA_FILE;
+      if(global.contains(P)) {
 
-        // zn_data_file
-        P = P_ZN_DATA_FILE;
-        if(global.contains(P)) {
+        p.zn_data_file = global.value(P).toString();
 
-          p.zn_data_file = global.value(P).toString();
-
-        }
-        else
-          p.zn_data_file = "";
-
-        // log_level
-        P = P_LOG_LEVEL;
-        if(global.contains(P))
-        {
-          p.log_level = sv::log::stringToLevel(global.value(P).toString(""));
-
-          if(p.log_level == sv::log::llUndefined)
-            throw SvException(QString(IMPERMISSIBLE_VALUE)
-                               .arg(P).arg(QString(QJsonDocument(global).toJson(QJsonDocument::Compact)))
-                               .arg(QString("Неверное значение для параметра \"%1\". Допустимые значения: error, warning, info, debug, debug2")
-                                                  .arg(P_LOG_LEVEL)));
-        }
-        else
-          p.log_level = sv::log::llInfo;
       }
+      else
+        p.zn_data_file = "";
+
+      // log_level
+      P = P_LOG_LEVEL;
+      if(global.contains(P))
+      {
+        p.log_level = sv::log::stringToLevel(global.value(P).toString(""));
+
+        if(p.log_level == sv::log::llUndefined)
+          throw SvException(QString(IMPERMISSIBLE_VALUE)
+                             .arg(P).arg(QString(QJsonDocument(global).toJson(QJsonDocument::Compact)))
+                             .arg(QString("Неверное значение для параметра \"%1\". Допустимые значения: error, warning, info, debug, debug2")
+                                                .arg(P_LOG_LEVEL)));
+      }
+      else
+        p.log_level = sv::log::llInfo;
+
+      // systems
+      if(object.contains(P_SYSTEMS)) {
+
+        if(!object.value(P_SYSTEMS).isArray())
+          throw SvException(QString("Неверная конфигурация json. Раздел \"%1\" отсутствует или не является массивом").arg(P_SYSTEMS));
+
+        else
+        {
+          QJsonArray systems = object.value(P_SYSTEMS).toArray();
+
+          for(QJsonValue s: systems) {
+
+            if(!s.isObject())
+              continue;
+
+            QJsonObject so = s.toObject();
+            ZNSystem system = ZNSystem{};
+
+            // marker
+            P = P_MARKER;
+            if(so.contains(P)) {
+
+              QString m = so.value(P).toString("");
+
+              if(m.isEmpty())
+                throw SvException(QString(IMPERMISSIBLE_VALUE)
+                                   .arg(P).arg(QString(QJsonDocument(so).toJson(QJsonDocument::Compact)))
+                                   .arg("Не допустим пустой маркер"));
+
+              system.setMarker(m);
+
+            }
+            else
+              throw SvException(QString(MISSING_PARAM_DESC).arg(QString(QJsonDocument(so).toJson(QJsonDocument::Compact))).arg(P));
+!!!
+            // begin
+            P = P_BEGIN;
+            if(so.contains(P)) {
+
+              QDateTime b = QDateTime::fromString(so.value(P).toString(""), DEFAULT_DATETIME_FORMAT);
+
+              if(b.isNull() || !b.isValid())
+                throw SvException(QString(IMPERMISSIBLE_VALUE)
+                                   .arg(P).arg(QString(QJsonDocument(so).toJson(QJsonDocument::Compact)))
+                                   .arg("Не допустимое значение начала периода"));
+
+              system.setBegin(b);
+
+            }
+            else
+              throw SvException(QString(MISSING_PARAM_DESC).arg(QString(QJsonDocument(so).toJson(QJsonDocument::Compact))).arg(P));
+
+            // end
+            P = P_END;
+            if(so.contains(P)) {
+
+              QDateTime e = QDateTime::fromString(so.value(P).toString(""), DEFAULT_DATETIME_FORMAT);
+
+              if(e.isNull() || !e.isValid())
+                throw SvException(QString(IMPERMISSIBLE_VALUE)
+                                   .arg(P).arg(QString(QJsonDocument(so).toJson(QJsonDocument::Compact)))
+                                   .arg("Не допустимое значение конца периода"));
+
+              system.setEnd(e);
+
+            }
+            else
+              throw SvException(QString(MISSING_PARAM_DESC).arg(QString(QJsonDocument(so).toJson(QJsonDocument::Compact))).arg(P));
+
+            // path
+            P = P_PATH;
+            if(so.contains(P)) {
+
+              QString path = so.value(P).toString("");
+
+              if(path.isEmpty())
+                throw SvException(QString(IMPERMISSIBLE_VALUE)
+                                   .arg(P).arg(QString(QJsonDocument(so).toJson(QJsonDocument::Compact)))
+                                   .arg("Необходимо указать путь для сохранения данных"));
+
+              system.setPath(path);
+
+            }
+            else
+              throw SvException(QString(MISSING_PARAM_DESC).arg(QString(QJsonDocument(so).toJson(QJsonDocument::Compact))).arg(P));
+
+            // save_file
+            P = P_FILE_NAME;
+            if(so.contains(P)) {
+
+              QString file_name = so.value(P).toString("");
+
+              if(file_name.isEmpty())
+                throw SvException(QString(IMPERMISSIBLE_VALUE)
+                                   .arg(P).arg(QString(QJsonDocument(so).toJson(QJsonDocument::Compact)))
+                                   .arg("Необходимо указать имя файла для сохранения загруженных данных"));
+
+              system.setFileName(file_name);
+
+            }
+            else
+              throw SvException(QString(MISSING_PARAM_DESC).arg(QString(QJsonDocument(so).toJson(QJsonDocument::Compact))).arg(P));
+
+            p.tasks.append(system);
+
+          }
+        }
+      }
+
+
 
   }
 
