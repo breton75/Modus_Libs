@@ -1327,8 +1327,8 @@ namespace zn1 {
       QJsonObject j;
 
       QJsonObject p;
-      p.insert(P_FULL_FILE_NAME, QJsonValue(full_file_name).toString());
-      p.insert(P_LOG_LEVEL,      QJsonValue(sv::log::levelToString(log_level)).toString());
+//      p.insert(P_FULL_FILE_NAME, QJsonValue(full_file_name).toString());
+//      p.insert(P_LOG_LEVEL,      QJsonValue(sv::log::levelToString(log_level)).toString());
       p.insert(P_START_BYTE,     QJsonValue(start_byte));
 
       QJsonArray a;
