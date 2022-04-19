@@ -28,10 +28,11 @@ HEADERS += \
     ../../../../../../Modus/global/global_defs.h \
     ../../../../../../Modus/global/signal/sv_signal.h \
     raduga_imitator_global.h \
-    raduga_defs.h \
+    ../../../../../../../ProjectData/APAK/c++/ZNRecovery/lib/radga/raduga_defs.h \
     data_type_collection.h \
     raduga_imitator.h \
-    protocol_params.h
+    protocol_params.h \
+    abstract_signal_collection.h
 
 # Default rules for deployment.
 unix {

@@ -10,7 +10,8 @@
 #include "../../../../../../Modus/global/signal/sv_signal.h"
 
 #include "protocol_params.h"
-#include "raduga_defs.h"
+#include "../../../../../../../ProjectData/APAK/c++/ZNRecovery/lib/radga/raduga_defs.h"
+#include "abstract_signal_collection.h"
 
 #include "data_type_collection.h"
 

@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QList>
 
-#include "raduga_defs.h"
+#include "../../../../../../../ProjectData/APAK/c++/ZNRecovery/lib/radga/raduga_defs.h"
 
 namespace raduga {
 
