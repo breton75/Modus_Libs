@@ -60,12 +60,12 @@ namespace apak {
     ups::ProtocolParams                       m_params;
 
     QMap<modus::SvSignal*, ups::SignalParams> m_params_by_signals;
-    QMap<quint16, QList<modus::SvSignal*>> m_signals_by_registers;
+    QMap<quint16, QList<modus::SvSignal*>>    m_signals_by_registers;
 
-    modus::SvSignal*  m_state_signal;
-    ups::SignalParams m_state_params;
+    modus::SvSignal*                          m_state_signal;
+    ups::SignalParams                         m_state_params;
 
-    bool    m_i_have_got_answer;
+    bool                                      m_i_have_got_answer;
 
   private slots:
     void queued_request();

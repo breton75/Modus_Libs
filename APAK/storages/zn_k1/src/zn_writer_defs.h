@@ -141,7 +141,7 @@ namespace zn1 {
         p.queue_len = DEFAULT_QUEUE_LEN;
 
       /* write biffer length */
-      P = P_WRITE_BUF;
+      P = P_WRITE_BUF_SIZE;
       if(object.contains(P))
       {
         if(object.value(P).toInt(-1) < 1)
@@ -177,7 +177,7 @@ namespace zn1 {
       j.insert(P_ZONE,      QJsonValue(zone).toString());
       j.insert(P_PASS,      QJsonValue(pass).toString());
       j.insert(P_QUEUE_LEN, QJsonValue(static_cast<int>(queue_len)).toInt());
-      j.insert(P_WRITE_BUF, QJsonValue(static_cast<int>(write_buf)).toInt());
+      j.insert(P_WRITE_BUF_SIZE, QJsonValue(static_cast<int>(write_buf)).toInt());
 
       return j;
 

@@ -112,6 +112,7 @@ void apak::SvUPS::start()
 
 void apak::SvUPS::queued_request()
 {
+
   for(quint16 registr: m_signals_by_registers.keys()) {
 
     QByteArray outdata;
@@ -122,11 +123,9 @@ void apak::SvUPS::queued_request()
               << registr                                // Адрес первого регистра
               << quint16(1);                            // Количество регистров
 
-
     quint16 crc = crc::crc16ibm((unsigned char*)(outdata.data()), outdata.length()); // Контрольная сумма CRC
     outdata.append(quint8(crc & 0xFF));
     outdata.append(quint8(crc >> 8));
-
 
     p_io_buffer->output->mutex.lock();
 

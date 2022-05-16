@@ -15,6 +15,13 @@
 #include "../../../../../Modus/global/signal/sv_signal.h"
 #include "../../../../../svlib/SvAbstractLogger/svabstractlogger.h"
 
+#define P_HOST                    "host"
+#define P_ZONE                    "zone"
+#define P_QUEUE_LEN               "queue"
+#define P_WRITE_BUF_SIZE          "bufsize"
+
+#define P_ZN_MARKER               "zn_marker"
+
 #define DEFAULT_DATETIME_FORMAT   "yyyy-MM-dd hh:mm:ss"
 
 
@@ -83,15 +90,14 @@ namespace zn1 {
 
     bool fromRawData(const char* data)
     {
-//qDebug() << 1;
       QByteArray b(data, sizeof(marker) + sizeof(coarseDateTime)  + sizeof(dataLength) + sizeof(crc16));
       QDataStream s(b);
       s.setByteOrder(QDataStream::LittleEndian); // !
-//qDebug() << 2;
+
       s.readRawData(&marker[0], sizeof(marker));
-//qDebug() << 3;
+
       s >> coarseDateTime >> dataLength >> crc16;
-//qDebug() << 4;
+
       return (crc16 == crc::crc16ccitt(data, sizeof(marker) + sizeof(coarseDateTime) + sizeof(dataLength)));
     }
 

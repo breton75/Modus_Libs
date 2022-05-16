@@ -317,12 +317,12 @@ void zn1::ZNWriter::signalUpdated(modus::SvSignal* signal)
       if(signal_params.zn_marker.isEmpty())
         emit message(QString("Для сигнала \"%1\" не задан идентфикатор записи \"zn_marker\"").arg(signal->config()->name), lldbg, mterr);
 
-      Record p(signal->lastUpdate().toMSecsSinceEpoch(), signal_params.zn_marker, signal->value().toByteArray());
+      Record r(signal->lastUpdate().toMSecsSinceEpoch(), signal_params.zn_marker, signal->value().toByteArray());
 
-      bunches.last()->appendRecord(&p);
+      bunches.last()->appendRecord(&r);
 
       emit message(QString("%1 bytes appended to bunch. Bunch size: %2, records: %3")
-                   .arg(p.size()).arg(bunches.last()->length()).arg(bunches.last()->recordCount()), lldbg2, mtdbg);
+                   .arg(r.size()).arg(bunches.last()->length()).arg(bunches.last()->recordCount()), lldbg2, mtdbg);
 
     }
   }
