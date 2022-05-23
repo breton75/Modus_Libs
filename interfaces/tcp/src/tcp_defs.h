@@ -13,7 +13,7 @@
 
 #include "../../../../svlib/SvException/svexception.h"
 #include "../../../../Modus/global/global_defs.h"
-#include "../../../../Modus_Libs/APAK/global_apak_defs.h"
+//#include "../../../../Modus_Libs/APAK/global_apak_defs.h"
 
 #define P_TCP_MODE                  "mode"
 #define P_TCP_IFC                   "ifc"
@@ -93,7 +93,7 @@ namespace tcp {
     QHostAddress host             = QHostAddress::Any;
     quint16      port             = DEFAULT_PORT;
     quint16      connect_timeout  = DEFAULT_TIMEOUT;
-    quint16      fmt              = apak::HEX;
+    quint16      fmt              = HEX;
     quint16      grain_gap        = DEFAULT_GRAIN_GAP;
 
     static Params fromJsonString(const QString& json_string) //throw (SvException)
@@ -193,20 +193,20 @@ namespace tcp {
         if(!object.value(P).isString())
           throw SvException(QString(IMPERMISSIBLE_VALUE)
                             .arg(P).arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact)))
-                            .arg(QString("Формат вывода данных должен быть задан строковым значением [\"hex\"|\"ascii\"|\"datalen\"]")));
+                            .arg(QString("Формат вывода данных должен быть задан строковым значением [\"hex\"|\"ascii\"|\"len\"]")));
 
         QString fmt = object.value(P).toString("hex").toLower();
 
-        if(!apak::LogFormats.contains(fmt))
+        if(!LogFormats.contains(fmt))
           throw SvException(QString(IMPERMISSIBLE_VALUE)
                             .arg(P).arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact)))
-                            .arg(QString("Не поддерживаемый формат вывода данных. Допустимые значения: [\"hex\"|\"ascii\"|\"datalen\"]")));
+                            .arg(QString("Не поддерживаемый формат вывода данных. Допустимые значения: [\"hex\"|\"ascii\"|\"len\"]")));
 
-        p.fmt = apak::LogFormats.value(fmt);
+        p.fmt = LogFormats.value(fmt);
 
       }
       else
-        p.fmt = apak::HEX;
+        p.fmt = HEX;
 
       /* grain gap*/
       P = P_GRAIN_GAP;

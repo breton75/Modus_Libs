@@ -110,6 +110,9 @@ void SvUdp::read()
 //    /* ... the rest of the datagram will be lost ... */
   qint64 readed = m_socket->readDatagram(&p_io_buffer->input->data[p_io_buffer->input->offset], p_config->bufsize - p_io_buffer->input->offset);
 
+  if(p_io_buffer->input->offset == 0)
+    p_io_buffer->input->set_time = QDateTime::currentMSecsSinceEpoch();
+
   emit_message(QByteArray((const char*)&p_io_buffer->input->data[p_io_buffer->input->offset], readed), sv::log::llDebug, sv::log::mtReceive);
 
   p_io_buffer->input->offset += readed;
@@ -152,15 +155,15 @@ void SvUdp::emit_message(const QByteArray& bytes, sv::log::Level level, sv::log:
 
   //! The append() function is typically very fast
   switch (m_params.fmt) {
-    case apak::HEX:
+    case HEX:
       msg.append(bytes.toHex());
       break;
 
-    case apak::ASCII:
+    case ASCII:
       msg.append(bytes);
       break;
 
-    case apak::DATALEN:
+    case DATALEN:
       msg = QString("%1 байт %2").arg(bytes.length()).arg(type == sv::log::mtSend ? "отправлено" : type == sv::log::mtReceive ? "принято" : "");
       break;
 

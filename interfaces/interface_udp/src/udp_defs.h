@@ -13,7 +13,7 @@
 
 #include "../../../../svlib/SvException/svexception.h"
 #include "../../../../Modus/global/global_defs.h"
-#include "../../../../Modus_Libs/APAK/global_apak_defs.h"
+//#include "../../../../Modus_Libs/APAK/global_apak_defs.h"
 
 #define P_UDP_IFC                   "ifc"
 #define P_UDP_HOST                  "host"
@@ -35,7 +35,7 @@ struct UdpParams {
   QHostAddress host             = QHostAddress::Any;
   quint16      recv_port        = DEFAULT_RECV_PORT;
   quint16      send_port        = DEFAULT_SEND_PORT;
-  quint16      fmt              = apak::HEX;
+  quint16      fmt              = HEX;
   quint16      grain_gap        = DEFAULT_GRAIN_GAP;
 
   static UdpParams fromJsonString(const QString& json_string) //throw (SvException)
@@ -120,20 +120,20 @@ struct UdpParams {
       if(!object.value(P).isString())
         throw SvException(QString(IMPERMISSIBLE_VALUE)
                           .arg(P).arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact)))
-                          .arg(QString("Формат вывода данных должен быть задан строковым значением [\"hex\"|\"ascii\"|\"datalen\"]")));
+                          .arg(QString("Формат вывода данных должен быть задан строковым значением [\"hex\"|\"ascii\"|\"len\"]")));
 
       QString fmt = object.value(P).toString("hex").toLower();
 
-      if(!apak::LogFormats.contains(fmt))
+      if(!LogFormats.contains(fmt))
         throw SvException(QString(IMPERMISSIBLE_VALUE)
                           .arg(P).arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact)))
-                          .arg(QString("Не поддерживаемый формат вывода данных. Допустимые значения: [\"hex\"|\"ascii\"|\"datalen\"]")));
+                          .arg(QString("Не поддерживаемый формат вывода данных. Допустимые значения: [\"hex\"|\"ascii\"|\"len\"]")));
 
-      p.fmt = apak::LogFormats.value(fmt);
+      p.fmt = LogFormats.value(fmt);
 
     }
     else
-      p.fmt = apak::HEX;
+      p.fmt = HEX;
 
     /* grain gap*/
     P = P_GRAIN_GAP;

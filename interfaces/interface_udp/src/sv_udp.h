@@ -7,7 +7,7 @@
 #include "ifc_udp_global.h"
 #include "udp_defs.h"
 
-#include "../../../../Modus_Libs/APAK/global_apak_defs.h"
+#include "../../../../Modus/global/global_defs.h"
 #include "../../../../Modus/global/device/interface/sv_abstract_interface.h"
 
 extern "C" {

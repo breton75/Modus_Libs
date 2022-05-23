@@ -39,6 +39,7 @@ bool SvTcp::start()
       connect(p_io_buffer,  &modus::IOBuffer::readyWrite, this, &SvTcp::write       );
 
       m_gap_timer = new QTimer;
+      m_gap_timer->setTimerType(Qt::PreciseTimer);
       m_gap_timer->setInterval(m_params.grain_gap);
       m_gap_timer->setSingleShot(true);
       connect(m_gap_timer, &QTimer::timeout, this, &SvTcp::newData);
@@ -108,7 +109,11 @@ void SvTcp::read()
   if(p_io_buffer->input->offset + m_client->bytesAvailable() > p_config->bufsize)
     p_io_buffer->input->reset();
 
+//  qint64 readed = p_io_buffer->input->read(m_client);
   qint64 readed = m_client->read(&p_io_buffer->input->data[p_io_buffer->input->offset], p_config->bufsize - p_io_buffer->input->offset);
+
+  if(p_io_buffer->input->offset == 0)
+    p_io_buffer->input->set_time = QDateTime::currentMSecsSinceEpoch();
 
   emit_message(QByteArray((const char*)&p_io_buffer->input->data[p_io_buffer->input->offset], readed), sv::log::llDebug, sv::log::mtReceive);
 
@@ -156,15 +161,15 @@ void SvTcp::emit_message(const QByteArray& bytes, sv::log::Level level, sv::log:
 
   //! The append() function is typically very fast
   switch (m_params.fmt) {
-    case apak::HEX:
+    case LogFormat::HEX:
       msg.append(bytes.toHex());
       break;
 
-    case apak::ASCII:
+    case LogFormat::ASCII:
       msg.append(bytes);
       break;
 
-    case apak::DATALEN:
+    case LogFormat::DATALEN:
       msg = QString("%1 байт %2").arg(bytes.length()).arg(type == sv::log::mtSend ? "отправлено" : type == sv::log::mtReceive ? "принято" : "");
       break;
 
