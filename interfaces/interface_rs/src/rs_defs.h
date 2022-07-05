@@ -21,7 +21,6 @@
 
 #include "../../../../svlib/SvException/svexception.h"
 #include "../../../../Modus/global/global_defs.h"
-#include "../../../../Modus_Libs/APAK/global_apak_defs.h"
 
 // имена параметров для RS
 #define P_SERIAL_BAUDRATE "baudrate"
@@ -69,7 +68,7 @@ struct SerialParams {
   QSerialPort::Parity       parity      =     QSerialPort::NoParity;
   QSerialPort::StopBits     stopbits    =     QSerialPort::OneStop;
   QSerialPort::FlowControl  flowcontrol =     QSerialPort::NoFlowControl;
-  quint16                   fmt         =     apak::HEX;
+  quint16                   fmt         =     modus::HEX;
   quint16                   grain_gap   =     DEFAULT_GRAIN_GAP;
 
   bool isValid = true;
@@ -193,16 +192,16 @@ struct SerialParams {
 
       QString fmt = object.value(P).toString("hex").toLower();
 
-      if(!apak::LogFormats.contains(fmt))
+      if(!modus::LogFormats.contains(fmt))
         throw SvException(QString(IMPERMISSIBLE_VALUE)
                           .arg(P).arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact)))
                           .arg(QString("Не поддерживаемый формат вывода данных. Допустимые значения: [\"hex\"|\"ascii\"|\"datalen\"]")));
 
-      p.fmt = apak::LogFormats.value(fmt);
+      p.fmt = modus::LogFormats.value(fmt);
 
     }
     else
-      p.fmt = apak::HEX;
+      p.fmt = modus::HEX;
 
     /* grain gap*/
     P = P_GRAIN_GAP;

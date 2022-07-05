@@ -6,7 +6,6 @@
 #include "ifc_rs_global.h"
 #include "rs_defs.h"
 
-#include "../../../../Modus_Libs/APAK/global_apak_defs.h"
 #include "../../../../Modus/global/device/interface/sv_abstract_interface.h"
 
 extern "C" {
