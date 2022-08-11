@@ -23,6 +23,7 @@ SOURCES += \
 
 HEADERS += \
     ../../../../Modus/global/device/interface/sv_abstract_interface.h \
+    ../../../../Modus/global/device/device_defs.h \
     ifc_rs_global.h \
     sv_rs.h \
     rs_defs.h

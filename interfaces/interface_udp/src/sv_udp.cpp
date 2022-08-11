@@ -155,15 +155,15 @@ void SvUdp::emit_message(const QByteArray& bytes, sv::log::Level level, sv::log:
 
   //! The append() function is typically very fast
   switch (m_params.fmt) {
-    case HEX:
+    case modus::HEX:
       msg.append(bytes.toHex());
       break;
 
-    case ASCII:
+    case modus::ASCII:
       msg.append(bytes);
       break;
 
-    case DATALEN:
+    case modus::DATALEN:
       msg = QString("%1 байт %2").arg(bytes.length()).arg(type == sv::log::mtSend ? "отправлено" : type == sv::log::mtReceive ? "принято" : "");
       break;
 

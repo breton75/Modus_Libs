@@ -23,9 +23,11 @@ SOURCES += \
 
 HEADERS += \
     ../../../../Modus/global/device/interface/sv_abstract_interface.h \
+    ../../../../Modus/global/device/device_defs.h \
     ifc_udp_global.h \
     sv_udp.h \
     udp_defs.h
+
 
 # Default rules for deployment.
 unix {

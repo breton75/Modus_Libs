@@ -13,7 +13,6 @@
 
 #include "../../../../svlib/SvException/svexception.h"
 #include "../../../../Modus/global/global_defs.h"
-//#include "../../../../Modus_Libs/APAK/global_apak_defs.h"
 
 #define P_UDP_IFC                   "ifc"
 #define P_UDP_HOST                  "host"
@@ -35,7 +34,7 @@ struct UdpParams {
   QHostAddress host             = QHostAddress::Any;
   quint16      recv_port        = DEFAULT_RECV_PORT;
   quint16      send_port        = DEFAULT_SEND_PORT;
-  quint16      fmt              = HEX;
+  quint16      fmt              = modus::HEX;
   quint16      grain_gap        = DEFAULT_GRAIN_GAP;
 
   static UdpParams fromJsonString(const QString& json_string) //throw (SvException)
@@ -124,16 +123,16 @@ struct UdpParams {
 
       QString fmt = object.value(P).toString("hex").toLower();
 
-      if(!LogFormats.contains(fmt))
+      if(!modus::LogFormats.contains(fmt))
         throw SvException(QString(IMPERMISSIBLE_VALUE)
                           .arg(P).arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact)))
                           .arg(QString("Не поддерживаемый формат вывода данных. Допустимые значения: [\"hex\"|\"ascii\"|\"len\"]")));
 
-      p.fmt = LogFormats.value(fmt);
+      p.fmt = modus::LogFormats.value(fmt);
 
     }
     else
-      p.fmt = HEX;
+      p.fmt = modus::HEX;
 
     /* grain gap*/
     P = P_GRAIN_GAP;
