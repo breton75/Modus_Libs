@@ -32,14 +32,12 @@ bool SvCAN::configure(modus::DeviceConfig *config, modus::IOBuffer *iobuffer)
         b = p.readAllStandardError();
 
         if(!b.isEmpty())
-          throw SvException(QString("Ошибка при настроке порта %1: %2")
-                            .arg(m_params.portname)
-                            .arg(QString(b)));
+          throw SvException(QString(ERR_PORT_ADJUST)
+                            .arg(m_params.portname).arg(QString(b)));
       }
       else
-        throw SvException(QString("Ошибка при настроке порта %1: %2")
-                          .arg(m_params.portname)
-                          .arg(p.errorString()));
+        throw SvException(QString(ERR_PORT_ADJUST)
+                          .arg(m_params.portname).arg(p.errorString()));
 
       p.start(QString("sudo ip link set %1 type can bitrate %2")
             .arg(m_params.portname)
@@ -50,14 +48,12 @@ bool SvCAN::configure(modus::DeviceConfig *config, modus::IOBuffer *iobuffer)
         b = p.readAllStandardError();
 
         if(!b.isEmpty())
-          throw SvException(QString("Ошибка при настроке порта %1: %2")
-                            .arg(m_params.portname)
-                            .arg(QString(b)));
+          throw SvException(QString(ERR_PORT_ADJUST)
+                            .arg(m_params.portname).arg(QString(b)));
       }
       else
-        throw SvException(QString("Ошибка при настроке порта %1: %2")
-                          .arg(m_params.portname)
-                          .arg(p.errorString()));
+        throw SvException(QString(ERR_PORT_ADJUST)
+                          .arg(m_params.portname).arg(p.errorString()));
 
       p.start(QString("sudo ip link set %1 up").arg(m_params.portname));
 
@@ -66,9 +62,8 @@ bool SvCAN::configure(modus::DeviceConfig *config, modus::IOBuffer *iobuffer)
         b = p.readAllStandardError();
 
         if(!b.isEmpty())
-          throw SvException(QString("Ошибка при настроке порта %1: %2")
-                            .arg(m_params.portname)
-                            .arg(QString(b)));
+          throw SvException(QString(ERR_PORT_ADJUST)
+                            .arg(m_params.portname).arg(QString(b)));
 
       }
     }
@@ -98,7 +93,7 @@ bool SvCAN::configure(modus::DeviceConfig *config, modus::IOBuffer *iobuffer)
   }
 }
 
-void SvCAN::run()
+bool SvCAN::start()
 {
   p_is_active = true;
 
@@ -108,6 +103,7 @@ void SvCAN::run()
 //  qint64 reset_time = QDateTime::currentMSecsSinceEpoch() + p_config->interface.buffer_reset_interval;
 
   // по стандарту CAN между фреймами должен быть интервал длиной минимум 3 бита
+  // вычисляем длину интервала в микросекундах!, исходя из заданного битрейта
   quint32 interval = int((1.0 / m_params.bitrate) * 1000000) * 3;
 
   qDebug() << interval;
@@ -116,7 +112,7 @@ void SvCAN::run()
 
     memset(&frame, 0, framesz);
 
-    nbytes = read(sock, &frame, framesz);
+    nbytes = recv(sock, &frame, framesz, 0);
 
 //    if(nbytes == 0) {
 
@@ -156,12 +152,16 @@ void SvCAN::run()
 
       if(nbytes != framesz) {
 
-        p_io_buffer->input->reset();
+//        p_io_buffer->input->reset();
 
-        message(QString("Неверный размер пакета. %1 байт вместо %2").arg(nbytes).arg(framesz));
+        emit message(QString("Неверный размер пакета. %1 байт вместо %2").arg(nbytes).arg(framesz),
+                     sv::log::llError, sv::log::mtError);
+
+        emit_message(QByteArray((const char*)&frame, nbytes), sv::log::llError, sv::log::mtError);
+
 
       }
-      else { // if (nbytes == framesz) {
+      else {
 
         p_io_buffer->input->mutex.lock();
 
@@ -170,6 +170,8 @@ void SvCAN::run()
 
         memcpy(&p_io_buffer->input->data[p_io_buffer->input->offset], &frame, framesz);
         p_io_buffer->input->offset += framesz;
+
+        emit_message(QByteArray((const char*)&p_io_buffer->input->data[p_io_buffer->input->offset], framesz), sv::log::llDebug, sv::log::mtReceive);
 
 //        qDebug() << p_io_buffer->input->offset << QDateTime::currentDateTime().currentMSecsSinceEpoch() << QString(QByteArray(&((const char*)(&frame))[0], framesz).toHex());
         p_io_buffer->input->mutex.unlock();
@@ -181,23 +183,51 @@ void SvCAN::run()
     // отправляем управляющие данные, если они есть
     p_io_buffer->output->mutex.lock();
 
-    if(p_io_buffer->output->ready()) {
+    if(p_io_buffer->output->isReady()) {
 
-      int nbytes = write(sock, &p_io_buffer->output->data[0], sizeof(struct can_frame));
+      int nbytes = send(sock, &p_io_buffer->output->data[0], sizeof(struct can_frame), 0);
 
       if(nbytes > 0) {
-        message(QString("<< %1").arg(QString(QByteArray((const char*)&p_io_buffer->output->data[0], p_io_buffer->output->offset).toHex())));
+
+        emit_message(QByteArray((const char*)&p_io_buffer->output->data[0], p_io_buffer->output->offset),
+            sv::log::llDebug, sv::log::mtSend);
+
         p_io_buffer->output->reset();
       }
     }
 
     p_io_buffer->output->mutex.unlock();
 
-//    QThread::yieldCurrentThread();
-
     usleep(interval);
 
   }
+}
+
+void SvCAN::emit_message(const QByteArray& bytes, sv::log::Level level, sv::log::MessageTypes type)
+{
+  QString msg = "";
+
+  //! The append() function is typically very fast
+  switch (m_params.fmt) {
+    case modus::HEX:
+      msg.append(bytes.toHex());
+      break;
+
+    case modus::ASCII:
+      msg.append(bytes);
+      break;
+
+    case modus::DATALEN:
+      msg = QString("%1 байт %2").arg(bytes.length()).arg(type == sv::log::mtSend ? "отправлено" : type == sv::log::mtReceive ? "принято" : "");
+      break;
+
+    default:
+      return;
+      break;
+  }
+
+  emit message(msg, level, type);
+
 }
 
 /** ********** EXPORT ************ **/

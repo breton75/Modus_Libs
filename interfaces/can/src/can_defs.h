@@ -2,8 +2,8 @@
  *  автор Свиридов С.А. Авиационные и Морская Электроника
  * *********************************************************************/
 
-#ifndef CAN_PARAMS
-#define CAN_PARAMS
+#ifndef CAN_IFC_PARAMS
+#define CAN_IFC_PARAMS
 
 #include <QtGlobal>
 #include <QVariant>
@@ -11,19 +11,21 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-#include "../../../../Modus/global/misc/sv_exception.h"
+#include "../../../../svlib/SvException/svexception.h"
 #include "../../../../Modus/global/global_defs.h"
 
 // имена параметров для CAN
 #define P_PORTNAME "portname"
 #define P_BITRATE  "bitrate"
+#define P_LOG_FMT  "fmt"
 
 #define DEFAULT_CAN_BITRATE 125000
 
 struct CANParams {
 
-  QString                   portname    =     "can0";
-  int                       bitrate     =     DEFAULT_CAN_BITRATE;
+  QString         portname    = "can0";
+  int             bitrate     = DEFAULT_CAN_BITRATE;
+  quint16         fmt         = modus::HEX;
 
   bool isValid = true;
 
@@ -77,6 +79,27 @@ struct CANParams {
     else
       throw SvException(QString(MISSING_PARAM).arg(QString("%1/%2").arg(P_INTERFACE).arg(P_PARAMS)).arg(P));
 
+    // log fmt
+    P = P_LOG_FMT;
+    if(object.contains(P)) {
+
+      if(!object.value(P).isString())
+        throw SvException(QString(IMPERMISSIBLE_VALUE)
+                          .arg(P).arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact)))
+                          .arg(QString("Формат вывода данных должен быть задан строковым значением [\"hex\"|\"ascii\"|\"len\"]")));
+
+      QString fmt = object.value(P).toString("hex").toLower();
+
+      if(!modus::LogFormats.contains(fmt))
+        throw SvException(QString(IMPERMISSIBLE_VALUE)
+                          .arg(P).arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact)))
+                          .arg(QString("Не поддерживаемый формат вывода данных. Допустимые значения: [\"hex\"|\"ascii\"|\"len\"]")));
+
+      p.fmt = modus::LogFormats.value(fmt);
+
+    }
+    else
+      p.fmt = modus::HEX;
 
     return p;
 
@@ -103,5 +126,5 @@ struct CANParams {
 };
 
 
-#endif // CAN_PARAMS
+#endif // CAN_IFC_PARAMS
 

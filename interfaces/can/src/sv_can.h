@@ -1,5 +1,5 @@
-﻿#ifndef SV_CAN_H
-#define SV_CAN_H
+﻿#ifndef SV_CAN_IFC_H
+#define SV_CAN_IFC_H
 
 #include <QProcess>
 
@@ -18,6 +18,8 @@
 
 #include "../../../../Modus/global/device/interface/sv_abstract_interface.h"
 
+#define ERR_PORT_ADJUST "Ошибка при настроке порта %1: %2"
+
 extern "C" {
 
     IFC_CAN_EXPORT modus::SvAbstractInterface* create();
@@ -35,17 +37,27 @@ public:
 
   virtual bool configure(modus::DeviceConfig* config, modus::IOBuffer*iobuffer) override;
 
-protected:
-  virtual void run() override;
+public slots:
+  bool start() override;
+
+  void read() override
+  { }
+
+  virtual void write(modus::BUFF* buffer) override
+  { Q_UNUSED(buffer); }
 
 private:
-  CANParams     m_params;
+  CANParams m_params;
 
-  int sock = 0;
-  struct sockaddr_can addr;
-  struct can_frame frame;
-  struct ifreq ifr;
+  int       sock              = 0   ;
+  struct    sockaddr_can addr       ;
+  struct    can_frame         frame ;
+  struct    ifreq             ifr   ;
+
+private slots:
+  void emit_message(const QByteArray& bytes, sv::log::Level level, sv::log::MessageTypes type);
+
 
 };
 
-#endif // SVUDP_H
+#endif // SV_CAN_IFC_H
