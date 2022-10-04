@@ -1,16 +1,16 @@
 /****************************************************************************
-** Meta object code from reading C++ file 'dummy.h'
+** Meta object code from reading C++ file 'ksuts_skm.h'
 **
 ** Created by: The Qt Meta Object Compiler version 67 (Qt 5.5.1)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
-#include "../src/dummy.h"
+#include "../../../../KSUTS/modus_libs/ksuts_skm/src/ksuts_skm.h"
 #include <QtCore/qbytearray.h>
 #include <QtCore/qmetatype.h>
 #if !defined(Q_MOC_OUTPUT_REVISION)
-#error "The header file 'dummy.h' doesn't include <QObject>."
+#error "The header file 'ksuts_skm.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 67
 #error "This file was generated using the moc from 5.5.1. It"
 #error "cannot be used with the include files from this version of Qt."
@@ -18,36 +18,36 @@
 #endif
 
 QT_BEGIN_MOC_NAMESPACE
-struct qt_meta_stringdata_plug__SvDummy_t {
+struct qt_meta_stringdata_skm__SvSKM_t {
     QByteArrayData data[10];
-    char stringdata0[99];
+    char stringdata0[96];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
-    qptrdiff(offsetof(qt_meta_stringdata_plug__SvDummy_t, stringdata0) + ofs \
+    qptrdiff(offsetof(qt_meta_stringdata_skm__SvSKM_t, stringdata0) + ofs \
         - idx * sizeof(QByteArrayData)) \
     )
-static const qt_meta_stringdata_plug__SvDummy_t qt_meta_stringdata_plug__SvDummy = {
+static const qt_meta_stringdata_skm__SvSKM_t qt_meta_stringdata_skm__SvSKM = {
     {
-QT_MOC_LITERAL(0, 0, 13), // "plug::SvDummy"
-QT_MOC_LITERAL(1, 14, 13), // "signalUpdated"
-QT_MOC_LITERAL(2, 28, 0), // ""
-QT_MOC_LITERAL(3, 29, 16), // "modus::SvSignal*"
-QT_MOC_LITERAL(4, 46, 6), // "signal"
-QT_MOC_LITERAL(5, 53, 13), // "signalChanged"
-QT_MOC_LITERAL(6, 67, 5), // "start"
-QT_MOC_LITERAL(7, 73, 5), // "parse"
-QT_MOC_LITERAL(8, 79, 12), // "modus::BUFF*"
-QT_MOC_LITERAL(9, 92, 6) // "buffer"
+QT_MOC_LITERAL(0, 0, 10), // "skm::SvSKM"
+QT_MOC_LITERAL(1, 11, 13), // "signalUpdated"
+QT_MOC_LITERAL(2, 25, 0), // ""
+QT_MOC_LITERAL(3, 26, 16), // "modus::SvSignal*"
+QT_MOC_LITERAL(4, 43, 6), // "signal"
+QT_MOC_LITERAL(5, 50, 13), // "signalChanged"
+QT_MOC_LITERAL(6, 64, 5), // "start"
+QT_MOC_LITERAL(7, 70, 5), // "parse"
+QT_MOC_LITERAL(8, 76, 12), // "modus::BUFF*"
+QT_MOC_LITERAL(9, 89, 6) // "buffer"
 
     },
-    "plug::SvDummy\0signalUpdated\0\0"
-    "modus::SvSignal*\0signal\0signalChanged\0"
-    "start\0parse\0modus::BUFF*\0buffer"
+    "skm::SvSKM\0signalUpdated\0\0modus::SvSignal*\0"
+    "signal\0signalChanged\0start\0parse\0"
+    "modus::BUFF*\0buffer"
 };
 #undef QT_MOC_LITERAL
 
-static const uint qt_meta_data_plug__SvDummy[] = {
+static const uint qt_meta_data_skm__SvSKM[] = {
 
  // content:
        7,       // revision
@@ -75,10 +75,10 @@ static const uint qt_meta_data_plug__SvDummy[] = {
        0        // eod
 };
 
-void plug::SvDummy::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+void skm::SvSKM::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
-        SvDummy *_t = static_cast<SvDummy *>(_o);
+        SvSKM *_t = static_cast<SvSKM *>(_o);
         Q_UNUSED(_t)
         switch (_id) {
         case 0: _t->signalUpdated((*reinterpret_cast< modus::SvSignal*(*)>(_a[1]))); break;
@@ -108,26 +108,26 @@ void plug::SvDummy::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _i
     }
 }
 
-const QMetaObject plug::SvDummy::staticMetaObject = {
-    { &modus::SvAbstractProtocol::staticMetaObject, qt_meta_stringdata_plug__SvDummy.data,
-      qt_meta_data_plug__SvDummy,  qt_static_metacall, Q_NULLPTR, Q_NULLPTR}
+const QMetaObject skm::SvSKM::staticMetaObject = {
+    { &modus::SvAbstractProtocol::staticMetaObject, qt_meta_stringdata_skm__SvSKM.data,
+      qt_meta_data_skm__SvSKM,  qt_static_metacall, Q_NULLPTR, Q_NULLPTR}
 };
 
 
-const QMetaObject *plug::SvDummy::metaObject() const
+const QMetaObject *skm::SvSKM::metaObject() const
 {
     return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
-void *plug::SvDummy::qt_metacast(const char *_clname)
+void *skm::SvSKM::qt_metacast(const char *_clname)
 {
     if (!_clname) return Q_NULLPTR;
-    if (!strcmp(_clname, qt_meta_stringdata_plug__SvDummy.stringdata0))
-        return static_cast<void*>(const_cast< SvDummy*>(this));
+    if (!strcmp(_clname, qt_meta_stringdata_skm__SvSKM.stringdata0))
+        return static_cast<void*>(const_cast< SvSKM*>(this));
     return modus::SvAbstractProtocol::qt_metacast(_clname);
 }
 
-int plug::SvDummy::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+int skm::SvSKM::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = modus::SvAbstractProtocol::qt_metacall(_c, _id, _a);
     if (_id < 0)
