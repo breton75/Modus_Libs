@@ -59,3 +59,5 @@ server/build/
 mdserver/build/
 global/std/
 interfaces/tcp/build/
+interfaces/interface_tcp_client/build/
+interfaces/interface_tcp_server/build/
