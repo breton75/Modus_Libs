@@ -72,16 +72,17 @@ void SvTcpServer::read()
   qDebug() << "TCP-сервер: отладка затыкания - r1";
   m_gap_timer->stop();
 
+  p_io_buffer->input->mutex.lock();
+
   qDebug() << "TCP-сервер: отладка затыкания - r2";
   // Если нам надо читать данные от интерфейса в буфер, а протокольная часть ещё не прочла
   // прошлое содержание буфера, то стираем прошлое содержание.
   if(p_io_buffer->input->isReady())
   {
-     qDebug() << "TCP-сервер: отладка затыкания - r3";
-    p_io_buffer->input->reset();
+      qDebug() << "TCP-сервер: отладка затыкания - r3";
+      p_io_buffer->input->reset();
   }
   qDebug() << "TCP-сервер: отладка затыкания - r4";
-  p_io_buffer->input->mutex.lock();
 
   if(p_io_buffer->input->offset + m_clientConnection->bytesAvailable() > p_config->bufsize)
   {
@@ -94,7 +95,7 @@ void SvTcpServer::read()
 
   if(p_io_buffer->input->offset == 0)
   { // Фиксируем момент НАЧАЛА чтения:
-    p_io_buffer->input->set_time = QDateTime::currentMSecsSinceEpoch();
+      p_io_buffer->input->set_time = QDateTime::currentMSecsSinceEpoch();
   }
 
   emit_message(QByteArray((const char*)&p_io_buffer->input->data[p_io_buffer->input->offset], readed), sv::log::llDebug, sv::log::mtReceive);
