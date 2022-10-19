@@ -104,12 +104,12 @@ void SvTcpClient::read()
 {
    m_gap_timer->stop();
 
-  // Если нам надо читать данные от интерфейса в буфер, а протокольная часть ещё не прочла
-  // прошлое содержание буфера, то стираем прошлое содержание.
-  if(p_io_buffer->input->isReady())
-    p_io_buffer->input->reset();
+   // Если нам надо читать данные от интерфейса в буфер, а протокольная часть ещё не прочла
+   // прошлое содержание буфера, то стираем прошлое содержание.
+   if(p_io_buffer->input->isReady())
+     p_io_buffer->input->reset();
 
-  p_io_buffer->input->mutex.lock();
+   p_io_buffer->input->mutex.lock();
 
   if(p_io_buffer->input->offset + m_client->bytesAvailable() > p_config->bufsize)
     p_io_buffer->input->reset();
