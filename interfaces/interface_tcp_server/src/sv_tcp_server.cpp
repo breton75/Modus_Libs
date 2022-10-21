@@ -69,29 +69,24 @@ void SvTcpServer::stateChanged(QAbstractSocket::SocketState state)
 void SvTcpServer::read()
 // Получение данных от сокета клиентского подключения.
 {
-  qDebug() << "TCP-сервер: отладка затыкания - r1";
   m_gap_timer->stop();
 
   p_io_buffer->input->mutex.lock();
 
-  qDebug() << "TCP-сервер: отладка затыкания - r2";
   // Если нам надо читать данные от интерфейса в буфер, а протокольная часть ещё не прочла
   // прошлое содержание буфера, то стираем прошлое содержание.
   if(p_io_buffer->input->isReady())
   {
-      qDebug() << "TCP-сервер: отладка затыкания - r3";
       p_io_buffer->input->reset();
   }
-  qDebug() << "TCP-сервер: отладка затыкания - r4";
 
   if(p_io_buffer->input->offset + m_clientConnection->bytesAvailable() > p_config->bufsize)
   {
-      qDebug() << "TCP-сервер: отладка затыкания - r5";
       p_io_buffer->input->reset();
   }
+
 //  qint64 readed = p_io_buffer->input->read(m_client);
   qint64 readed = m_clientConnection->read(&p_io_buffer->input->data[p_io_buffer->input->offset], p_config->bufsize - p_io_buffer->input->offset);
-    qDebug() << "TCP-сервер: отладка затыкания - r6" << "Прочитано символов: "<< readed;
 
   if(p_io_buffer->input->offset == 0)
   { // Фиксируем момент НАЧАЛА чтения:
@@ -185,7 +180,6 @@ void SvTcpServer::newData()
 {
   QMutexLocker(&p_io_buffer->input->mutex);
 
-  qDebug() << "TCP-сервер: отладка затыкания - n1";
   QByteArray received = QByteArray((const char*)&p_io_buffer->input->data[0], p_io_buffer ->input ->offset); // Отладка
 
   emit_message((received), sv::log::llDebug, sv::log::mtReceive);
@@ -196,7 +190,6 @@ void SvTcpServer::newData()
 
   p_io_buffer->input->setReady(true);
   emit p_io_buffer->dataReaded(p_io_buffer->input);
-  qDebug() << "TCP-сервер: отладка затыкания - n2";
 }
 
 
