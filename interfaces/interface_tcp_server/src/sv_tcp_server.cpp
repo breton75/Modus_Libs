@@ -73,19 +73,18 @@ void SvTcpServer::read()
 
   p_io_buffer->input->mutex.lock();
 
-  // Если нам надо читать данные от интерфейса в буфер, а протокольная часть ещё не прочла
-  // прошлое содержание буфера, то стираем прошлое содержание.
+  // Если нам надо читать данные от сокета в буфер, а протокольная часть ещё не прочла
+  // прошлое содержание буфера, то сбрасываем флаг "is_ready", при этом данные,
+  // получаемые от сокета будут добавляться к тем данным, которые уже имеются в буфере:
   if(p_io_buffer->input->isReady())
-  {
-      p_io_buffer->input->reset();
-  }
+      p_io_buffer->input->is_ready = false;
 
+  // Если места в буфере на новые данные от сокета нет, то очищаем его содержимое и
+  // сбрасываем флаг "is_ready":
   if(p_io_buffer->input->offset + m_clientConnection->bytesAvailable() > p_config->bufsize)
-  {
       p_io_buffer->input->reset();
-  }
 
-//  qint64 readed = p_io_buffer->input->read(m_client);
+
   qint64 readed = m_clientConnection->read(&p_io_buffer->input->data[p_io_buffer->input->offset], p_config->bufsize - p_io_buffer->input->offset);
 
   if(p_io_buffer->input->offset == 0)
@@ -99,14 +98,15 @@ void SvTcpServer::read()
 
   p_io_buffer->input->mutex.unlock();
 
-  // Прочтя поступившие от клиента данные, мы не сразу испускаем сигнал "dataReaded",
-  // который говорит протокольной части о том что данные от интерфейса получены и
+  // Прочтя поступившие от клиента данные, мы не сразу устанавливаем флаг "is_ready" и
+  // испускаем сигнал "dataReaded",
+  // которые говорят протокольной части о том что данные от интерфейса получены и
   // находятся в буфере.Это связано с тем, что, возможно, получен ещё не весь пакет прикладного
   // уровня (у нас это - уровень устройств и имитаторов). Поэтому мы
   // запускаем на небольшое время (по умолчанию 10 мс) таймер. Если до того, как таймер
   // сработает от интерфейса придут новые данные - мы дополним ими содержимое
   // буфера и перезапустим таймер. По срабатыванию таймера вызывается функция "newData",
-  // которая испускает сигнал "dataReaded".
+  // которая устанавливает флаг "is_ready" и испускает сигнал "dataReaded".
   m_gap_timer->start(m_params.grain_gap);
 }
 
@@ -151,8 +151,9 @@ void SvTcpServer::newConnection()
     // Если изменилось состояние подключения -> отображаем информацию об этом в утилите "logview":
     connect(m_clientConnection, &QTcpSocket::stateChanged, this, &SvTcpServer::stateChanged, Qt::UniqueConnection);
 
-    // Устанавливаем параметры таймера, по срабатыванию которого
-    // испускаем сигнал "dataReaded". Более подробное описание см. в функции "SvTcpServer::read".
+    // Устанавливаем параметры таймера, по срабатыванию которого вызываем функцию "newData", которая
+    // устанавливает флаг "is_ready" и испускает сигнал "dataReaded".
+    // Более подробное описание см. в функции "SvTcpServer::read".
     m_gap_timer = new QTimer;
     m_gap_timer->setTimerType(Qt::PreciseTimer);
     m_gap_timer->setInterval(m_params.grain_gap);
@@ -175,7 +176,8 @@ void SvTcpServer::disconected()
 }
 
 void SvTcpServer::newData()
-// После выполнения чтения из сокета клиента испускаем сигнал "dataReaded" с некоторой задержкой.
+// После выполнения чтения из сокета клиента устанавливаем флаг "is_ready" и
+// испускаем сигнал "dataReaded" с некоторой задержкой.
 // Более подробное описание см. в функции "SvTcpServer::read"
 {
   QMutexLocker(&p_io_buffer->input->mutex);
