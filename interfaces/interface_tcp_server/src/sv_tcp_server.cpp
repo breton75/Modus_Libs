@@ -32,21 +32,31 @@ bool SvTcpServer::start()
     // Создаём объект TCP-сервера:
     m_tcpServer = new QTcpServer(this);
 
+    // В слуае доступности нового соединения -> вызываем слот "newConnection":
+    connect(m_tcpServer, SIGNAL(newConnection()), this, SLOT(newConnection()), Qt::UniqueConnection);
+
+    // Когда протокольная часть сообщает, что поместила в буфер данные
+    // для передачи по интерфейсу -> вызываем функцию "SvTcpServer::write",
+    // которая запишет данные из буфера в сокет:
+    connect(p_io_buffer, &modus::IOBuffer::readyWrite, this, &SvTcpServer::write, Qt::UniqueConnection);
+
+    // Когда от протокольной части поступает сигнал "say" -> вызывем функцию "say_WorkingOut",
+    // чтобы выяснить, какую команду он "требует" и выполнить её:
+    connect(p_io_buffer, &modus::IOBuffer::say, this, &SvTcpServer::say_WorkingOut);
+
     // Командуем ТСP-серверу начать прослушивать входящие соединения от клиента с
     // адресом и портом, указанными в конфигурационном файле для данного интерфейса:
     if (m_tcpServer->listen(m_params.listen_address, m_params.port) == false)
     {
         emit message(QString("TCP-сервер: Не удалось запустить TCP-сервер на прослушивание"), lldbg, mtfal);
         qDebug() << "TCP-сервер: Не удалось запустить TCP-сервер на прослушивание";
-        return (true);
+        return (false);
     }
 
     emit message(QString("TCP-cервер: TCP-cервер запущен на прослушивание"), lldbg, mtscc);
     qDebug() << "TCP-cервер: TCP-cервер запущен на прослушивание";
 
-    // В слуае доступности нового соединия -> вызываем слот "newConnection":
-    connect(m_tcpServer, SIGNAL(newConnection()), this, SLOT(newConnection()), Qt::UniqueConnection);
-    return (false);
+    return (true);
 }
 
 
@@ -111,7 +121,7 @@ void SvTcpServer::read()
 }
 
 
-void SvTcpServer::newConnection()
+void SvTcpServer::newConnection(void)
 // Функция вызывается, когда серверу доступно новое соединение с клиентом.
 {
     if (m_clientConnection != nullptr)
@@ -128,6 +138,7 @@ void SvTcpServer::newConnection()
         }
     } // if (m_clientConnection...
 
+    qDebug() << "TCP-сервер: устанавливаем новое соединение с клиентом";
 
     // Получаем TCP-сокет нового входящего подключения:
     m_clientConnection = m_tcpServer->nextPendingConnection();
@@ -136,14 +147,9 @@ void SvTcpServer::newConnection()
     connect(m_clientConnection, &QTcpSocket::disconnected, this, &SvTcpServer::disconected, Qt::UniqueConnection);
 
     // Когда сокет клиента сообщает, что получил от него данные ->
-    // вызываем функцию "SvTcp::read", которая прочтёт их и поместит
+    // вызываем функцию "SvTcpServer::read", которая прочтёт их и поместит
     // в буфер:
     connect(m_clientConnection, &QTcpSocket::readyRead, this, &SvTcpServer::read, Qt::UniqueConnection);
-
-    // Когда протокольная часть сообщает, что поместила в буфер данные
-    // для передачи по интерфейсу -> вызываем функцию "SvTcpServer::write",
-    // которая запишет данные из буфера в сокет:
-    connect(p_io_buffer, &modus::IOBuffer::readyWrite, this, &SvTcpServer::write, Qt::UniqueConnection);
 
     // Если произошла ошибка сокета -> отображаем информацию об этом в утилите "logview":
     connect(m_clientConnection, static_cast<void(QAbstractSocket::*)(QAbstractSocket::SocketError)>(&QAbstractSocket::error), this, &SvTcpServer::socketError, Qt::UniqueConnection);
@@ -161,7 +167,7 @@ void SvTcpServer::newConnection()
     connect(m_gap_timer, &QTimer::timeout, this, &SvTcpServer::newData, Qt::UniqueConnection);
 }
 
-void SvTcpServer::disconected()
+void SvTcpServer::disconected(void)
 // По отключению клиента -> отображаем информацию об этом в утилите "logview" и уничтожаем его TCP-сокет:
 {
     // Отображаем информацию об отключении в утилите "logview":
@@ -175,7 +181,7 @@ void SvTcpServer::disconected()
     m_gap_timer ->deleteLater();
 }
 
-void SvTcpServer::newData()
+void SvTcpServer::newData(void)
 // После выполнения чтения из сокета клиента устанавливаем флаг "is_ready" и
 // испускаем сигнал "dataReaded" с некоторой задержкой.
 // Более подробное описание см. в функции "SvTcpServer::read"
@@ -186,9 +192,9 @@ void SvTcpServer::newData()
 
   emit_message((received), sv::log::llDebug, sv::log::mtReceive);
 
-  qDebug() << "TCP-сервер: Принял: ";
-  qDebug() << "TCP-сервер: Размер: " << received.length();
-  qDebug() << "TCP-сервер: Содержание: " << received.toHex();
+  //qDebug() << "TCP-сервер: Принял: ";
+  //qDebug() << "TCP-сервер: Размер: " << received.length();
+  //qDebug() << "TCP-сервер: Содержание: " << received.toHex();
 
   p_io_buffer->input->setReady(true);
   emit p_io_buffer->dataReaded(p_io_buffer->input);
@@ -225,14 +231,34 @@ void SvTcpServer::write(modus::BUFF* buffer)
 
     emit_message(sended, sv::log::llDebug, sv::log::mtSend);
 
-    qDebug() << "TCP-сервер: Передал: ";
-    qDebug() << "TCP-сервер: Размер: " << sended.length();
-    qDebug() << "TCP-сервер: Содержание: " << sended.toHex();
+    //qDebug() << "TCP-сервер: Передал: ";
+    //qDebug() << "TCP-сервер: Размер: " << sended.length();
+    //qDebug() << "TCP-сервер: Содержание: " << sended.toHex();
   }
 
   buffer->reset();
 
   buffer->mutex.unlock();
+}
+
+
+void SvTcpServer::say_WorkingOut(QByteArray command)
+// Выяснение, какую команду требуется выполнить, и её выполнение.
+// Аргумент "command" - требуемая команда.
+// Возможные команды: "breakConnection" - разорвать соединение с клиентом.
+{
+    if (command == QString("breakConnection"))
+    {
+        // Отображаем информацию о закрытии клиентского подключения в утилите "logview":
+        qDebug () << QString("TCP-сервер: закрываем клиентское подключение");
+        emit message(QString("TCP-сервер: закрываем клиентское подключение"), lldbg, mtinf);
+
+        // Даём команду на закрытие клиентского подключения:
+        m_clientConnection->close();
+
+       // Ставим клиентское подключение в очередь на последующее удаление:
+       m_clientConnection->deleteLater();
+    }
 }
 
 
