@@ -16,6 +16,10 @@
 // Параметр "port" в конфигурационном файле определяет адрес порта, к которому клиент должен подключаться:
 #define P_TCP_PORT  "port"
 
+// Параментр "reconnect_period" в конфигурационном файле определяет период в милисекундах, с которым
+// TCP-клиент осуществляет попытки установить соединение с сервером:
+#define P_RECONNECT_PERIOD "reconnect_period"
+
 // Параметр "grain_gap" в конфигурационном файле определяет период таймера, используемого при чтении
 // данных от сервера. Подробное описание - см. функцию "SvTcpServer::read".
 #define P_GAIN_GAP  "gain_gap"
@@ -30,6 +34,11 @@
 // Значение периода таймера, используемого при чтении данных от сервера, по умолчанию (то есть
 // если оно не задано в конфигурационном файле):
 #define DEFAULT_GRAIN_GAP     10
+
+// Значение периода с которым TCP-клиент осуществляет попытки установить соединение с сервером,
+// по умолчанию:
+#define DEFAULT_RECONNECT_PERIOD  1000
+
 
 namespace tcp {
 
@@ -104,6 +113,9 @@ namespace tcp {
     // Период таймера, используемого при чтении данных от клиента.
     // Подробное описание - см. функцию "SvTcpClient::read"
     quint16      grain_gap        = DEFAULT_GRAIN_GAP;
+
+    // Период с которым TCP-клиент осуществляет попытки установить соединение с сервером:
+    quint16     reconnect_period = DEFAULT_RECONNECT_PERIOD;
 
     static Params fromJsonString(const QString& json_string) //throw (SvException)
     {
@@ -200,6 +212,21 @@ namespace tcp {
       }
       else p.grain_gap = quint16(DEFAULT_GRAIN_GAP);
 
+      // Считываем значение параметра "период с которым TCP-клиент осуществляет попытки установить
+      // соединение с сервером":
+      P = P_RECONNECT_PERIOD;
+      if(object.contains(P)) {
+
+        if(object.value(P).toInt(-1) < 1)
+          throw SvException(QString(IMPERMISSIBLE_VALUE)
+                            .arg(P)
+                            .arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact)))
+                            .arg("Период в милисекундах, с которым TCP-клиент осуществляет попытки установить соединение с сервером, должен быть задан целым числом"));
+
+        p.reconnect_period = object.value(P).toInt(DEFAULT_RECONNECT_PERIOD);
+
+      }
+      else p.reconnect_period = quint16(DEFAULT_RECONNECT_PERIOD);
 
       return p;
 
@@ -219,9 +246,10 @@ namespace tcp {
 
 
       j.insert(P_TCP_SERVER_ADDRESS,    QJsonValue(server_address.toString()).toString());
-      j.insert(P_TCP_PORT,    QJsonValue(static_cast<int>(port)).toInt());
+      j.insert(P_TCP_PORT,    QJsonValue(port));
       j.insert(P_GRAIN_GAP,   QJsonValue(grain_gap));
-      j.insert(P_TCP_FMT,     QJsonValue(static_cast<int>(fmt)).toInt());
+      j.insert(P_TCP_FMT,     QJsonValue(fmt));
+      j.insert(P_RECONNECT_PERIOD, QJsonValue(reconnect_period));
 
       return j;
     }
