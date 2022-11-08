@@ -63,6 +63,7 @@ private slots:
 
   // После выполнения чтения из сокета клиента испускаем сигнал "dataReaded" с некоторой задержкой.
   // Более подробное описание см. в функции "SvTcpServer::read":
+<<<<<<< HEAD
   void newData();
 
   // Функция вызывается, когда серверу доступно новое соединение с клиентом:
@@ -70,6 +71,21 @@ private slots:
 
   // По отключению клиента -> отображаем информацию об этом в утилите "logview" и уничтожаем его TCP-сокет:
   void disconected();
+=======
+  void newData(void);
+
+  // Функция вызывается, когда серверу доступно новое соединение с клиентом:
+  void newConnection(void);
+
+  // По отключению клиента -> отображаем информацию об этом в утилите "logview" и уничтожаем его TCP-сокет:
+  void disconected(void);
+
+  // Выяснение, какую команду требуется выполнить, и её выполнение.
+  // Аргумент "command" - требуемая команда.
+  // Возможные команды: "breakConnection" - разорвать соединение с клиентом.
+  void say_WorkingOut(QByteArray command);
+
+>>>>>>> kon
 
   void emit_message(const QByteArray& bytes, sv::log::Level level, sv::log::MessageTypes type);
 };
