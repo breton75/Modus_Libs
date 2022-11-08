@@ -23,6 +23,7 @@ class SvTcpClient: public modus::SvAbstractInterface
 {
 public:
   SvTcpClient();
+  ~SvTcpClient() override;
 
   // Получение параметров интерфейса из конфигурационного файла устрйства:
   virtual bool configure(modus::DeviceConfig* config, modus::IOBuffer*iobuffer) override;
@@ -38,6 +39,8 @@ public slots:
   // Запись данных в сокет:
   void write(modus::BUFF* buffer) override;
 
+  void stop() override;
+
 private:
   // TCP-сокет клиента
   QTcpSocket*   m_client = nullptr;
@@ -46,17 +49,17 @@ private:
   tcp::Params   m_params;
 
   // Таймер, используемый в функции "SvTcpClient::read". Коментарии - в этой функции.
-  QTimer*    m_gap_timer;
+  QTimer*       m_gap_timer;
 
   // Таймер, пр таймауту которого, мы выполняем проверку установлено ли TCP-соединение
   // с сервером:
-  QTimer*  connectionCheckTimer;
+  QTimer*       m_connectionCheckTimer;
 
   // Флаг, говорящий о том, что выполняется команда разрыва TCP-соединения
   // с сервером. Этот флаг нужен нам для того, чтобы с момента подачи TCP-сокету команды
   // на разъединение соединения с сервером до момента, когда соединение будет разорвано, не
   // выдавать TCP-сокету команды на попытку соединиться с сервером:
-  bool breakConnectionCommand;
+//  bool breakConnectionCommand;
 
   void datalog(const QByteArray& bytes, QString& message);
 
@@ -94,6 +97,8 @@ private slots:
 
 
   void emit_message(const QByteArray& bytes, sv::log::Level level, sv::log::MessageTypes type);
+
+
 };
 
 #endif // SV_TCP_CLIENT_H

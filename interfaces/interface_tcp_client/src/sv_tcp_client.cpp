@@ -1,7 +1,20 @@
 ﻿#include "sv_tcp_client.h"
 
-SvTcpClient::SvTcpClient()
+SvTcpClient::SvTcpClient():
+  m_client(nullptr),
+  m_gap_timer(nullptr),
+  m_connectionCheckTimer(nullptr)
 {
+}
+
+SvTcpClient::~SvTcpClient()
+{
+  stop();
+
+  m_gap_timer->stop();
+  delete(m_gap_timer);
+
+  deleteLater();
 }
 
 
@@ -34,22 +47,7 @@ bool SvTcpClient::start()
 
     // Сбрасываем флаг, говорящий о том, что выполняется команда разрыва TCP-соединения
       // с сервером:
-    breakConnectionCommand = false;
-
-    // На момент запуска TCP-клиента, TCP-сервер может быть не запущен, поэтому
-    // мы по таймеру будем c интервалом, указанным в параметре интерфейса, вызывать
-    // функцию "checkConnection", которая
-    // будет проверять установлено ли TCP-соединение и, если оно не установлено, пытаться
-    // его установить:
-    connectionCheckTimer = new QTimer;
-    connectionCheckTimer->setInterval(m_params.reconnect_period);
-    connect(connectionCheckTimer, &QTimer::timeout, this, &SvTcpClient::checkConnection);
-    connectionCheckTimer->start();
-
-    // Даём TCP-клиенту команду на подключение к серверу c
-    // адресом и портом, указанными в конфигурационном файле для данного интерфейса:
-    if (m_client->state() != QAbstractSocket::ConnectedState)
-          m_client->connectToHost(m_params.server_address, m_params.port);
+//    breakConnectionCommand = false;
 
     // После подключения -> вызываем слот "connected":
     connect(m_client,     &QTcpSocket::connected,       this, &SvTcpClient::connected);
@@ -70,6 +68,21 @@ bool SvTcpClient::start()
     // Когда от протокольной части поступает сигнал "say" -> вызывем функцию "say_WorkingOut",
     // чтобы выяснить, какую команду он "требует" и выполнить её:
     connect(p_io_buffer, &modus::IOBuffer::say, this, &SvTcpClient::say_WorkingOut);
+
+    p_is_active = true;
+
+    // Даём TCP-клиенту команду на подключение к серверу c
+    // адресом и портом, указанными в конфигурационном файле для данного интерфейса:
+    checkConnection();
+
+    // На момент запуска TCP-клиента, TCP-сервер может быть не запущен, поэтому
+    // мы по таймеру будем c интервалом, указанным в параметре интерфейса, вызывать
+    // функцию "checkConnection", которая
+    // будет проверять установлено ли TCP-соединение и, если оно не установлено, пытаться
+    // его установить:
+    m_connectionCheckTimer = new QTimer;
+    connect(m_connectionCheckTimer, &QTimer::timeout, this, &SvTcpClient::checkConnection);
+    m_connectionCheckTimer->start(m_params.reconnect_period);
 
     // Устанавливаем параметры таймера, по срабатыванию которого, вызываем функцию "newData", которая
     // устанавливает флаг "is_ready" и испускает сигнал "dataReaded".
@@ -99,7 +112,7 @@ void SvTcpClient::disconnected (void)
 {
     // Мы оказались в состоянии отлючения от сервера -> сбрасываем флаг "breakConnectionCommand",
     // чтобы возобновить попытки установить соединение (этого требует проткол обмена с КСОН):
-    breakConnectionCommand = false;
+    p_is_active = false;
 
     emit message(QString("TCP-клиент: Отключились от TCP-сервера"), lldbg, mtscc);
     qDebug() << QString("TCP-клиент: Отключились от TCP-сервера");
@@ -128,17 +141,15 @@ void SvTcpClient::checkConnection(void)
 // будет проверять установлено ли TCP-соединение и, если оно не установлено, пытаться
 // его установить:
 {
-     if (breakConnectionCommand == true)
-    { // Если выполняется команда разрыва TCP-соединения с сервером, то до того, как
-      // соединение будет разорвано, пытаться его установить - не нужно:
-
+    // Если выполняется команда разрыва TCP-соединения с сервером, то до того, как
+    // соединение будет разорвано, пытаться его установить - не нужно:
+    if (!p_is_active)
         return;
-    }
 
      qDebug() << "TCP-клиент: выполняется проверка соединения с сервером";
 
     // Проверим состояние соединения:
-    if (m_client->state() != QAbstractSocket::ConnectedState)
+    if (m_client && m_client->state() != QAbstractSocket::ConnectedState)
     { // Если соединение с сервером не установлено, то пытаемся его установить:
 
         qDebug() << "TCP-клиент: Даём команду на подслоединение к серверу";
@@ -251,17 +262,44 @@ void SvTcpClient::say_WorkingOut(QByteArray command)
 // Аргумент "command" - требуемая команда.
 // Возможные команды: "breakConnection" - разорвать соединение с сервером.
 {
-    if (command == QString("breakConnection"))
-    {
-        // Устанавливаем флаг, говорящий о том, что выполняется команда разрыва TCP-соединения
-        // с сервером:
-        breakConnectionCommand = true;
+    if (QString(command).toLower() == QString("disconnect")) {
 
-        // Даём команду на отключение от TCP-сервера:
-        m_client->disconnectFromHost();
+      this->stop();
+
+    }
+    else if(QString(command).toLower() == "connect") {
+
+      p_is_active = true;
+
+      checkConnection();
+
+      // На момент запуска TCP-клиента, TCP-сервер может быть не запущен, поэтому
+      // мы по таймеру будем c интервалом, указанным в параметре интерфейса, вызывать
+      // функцию "checkConnection", которая
+      // будет проверять установлено ли TCP-соединение и, если оно не установлено, пытаться
+      // его установить:
+      m_connectionCheckTimer = new QTimer;
+      connect(m_connectionCheckTimer, &QTimer::timeout, this, &SvTcpClient::checkConnection);
+      m_connectionCheckTimer->start(m_params.reconnect_period);
+
     }
 }
 
+void SvTcpClient::stop()
+{
+  p_is_active = false;
+
+  // отключаем все сигналы таймера от всех слотов
+  m_connectionCheckTimer->disconnect();
+  m_connectionCheckTimer->stop();
+  delete m_connectionCheckTimer;
+  m_connectionCheckTimer = nullptr;
+
+  // Даём команду на отключение от TCP-сервера:
+  if(m_client && m_client->state() == QAbstractSocket::ConnectedState)
+    m_client->disconnectFromHost();
+
+}
 
 void SvTcpClient::emit_message(const QByteArray& bytes, sv::log::Level level, sv::log::MessageTypes type)
 {
