@@ -218,6 +218,12 @@ void SvTcpClient::write(modus::BUFF* buffer)
     return;
   }
 
+  if (m_client -> state() != QAbstractSocket::ConnectedState)
+  {
+      // Если соединения с сервером не установлено, то некому и передавать (выходим из функции):
+      return;
+  }
+
   buffer->mutex.lock();
 
   bool written = m_client->write((const char*)&buffer->data[0], buffer->offset) > 0;
