@@ -1,7 +1,17 @@
 ﻿#include "sv_udp.h"
 
-SvUdp::SvUdp()
+SvUdp::SvUdp():
+  m_socket(nullptr),
+  m_forward_socket(nullptr)
 {
+}
+
+SvUdp::~SvUdp()
+{
+  delete m_socket;
+  delete m_forward_socket;
+
+  deleteLater();
 }
 
 bool SvUdp::configure(modus::DeviceConfig* config, modus::IOBuffer*iobuffer)
@@ -12,32 +22,6 @@ bool SvUdp::configure(modus::DeviceConfig* config, modus::IOBuffer*iobuffer)
     p_io_buffer = iobuffer;
 
     m_params = UdpParams::fromJsonString(p_config->interface.params);
-
-//    m_socket = new QUdpSocket();
-
-//    if(!m_params.ifc.isEmpty()) {
-
-//      QNetworkInterface ifc = QNetworkInterface::interfaceFromName(m_params.ifc);
-//      if(!ifc.isValid())
-//        throw SvException(QString("Wrong ifc name: %1").arg(m_params.ifc));
-
-//      if(ifc.addressEntries().count() == 0)
-//        throw SvException(QString("Wrong ifc name: %1").arg(m_params.ifc));
-
-//      /* For TCP sockets, this function may be used to specify
-//       * which interface to use for an outgoing connection,
-//       * which is useful in case of multiple network interfaces */
-//    //  socket->bind(ifc.addressEntries().at(0).ip());
-
-//      if(!m_socket->bind(ifc.addressEntries().at(0).ip(), m_params.recv_port, QAbstractSocket::DontShareAddress))
-//        throw SvException(m_socket->errorString());
-//    }
-//    else
-//      if(!m_socket->bind(QHostAddress::Any, m_params.recv_port, QAbstractSocket::DontShareAddress))
-//        throw SvException(m_socket->errorString());
-
-//    // именно после всего!
-////    m_socket->moveToThread(this);
 
     return true;
 
@@ -85,6 +69,13 @@ bool SvUdp::start()
     m_gap_timer->setSingleShot(true);
     connect(m_gap_timer, &QTimer::timeout, this, &SvUdp::newData);
 
+    if(m_params.forward_port)
+      m_forward_socket = new QUdpSocket();
+
+//    m_test_timer = new QTimer;
+//    connect(m_test_timer, &QTimer::timeout, this, &SvUdp::newData);
+//    m_test_timer->start(1000);
+
     return true;
 
   } catch (SvException& e) {
@@ -99,8 +90,8 @@ void SvUdp::read()
 {
   m_gap_timer->stop();
 
-  if(p_io_buffer->input->isReady())
-    p_io_buffer->input->reset();
+//  if(p_io_buffer->input->isReady())
+//    p_io_buffer->input->reset();
 
   p_io_buffer->input->mutex.lock();
 
@@ -126,6 +117,27 @@ void SvUdp::read()
 void SvUdp::newData()
 {
   QMutexLocker(&p_io_buffer->input->mutex);
+
+//  p_io_buffer->input->setData(QByteArray::fromHex("01100aa00022441342 "
+//                                                  "010000000000020000000000030000000000040000000000"
+//                                                  "053920000000060000000000070000000000080000000000"
+//                                                  "0900000000000A00000000000B0000000000218d"));
+
+//  p_io_buffer->input->setData(QByteArray::fromHex(
+//"0110041000050a020801008100010002000d60"));
+  if(m_forward_socket) {
+
+    qint64 w = m_forward_socket->writeDatagram(p_io_buffer->input->data, p_io_buffer->input->offset,
+                                    m_params.forward_host, m_params.forward_port);\
+
+    m_forward_socket->flush();
+
+    emit message(QString("Forwarded %1 bytes to %2:%3")
+                 .arg(w).arg(m_params.forward_host.toString()).arg(m_params.forward_port),
+                 sv::log::llDebug, sv::log::mtData);
+
+  }
+
 
   p_io_buffer->input->setReady(true);
   emit p_io_buffer->dataReaded(p_io_buffer->input);

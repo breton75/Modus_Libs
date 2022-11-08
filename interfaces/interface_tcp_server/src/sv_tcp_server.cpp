@@ -125,12 +125,12 @@ void SvTcpServer::newConnection()
     m_clientConnection = m_tcpServer->nextPendingConnection();
 
     // По отключению клиента -> отображаем информацию об этом в утилите "logview" и уничтожаем его TCP-сокет:
-    connect(m_clientConnection, &QTcpSocket::disconnected, this, &SvTcpServer::disconected, Qt::UniqueConnection);
+    connect(m_clientConnection.data(), &QTcpSocket::disconnected, this, &SvTcpServer::disconected, Qt::UniqueConnection);
 
     // Когда сокет клиента сообщает, что получил от него данные ->
     // вызываем функцию "SvTcp::read", которая прочтёт их и поместит
     // в буфер:
-    connect(m_clientConnection, &QTcpSocket::readyRead, this, &SvTcpServer::read, Qt::UniqueConnection);
+    connect(m_clientConnection.data(), &QTcpSocket::readyRead, this, &SvTcpServer::read, Qt::UniqueConnection);
 
     // Когда протокольная часть сообщает, что поместила в буфер данные
     // для передачи по интерфейсу -> вызываем функцию "SvTcpServer::write",
@@ -138,10 +138,10 @@ void SvTcpServer::newConnection()
     connect(p_io_buffer, &modus::IOBuffer::readyWrite, this, &SvTcpServer::write, Qt::UniqueConnection);
 
     // Если произошла ошибка сокета -> отображаем информацию об этом в утилите "logview":
-    connect(m_clientConnection, static_cast<void(QAbstractSocket::*)(QAbstractSocket::SocketError)>(&QAbstractSocket::error), this, &SvTcpServer::socketError, Qt::UniqueConnection);
+    connect(m_clientConnection.data(), static_cast<void(QAbstractSocket::*)(QAbstractSocket::SocketError)>(&QAbstractSocket::error), this, &SvTcpServer::socketError, Qt::UniqueConnection);
 
     // Если изменилось состояние подключения -> отображаем информацию об этом в утилите "logview":
-    connect(m_clientConnection, &QTcpSocket::stateChanged, this, &SvTcpServer::stateChanged, Qt::UniqueConnection);
+    connect(m_clientConnection.data(), &QTcpSocket::stateChanged, this, &SvTcpServer::stateChanged, Qt::UniqueConnection);
 
     // Устанавливаем параметры таймера, по срабатыванию которого
     // испускаем сигнал "dataReaded". Более подробное описание см. в функции "SvTcpServer::read".

@@ -23,6 +23,7 @@ class SvUdp: public modus::SvAbstractInterface
 {
 public:
   SvUdp();
+  ~SvUdp() override;
 
   virtual bool configure(modus::DeviceConfig* config, modus::IOBuffer*iobuffer) override;
 
@@ -32,10 +33,14 @@ public slots:
   void write(modus::BUFF* buffer) override;
 
 private:
-  QUdpSocket*   m_socket = nullptr;
+  QUdpSocket*   m_socket;
+  QUdpSocket*   m_forward_socket;
+
   UdpParams     m_params;
 
   QTimer*       m_gap_timer;
+
+  QTimer*       m_test_timer;
 
 private slots:
   void newData();
