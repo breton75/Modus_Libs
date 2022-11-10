@@ -12,7 +12,7 @@ SvTcpClient::~SvTcpClient()
   stop();
 
   m_gap_timer->stop();
-  delete(m_gap_timer);
+  delete m_gap_timer;
 
   deleteLater();
 }
@@ -260,7 +260,6 @@ void SvTcpClient::write(modus::BUFF* buffer)
 void SvTcpClient::say_WorkingOut(QByteArray command)
 // Выяснение, какую команду требуется выполнить, и её выполнение.
 // Аргумент "command" - требуемая команда.
-// Возможные команды: "breakConnection" - разорвать соединение с сервером.
 {
     if (QString(command).toLower() == QString("disconnect")) {
 
@@ -335,17 +334,22 @@ modus::SvAbstractInterface* create()
   return device;
 }
 
-const char* getDefaultParams()
+const char* getVersion()
 {
-  return "{ \"host\": \"172.16.4.11\", \"recv_port\": 6001, \"send_port\": 5001 }";
+  return LIB_VERSION;
 }
 
-const char* getName()
+const char* getParamsInfo()
 {
-  return "Драйвер для работы TCP-клиента";
+  return tcp::Params::usage();
+}
+
+const char* getInfo()
+{
+  return LIB_SHORT_INFO;
 }
 
 const char* getDescription()
 {
-  return "Драйвер для работы TCP-клиента";
+  return LIB_DESCRIPTION;
 }

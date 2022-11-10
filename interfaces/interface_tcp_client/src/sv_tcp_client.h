@@ -10,12 +10,26 @@
 #include "../../../../Modus/global/global_defs.h"
 #include "../../../../Modus/global/device/interface/sv_abstract_interface.h"
 
+#define LIB_SHORT_INFO \
+  "TCP клиент. Интерфейсная библиотека Modus. Версия" LIB_VERSION "\n"
+
+#define LIB_DESCRIPTION \
+  LIB_SHORT_INFO \
+  "Алгоритм работы:\n"\
+  "  1. Подключение к серверу с заданными праметрами " P_TCP_SERVER_ADDRESS " и " P_TCP_PORT ".\n"\
+  "  2. При получении новых данных, они помещаются в буфер input и эмитируется сигнал dataReaded.\n"\
+  "  3. При получении сигнала readyWrite от протокольной библиотеки, буфер output помещается в tcp стек на отправку.\n"\
+  "  4. С интервалом, заданным параметром " P_RECONNECT_PERIOD " проверяется соединение с сервером. При отсутствии подключения, производится попытка переподкючения.\n"\
+  "Автор " LIB_AUTHOR
+
+
 extern "C" {
 
     TCP_CLIENT_EXPORT modus::SvAbstractInterface* create();
 
-    TCP_CLIENT_EXPORT const char* getDefaultParams();
-    TCP_CLIENT_EXPORT const char* getName();
+    TCP_CLIENT_EXPORT const char* getVersion();
+    TCP_CLIENT_EXPORT const char* getUsage();
+    TCP_CLIENT_EXPORT const char* getInfo();
     TCP_CLIENT_EXPORT const char* getDescription();
 }
 

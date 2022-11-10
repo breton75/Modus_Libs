@@ -6,6 +6,11 @@ DEFINES += TCP_CLIENT_LIBRARY
 
 CONFIG += c++11 plugin
 
+
+VERSION = 1.2.0    # major.minor.patch
+DEFINES += LIB_VERSION=\\\"$$VERSION\\\"
+DEFINES += "LIB_AUTHOR=\"\\\"Свиридов С. А.\\\"\""
+
 TARGET = /home/user/Modus/lib/interfaces/tcp_client
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings

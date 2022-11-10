@@ -10,33 +10,19 @@
 #include "../../../../svlib/SvException/svexception.h"
 #include "../../../../Modus/global/global_defs.h"
 
-// Параметр "server_address" в конфигурационном файле определяет адрес, к которому клиент должен подключаться:
-#define P_TCP_SERVER_ADDRESS  "server_address"
+#define P_TCP_SERVER_ADDRESS_DESC "ip адрес, к которому клиент должен подключаться"
+#define P_TCP_SERVER_ADDRESS      "server_address"
+#define P_RECONNECT_PERIOD        "reconnect_period"
 
-// Параметр "port" в конфигурационном файле определяет адрес порта, к которому клиент должен подключаться:
-#define P_TCP_PORT  "port"
+#define P_TCP_PORT_DESC           "порт, к которому клиент должен подключаться"
+#define P_RECONNECT_PERIOD_DESC   "период в милисекундах, с которым TCP-клиент осуществляет попытки установить соединение с сервером"
+#define P_GRAIN_GAP_DESC          "период (в милисекундах) ожидания частей пакета данных"
+#define P_FMT_DESC                "форматирование сообщений для логирования"
 
-// Параментр "reconnect_period" в конфигурационном файле определяет период в милисекундах, с которым
-// TCP-клиент осуществляет попытки установить соединение с сервером:
-#define P_RECONNECT_PERIOD "reconnect_period"
+// дефолтное значение параметра "port" по умолчанию (то есть если оно не задано в конфигурационном файле):
+#define DEFAULT_PORT              3004
 
-// Параметр "grain_gap" в конфигурационном файле определяет период таймера, используемого при чтении
-// данных от сервера. Подробное описание - см. функцию "SvTcpServer::read".
-#define P_GAIN_GAP  "gain_gap"
-
-// Параметр "fmt" в конфигурационном файле определяет формат данных в сообщениях
-// отображаемых в утилите "logview":
-#define P_TCP_FMT   "fmt"
-
-// Значение параметра "port" по умолчанию (то есть если оно не задано в конфигурационном файле):
-#define DEFAULT_PORT         3004
-
-// Значение периода таймера, используемого при чтении данных от сервера, по умолчанию (то есть
-// если оно не задано в конфигурационном файле):
-#define DEFAULT_GRAIN_GAP     10
-
-// Значение периода с которым TCP-клиент осуществляет попытки установить соединение с сервером,
-// по умолчанию:
+// дефолтное значение периода с которым TCP-клиент осуществляет попытки установить соединение с сервером,
 #define DEFAULT_RECONNECT_PERIOD  1000
 
 
@@ -102,7 +88,7 @@ namespace tcp {
   struct Params
   {
     // Адрес, к которому должен подключаться клиент:
-    QHostAddress server_address   = QHostAddress::Any;
+    QHostAddress server_address   = QHostAddress::Null;
 
     // Порт, к которому должен подключаться клиент:
     quint16      port             = DEFAULT_PORT;
@@ -115,7 +101,30 @@ namespace tcp {
     quint16      grain_gap        = DEFAULT_GRAIN_GAP;
 
     // Период с которым TCP-клиент осуществляет попытки установить соединение с сервером:
-    quint16     reconnect_period = DEFAULT_RECONNECT_PERIOD;
+    quint16     reconnect_period  = DEFAULT_RECONNECT_PERIOD;
+
+    static const char*  usage()
+    {
+      auto addDesc = [=](QString& str, const QString& param_name, const QString& mean, const QString& type, bool required, const QString& deflt, const QString& range) -> void
+      {
+        str.append(MAKE_PARAM_DESCRIPTION(param_name, mean, type, "ds", deflt, range));
+      };
+
+      QString fmts = QString();
+      for(auto key: modus::LogFormats.keys())
+        fmts.append(key);
+
+      QString result = QString();
+      result.append((P_TCP_SERVER_ADDRESS, P_TCP_SERVER_ADDRESS_DESC,  "string",   "true", "NULL",                     "ip адреса в формате ***.***.***.***, localhost"));
+      addDesc(result, P_TCP_SERVER_ADDRESS, P_TCP_SERVER_ADDRESS_DESC,  "string",   "true", "NULL",                     "ip адреса в формате ***.***.***.***, localhost");
+      addDesc(result, P_PORT,               P_TCP_PORT_DESC,            "quint16",  "false", DEFAULT_PORT,              "1 - 65535");
+      addDesc(result, P_RECONNECT_PERIOD,   P_RECONNECT_PERIOD_DESC,    "quint16",  "false", DEFAULT_RECONNECT_PERIOD,  "1 - 65535");
+      addDesc(result, P_GRAIN_GAP,          P_GRAIN_GAP_DESC,           "quint16",  "false", DEFAULT_GRAIN_GAP,         "1 - 65535");
+      addDesc(result, P_FMT,                P_FMT_DESC,                 "string",   "false", "hex",                     fmts);
+
+      return result;
+
+    }
 
     static Params fromJsonString(const QString& json_string) //throw (SvException)
     {
@@ -137,7 +146,7 @@ namespace tcp {
     {
       Params p;
       QString P;
-
+      QString json = QString(QJsonDocument(object).toJson(QJsonDocument::Compact));
 
       // Считываем значение параметра: "адрес к которому должен подключаться клиент":
       P = P_TCP_SERVER_ADDRESS;
@@ -156,23 +165,21 @@ namespace tcp {
                              .arg("Допускаются ip адреса в формате 192.168.1.1, а также \"localhost\", \"any\", \"broadcast\""));
       }
       else
-        p.server_address = QHostAddress::Any;
+        throw SvException(QString(MISSING_PARAM_DESC).arg(json).arg(P));
 
       // Считываем значение параметра: "порт, к которому должен подключаться клиент":
       P = P_TCP_PORT;
       if(object.contains(P))
       {
         if(object.value(P).toInt(-1) < 1)
-          throw SvException(QString(IMPERMISSIBLE_VALUE)
-                             .arg(P).arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact)))
+          throw SvException(QString(IMPERMISSIBLE_VALUE).arg(P).arg(json)
                              .arg("Номер порта должен быть задан целым положительным числом в диапазоне [1..65535]"));
 
         p.port = object.value(P).toInt(DEFAULT_PORT);
 
       }
       else
-         throw SvException(QString(MISSING_PARAM_DESC)
-                           .arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact))).arg(P));
+         throw SvException(QString(MISSING_PARAM_DESC).arg(json).arg(P));
 
 
       // Считываем значение параметра "формат данных в сообщениях, отображаемых в утилите "logview":
@@ -180,15 +187,13 @@ namespace tcp {
       if(object.contains(P)) {
 
         if(!object.value(P).isString())
-          throw SvException(QString(IMPERMISSIBLE_VALUE)
-                            .arg(P).arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact)))
+          throw SvException(QString(IMPERMISSIBLE_VALUE).arg(P).arg(json)
                             .arg(QString("Формат вывода данных должен быть задан строковым значением [\"hex\"|\"ascii\"|\"len\"]")));
 
         QString fmt = object.value(P).toString("hex").toLower();
 
         if(!modus::LogFormats.contains(fmt))
-          throw SvException(QString(IMPERMISSIBLE_VALUE)
-                            .arg(P).arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact)))
+          throw SvException(QString(IMPERMISSIBLE_VALUE).arg(P).arg(json)
                             .arg(QString("Не поддерживаемый формат вывода данных. Допустимые значения: [\"hex\"|\"ascii\"|\"len\"]")));
 
         p.fmt = modus::LogFormats.value(fmt);
@@ -202,15 +207,14 @@ namespace tcp {
       if(object.contains(P)) {
 
         if(object.value(P).toInt(-1) < 1)
-          throw SvException(QString(IMPERMISSIBLE_VALUE)
-                            .arg(P)
-                            .arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact)))
+          throw SvException(QString(IMPERMISSIBLE_VALUE).arg(P).arg(json)
                             .arg("Интервал ожидания частей пакета не может быть меньше 1 мсек."));
 
         p.grain_gap = object.value(P).toInt(DEFAULT_GRAIN_GAP);
 
       }
-      else p.grain_gap = quint16(DEFAULT_GRAIN_GAP);
+      else
+        p.grain_gap = quint16(DEFAULT_GRAIN_GAP);
 
       // Считываем значение параметра "период с которым TCP-клиент осуществляет попытки установить
       // соединение с сервером":
@@ -218,9 +222,7 @@ namespace tcp {
       if(object.contains(P)) {
 
         if(object.value(P).toInt(-1) < 1)
-          throw SvException(QString(IMPERMISSIBLE_VALUE)
-                            .arg(P)
-                            .arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact)))
+          throw SvException(QString(IMPERMISSIBLE_VALUE).arg(P).arg(json)
                             .arg("Период в милисекундах, с которым TCP-клиент осуществляет попытки установить соединение с сервером, должен быть задан целым числом"));
 
         p.reconnect_period = object.value(P).toInt(DEFAULT_RECONNECT_PERIOD);
@@ -244,12 +246,11 @@ namespace tcp {
     {
       QJsonObject j;
 
-
-      j.insert(P_TCP_SERVER_ADDRESS,    QJsonValue(server_address.toString()).toString());
-      j.insert(P_TCP_PORT,    QJsonValue(port));
-      j.insert(P_GRAIN_GAP,   QJsonValue(grain_gap));
-      j.insert(P_TCP_FMT,     QJsonValue(fmt));
-      j.insert(P_RECONNECT_PERIOD, QJsonValue(reconnect_period));
+      j.insert(P_TCP_SERVER_ADDRESS,  QJsonValue(server_address.toString()).toString());
+      j.insert(P_TCP_PORT,            QJsonValue(port));
+      j.insert(P_GRAIN_GAP,           QJsonValue(grain_gap));
+      j.insert(P_TCP_FMT,             QJsonValue(fmt));
+      j.insert(P_RECONNECT_PERIOD,    QJsonValue(reconnect_period));
 
       return j;
     }
