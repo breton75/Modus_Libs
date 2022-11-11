@@ -339,9 +339,9 @@ const char* getVersion()
   return LIB_VERSION;
 }
 
-const char* getParamsInfo()
+const char* getParams()
 {
-  return tcp::Params::usage();
+  return tcp::Params::usage().toStdString().c_str();
 }
 
 const char* getInfo()

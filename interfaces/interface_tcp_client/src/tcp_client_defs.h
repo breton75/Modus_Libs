@@ -10,10 +10,11 @@
 #include "../../../../svlib/SvException/svexception.h"
 #include "../../../../Modus/global/global_defs.h"
 
-#define P_TCP_SERVER_ADDRESS_DESC "ip адрес, к которому клиент должен подключаться"
-#define P_TCP_SERVER_ADDRESS      "server_address"
+#define P_HOST                    "host"
 #define P_RECONNECT_PERIOD        "reconnect_period"
+#define P_CONNECTIONS             "connections"
 
+#define P_HOST_DESC               "ip адрес, к которому клиент должен подключаться"
 #define P_TCP_PORT_DESC           "порт, к которому клиент должен подключаться"
 #define P_RECONNECT_PERIOD_DESC   "период в милисекундах, с которым TCP-клиент осуществляет попытки установить соединение с сервером"
 #define P_GRAIN_GAP_DESC          "период (в милисекундах) ожидания частей пакета данных"
@@ -103,24 +104,19 @@ namespace tcp {
     // Период с которым TCP-клиент осуществляет попытки установить соединение с сервером:
     quint16     reconnect_period  = DEFAULT_RECONNECT_PERIOD;
 
-    static const char*  usage()
+    static QString usage()
     {
-      auto addDesc = [=](QString& str, const QString& param_name, const QString& mean, const QString& type, bool required, const QString& deflt, const QString& range) -> void
-      {
-        str.append(MAKE_PARAM_DESCRIPTION(param_name, mean, type, "ds", deflt, range));
-      };
-
       QString fmts = QString();
       for(auto key: modus::LogFormats.keys())
         fmts.append(key);
 
-      QString result = QString();
-      result.append((P_TCP_SERVER_ADDRESS, P_TCP_SERVER_ADDRESS_DESC,  "string",   "true", "NULL",                     "ip адреса в формате ***.***.***.***, localhost"));
-      addDesc(result, P_TCP_SERVER_ADDRESS, P_TCP_SERVER_ADDRESS_DESC,  "string",   "true", "NULL",                     "ip адреса в формате ***.***.***.***, localhost");
-      addDesc(result, P_PORT,               P_TCP_PORT_DESC,            "quint16",  "false", DEFAULT_PORT,              "1 - 65535");
-      addDesc(result, P_RECONNECT_PERIOD,   P_RECONNECT_PERIOD_DESC,    "quint16",  "false", DEFAULT_RECONNECT_PERIOD,  "1 - 65535");
-      addDesc(result, P_GRAIN_GAP,          P_GRAIN_GAP_DESC,           "quint16",  "false", DEFAULT_GRAIN_GAP,         "1 - 65535");
-      addDesc(result, P_FMT,                P_FMT_DESC,                 "string",   "false", "hex",                     fmts);
+      QString result = QString("\"params\": [\n")
+        .append(MAKE_PARAM_STR(P_HOST,              P_HOST_DESC,              "string",   "true", "NULL",                     "ip адреса в формате xxx.xxx.xxx.xxx, localhost", ",\n"))
+        .append(MAKE_PARAM_STR(P_PORT,              P_TCP_PORT_DESC,          "quint16",  "false", DEFAULT_PORT,              "1 - 65535", ",\n"))
+        .append(MAKE_PARAM_STR(P_RECONNECT_PERIOD,  P_RECONNECT_PERIOD_DESC,  "quint16",  "false", DEFAULT_RECONNECT_PERIOD,  "1 - 65535", ",\n"))
+        .append(MAKE_PARAM_STR(P_GRAIN_GAP,         P_GRAIN_GAP_DESC,         "quint16",  "false", DEFAULT_GRAIN_GAP,         "1 - 65535", ",\n"))
+        .append(MAKE_PARAM_STR(P_FMT,               P_FMT_DESC,               "string",   "false", "hex",                     fmts, "\n"))
+        .append("]");
 
       return result;
 
@@ -149,7 +145,7 @@ namespace tcp {
       QString json = QString(QJsonDocument(object).toJson(QJsonDocument::Compact));
 
       // Считываем значение параметра: "адрес к которому должен подключаться клиент":
-      P = P_TCP_SERVER_ADDRESS;
+      P = P_HOST;
       if(object.contains(P)) {
 
         QString server_address = object.value(P).toString("").toLower();
@@ -168,7 +164,7 @@ namespace tcp {
         throw SvException(QString(MISSING_PARAM_DESC).arg(json).arg(P));
 
       // Считываем значение параметра: "порт, к которому должен подключаться клиент":
-      P = P_TCP_PORT;
+      P = P_PORT;
       if(object.contains(P))
       {
         if(object.value(P).toInt(-1) < 1)
@@ -183,7 +179,7 @@ namespace tcp {
 
 
       // Считываем значение параметра "формат данных в сообщениях, отображаемых в утилите "logview":
-      P = P_TCP_FMT;
+      P = P_FMT;
       if(object.contains(P)) {
 
         if(!object.value(P).isString())
@@ -246,11 +242,11 @@ namespace tcp {
     {
       QJsonObject j;
 
-      j.insert(P_TCP_SERVER_ADDRESS,  QJsonValue(server_address.toString()).toString());
-      j.insert(P_TCP_PORT,            QJsonValue(port));
-      j.insert(P_GRAIN_GAP,           QJsonValue(grain_gap));
-      j.insert(P_TCP_FMT,             QJsonValue(fmt));
-      j.insert(P_RECONNECT_PERIOD,    QJsonValue(reconnect_period));
+      j.insert(P_HOST,              QJsonValue(server_address.toString()).toString());
+      j.insert(P_PORT,              QJsonValue(port));
+      j.insert(P_GRAIN_GAP,         QJsonValue(grain_gap));
+      j.insert(P_FMT,               QJsonValue(fmt));
+      j.insert(P_RECONNECT_PERIOD,  QJsonValue(reconnect_period));
 
       return j;
     }

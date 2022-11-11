@@ -16,7 +16,7 @@
 #define LIB_DESCRIPTION \
   LIB_SHORT_INFO \
   "Алгоритм работы:\n"\
-  "  1. Подключение к серверу с заданными праметрами " P_TCP_SERVER_ADDRESS " и " P_TCP_PORT ".\n"\
+  "  1. Подключение к серверу с заданными праметрами " P_HOST " и " P_PORT ".\n"\
   "  2. При получении новых данных, они помещаются в буфер input и эмитируется сигнал dataReaded.\n"\
   "  3. При получении сигнала readyWrite от протокольной библиотеки, буфер output помещается в tcp стек на отправку.\n"\
   "  4. С интервалом, заданным параметром " P_RECONNECT_PERIOD " проверяется соединение с сервером. При отсутствии подключения, производится попытка переподкючения.\n"\
@@ -28,7 +28,7 @@ extern "C" {
     TCP_CLIENT_EXPORT modus::SvAbstractInterface* create();
 
     TCP_CLIENT_EXPORT const char* getVersion();
-    TCP_CLIENT_EXPORT const char* getUsage();
+    TCP_CLIENT_EXPORT const char* getParams();
     TCP_CLIENT_EXPORT const char* getInfo();
     TCP_CLIENT_EXPORT const char* getDescription();
 }
