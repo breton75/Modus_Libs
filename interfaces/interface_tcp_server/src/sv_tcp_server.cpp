@@ -253,6 +253,13 @@ void SvTcpServer::say_WorkingOut(QByteArray command)
         qDebug () << QString("TCP-сервер: закрываем клиентское подключение");
         emit message(QString("TCP-сервер: закрываем клиентское подключение"), lldbg, mtinf);
 
+        if (m_clientConnection == nullptr)
+        { // Если сокет клиентского подключения не создан, то нечего и закрывать ->
+            // выходим из функции:
+
+            return;
+        }
+
         // Даём команду на закрытие клиентского подключения:
         m_clientConnection->close();
 
