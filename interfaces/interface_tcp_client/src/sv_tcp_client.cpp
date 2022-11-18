@@ -205,13 +205,18 @@ void SvTcpClient::write(modus::BUFF* buffer)
     return;
   }
 
+  QMutexLocker (&(buffer->mutex));
+
   if (m_client -> state() != QAbstractSocket::ConnectedState)
   {
-      // Если соединения с сервером не установлено, то некому и передавать (выходим из функции):
-      return;
-  }
+        // Если соединения с сервером не установлено, то некому и передавать:
+        // 1. Очищаем буфер (если этого не делать, то когда соединение с TCP-сервером будет
+        //    установлено, он получит УСТАРЕВШИЕ данные, оставшиеся в буфере).
+        buffer->reset();
 
-  buffer->mutex.lock();
+        // 2. Выходим из функции:
+        return;
+  }
 
   bool written = m_client->write((const char*)&buffer->data[0], buffer->offset) > 0;
   m_client->flush();
@@ -228,8 +233,6 @@ void SvTcpClient::write(modus::BUFF* buffer)
   }
 
   buffer->reset();
-
-  buffer->mutex.unlock();
 }
 
 
