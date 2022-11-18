@@ -59,6 +59,10 @@ bool SvTcpClientMulti::start()
     // По отключении -> отображаем информацию об этом в утилите "logview":
     connect(m_client,     &QTcpSocket::disconnected,    this, &SvTcpClientMulti::disconnected);
 
+    connect(m_client,     &QTcpSocket::stateChanged,    this, &SvTcpClientMulti::stateChanged);
+    connect(m_client, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(socketError(QAbstractSocket::SocketError)));
+//    connect(m_client,     &QTcpSocket::error,           this, &SvTcpClientMulti::socketError);
+
     // Когда сокет сообщает, что получил от сервера данные ->
     // вызываем функцию "SvTcpClient::read", которая прочтёт их и поместит
     // в буфер:
@@ -118,7 +122,7 @@ void SvTcpClientMulti::disconnected (void)
 {
     // Мы оказались в состоянии отлючения от сервера -> сбрасываем флаг "breakConnectionCommand",
     // чтобы возобновить попытки установить соединение (этого требует проткол обмена с КСОН):
-    p_is_active = false;
+//    p_is_active = false;
 
     emit message(QString("TCP-клиент: Отключились от TCP-сервера"), lldbg, mtscc);
     qDebug() << QString("TCP-клиент: Отключились от TCP-сервера");
@@ -159,52 +163,75 @@ void SvTcpClientMulti::checkConnection(void)
 
      // Если соединение с сервером не установлено, то пытаемся его установить:
      // пытаемся по очереди подключиться к серверам, заданным в списке connections
-     bool ok;
-     int cur_can_entry = m_client->property(CURRENT_CAN_ENTRY).toInt(&ok);
-     if(!ok)
-       cur_can_entry = -1;
-
      for(int i = 0; i < m_params.connections.count(); i++) {
+qDebug() << 0 << "i=" << i << m_client->state();
+       if(m_client->state() == QAbstractSocket::ConnectedState) {
 
-       if(m_params.connections.at(i).socket && (m_params.connections.at(i).socket->state() == QAbstractSocket::ConnectedState))
-         continue;
+         if(m_params.connections.at(i).socketDescriptor == m_client->socketDescriptor()) {
 
-       m_params.connections[i].socket = new QTcpSocket;
-       m_params.connections[i].socket->connectToHost(m_params.connections.at(i).host, m_params.connections.at(i).port);
-       if(m_params.connections[i].socket->waitForConnected(1000))
-         m_params.connections[i].state = 1;
+           states[i] = 2;
+           continue;
+         }
+         else {
+
+           // проверяем доступность очередного сервера
+           m_params.connections[i].socket = new QTcpSocket;
+           m_params.connections[i].socket ->connectToHost(m_params.connections.at(i).host, m_params.connections.at(i).port);
+           states[i] = m_params.connections[i].socket->waitForConnected(1000) ? 1 : 0;
+
+           m_params.connections[i].socket->disconnectFromHost();
+           delete m_params.connections[i].socket;
+           m_params.connections[i].socket = nullptr;
+           m_params.connections[i].socketDescriptor = -1;
+
+qDebug() << 2 << "i=" << i << m_params.connections.at(i).host.toString() << m_params.connections.at(i).port;
+         }
+       }
+       else {
+
+//         if(m_params.connections[i].socket) {
+//qDebug() << "magic" << i << m_params.connections[i].socket;
+//           try {
+//             delete m_params.connections[i].socket;
+//           }
+//           catch(...){
+//             qDebug() << "wrong tcp socket pointer";
+//           }
+
+           m_params.connections[i].socketDescriptor = -1; //nullptr;
 
 
+//         }
+qDebug() << 1 << "i=" << i << m_params.connections.at(i).host.toString() << m_params.connections.at(i).port;
+         m_client->connectToHost(m_params.connections.at(i).host, m_params.connections.at(i).port);
 
-        // если основное подключение не установлено, то в первую очередь пытаемся
-        // установить основное подключение, с которым будем работать - m_client
-qDebug() << 1 << m_client->state() << "i =" << i;
-        if(m_client->state() != QAbstractSocket::ConnectedState) {
+         if(m_client->waitForConnected(1000)) {
 
-          m_client->connectToHost(m_params.connections.at(i).host, m_params.connections.at(i).port);
-qDebug() << 2;
-          bool b = m_client->waitForConnected(1000);
-qDebug() << 3 << b;
-          if(b)
-            states[i] = 2; // признак, что сервер доступен и используется в качестве текущего подключения
+           int fd = m_client->socketDescriptor();
+           int enableKeepAlive = 1;
+           setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &enableKeepAlive, sizeof(enableKeepAlive));
 
-        }
-        // если уже имеется подключение к данному серверу, то проверяем
-        // подключение к остальным серверам из списка
-        else {
-qDebug() << 4;
-          QTcpSocket test_socket;
-          test_socket.connectToHost(m_params.connections.at(i).host, m_params.connections.at(i).port);
-qDebug() << 5 << QDateTime::currentDateTime().toString("hh:mm:ss.zzz");
-          bool b = test_socket.waitForConnected(1000);
-qDebug() << 6 << b << QDateTime::currentDateTime().toString("hh:mm:ss.zzz");
-          if(b)
-            states[i] = 1; // сервер доступен
+           int maxIdle = 2; /* seconds */
+           setsockopt(fd, IPPROTO_TCP, TCP_KEEPIDLE, &maxIdle, sizeof(maxIdle));
 
-        }
+           int count = 1;  // send up to 3 keepalive packets out, then disconnect if no response
+           setsockopt(fd, SOL_TCP, TCP_KEEPCNT, &count, sizeof(count));
 
-        // для серверов, к которым не удалось подключиться states[i] останется
-        // равным 0 - признак отстутствия подключения
+           int interval = 1;   // send a keepalive packet out every 2 seconds (after the 5 second idle period)
+           setsockopt(fd, SOL_TCP, TCP_KEEPINTVL, &interval, sizeof(interval));
+
+           m_params.connections[i].socketDescriptor = m_client->socketDescriptor();
+           states[i]  = 2;
+
+         }
+         else {
+
+           m_params.connections[i].socketDescriptor = -1;
+           // для серверов, к которым не удалось подключиться states[i] останется
+           // равным 0 - признак отстутствия подключения
+
+         }
+       }
      }
   }
 

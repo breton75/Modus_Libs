@@ -102,6 +102,7 @@ namespace tcp {
     bool         enable     = true;
 
     QTcpSocket*  socket     = nullptr;
+    int          socketDescriptor = -1;
     int          state      = -1;
 
   };

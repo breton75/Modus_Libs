@@ -5,6 +5,10 @@
 #include <QTcpSocket>
 #include <QObjectUserData>
 
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+
 #include "tcp_client_multi_global.h"
 #include "tcp_client_multi_defs.h"
 
