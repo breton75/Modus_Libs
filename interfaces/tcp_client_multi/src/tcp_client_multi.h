@@ -66,7 +66,9 @@ public slots:
 
 private:
   // TCP-сокет клиента
-  QTcpSocket*   m_client = nullptr;
+  QList<QTcpSocket*>   m_client_list; // = nullptr;
+
+  tcp::CanEntryConnection*  m_current_connection = nullptr;
 
  // Структура, хранящая параметры TCP-клиента:
   tcp::Params   m_params;

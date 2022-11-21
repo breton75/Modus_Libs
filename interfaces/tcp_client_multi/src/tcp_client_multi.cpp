@@ -3,7 +3,8 @@
 #define CURRENT_CAN_ENTRY "current_can_entry"
 
 SvTcpClientMulti::SvTcpClientMulti():
-  m_client(nullptr),
+  m_client_list(QList<QTcpSocket*>()),
+  m_current_connection(nullptr),
   m_gap_timer(nullptr),
   m_connectionCheckTimer(nullptr)
 {
@@ -44,90 +45,124 @@ bool SvTcpClientMulti::start()
 // Создание и инициализация объектов; создание подключений сигналов к слотам,
 // которые необходимы для работы tcp-клиента.
 {
-    // Создаём объект TCP-клиента:
-    m_client = new QTcpSocket;
+  // Создаём сокеты TCP-клиента, в количестве заданном параметром connections
+  for(int i = 0; i < m_params.connections.count(); i++) {
 
-    m_client->setProperty(CURRENT_CAN_ENTRY, QVariant());
+    m_params.connections[i].socket = new QTcpSocket;
 
-    // Сбрасываем флаг, говорящий о том, что выполняется команда разрыва TCP-соединения
-      // с сервером:
-//    breakConnectionCommand = false;
+    // созданные сокеты поключаем к слотам connected и disconnected, для отслеживания этих событий
+    connect(m_params.connections[i].socket,     &QTcpSocket::connected,       this, &SvTcpClientMulti::connected);
+    connect(m_params.connections[i].socket,     &QTcpSocket::disconnected,    this, &SvTcpClientMulti::disconnected);
 
-    // После подключения -> вызываем слот "connected":
-    connect(m_client,     &QTcpSocket::connected,       this, &SvTcpClientMulti::connected);
+    // слот readyRead переключаем в функции checkConnection на сокет, который имеет наибольший приоритет
+//    connect(m_params.connections[i].socket,     &QTcpSocket::readyRead,       this, &SvTcpClientMulti::read );
 
-    // По отключении -> отображаем информацию об этом в утилите "logview":
-    connect(m_client,     &QTcpSocket::disconnected,    this, &SvTcpClientMulti::disconnected);
+//    connect(m_params.connections[i].socket,     &QTcpSocket::stateChanged,    this, &SvTcpClientMulti::stateChanged);
+//    connect(client, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(socketError(QAbstractSocket::SocketError)));
+//    connect(client,     &QTcpSocket::error,           this, &SvTcpClientMulti::socketError);
+  }
 
-    connect(m_client,     &QTcpSocket::stateChanged,    this, &SvTcpClientMulti::stateChanged);
-    connect(m_client, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(socketError(QAbstractSocket::SocketError)));
-//    connect(m_client,     &QTcpSocket::error,           this, &SvTcpClientMulti::socketError);
+  // Когда протокольная часть сообщает, что поместила в буфер данные
+  // для передачи по интерфейсу -> вызываем функцию "SvTcpClient::write",
+  // которая запишет данные из буфера в сокет:
+  connect(p_io_buffer,  &modus::IOBuffer::readyWrite, this, &SvTcpClientMulti::write);
 
-    // Когда сокет сообщает, что получил от сервера данные ->
-    // вызываем функцию "SvTcpClient::read", которая прочтёт их и поместит
-    // в буфер:
-    connect(m_client,     &QTcpSocket::readyRead,       this, &SvTcpClientMulti::read );
+  // Когда от протокольной части поступает сигнал "say" -> вызывем функцию "say_WorkingOut",
+  // чтобы выяснить, какую команду он "требует" и выполнить её:
+  connect(p_io_buffer, &modus::IOBuffer::say, this, &SvTcpClientMulti::say_WorkingOut);
 
-    // Когда протокольная часть сообщает, что поместила в буфер данные
-    // для передачи по интерфейсу -> вызываем функцию "SvTcpClient::write",
-    // которая запишет данные из буфера в сокет:
-    connect(p_io_buffer,  &modus::IOBuffer::readyWrite, this, &SvTcpClientMulti::write);
+  p_is_active = true;
 
-    // Когда от протокольной части поступает сигнал "say" -> вызывем функцию "say_WorkingOut",
-    // чтобы выяснить, какую команду он "требует" и выполнить её:
-    connect(p_io_buffer, &modus::IOBuffer::say, this, &SvTcpClientMulti::say_WorkingOut);
+  // На момент запуска TCP-клиента, TCP-сервер может быть не запущен, поэтому
+  // мы по таймеру будем c интервалом, указанным в параметре интерфейса, вызывать
+  // функцию "checkConnection", которая будет проверять установлено ли TCP-соединение и,
+  // если оно не установлено, пытаться его установить:
+  m_connectionCheckTimer = new QTimer;
+  connect(m_connectionCheckTimer, &QTimer::timeout, this, &SvTcpClientMulti::checkConnection);
+  m_connectionCheckTimer->setSingleShot(true);
 
-    p_is_active = true;
+  // Даём TCP-клиенту команду на подключение к серверу c
+  // адресом и портом, указанными в конфигурационном файле для данного интерфейса:
+  checkConnection();
 
-    m_connectionCheckTimer = new QTimer;
-    connect(m_connectionCheckTimer, &QTimer::timeout, this, &SvTcpClientMulti::checkConnection);
-    m_connectionCheckTimer->setSingleShot(true);
-//    m_connectionCheckTimer->start(m_params.reconnect_period);
+  // Устанавливаем параметры таймера, по срабатыванию которого, вызываем функцию "newData", которая
+  // устанавливает флаг "is_ready" и испускает сигнал "dataReaded".
+  // Более подробное описание см. в функции "SvTcpServer::read".
+  m_gap_timer = new QTimer;
+  m_gap_timer->setTimerType(Qt::PreciseTimer);
+  m_gap_timer->setInterval(m_params.grain_gap);
+  m_gap_timer->setSingleShot(true);
+  connect(m_gap_timer, &QTimer::timeout, this, &SvTcpClientMulti::newData);
 
-    // Даём TCP-клиенту команду на подключение к серверу c
-    // адресом и портом, указанными в конфигурационном файле для данного интерфейса:
-    checkConnection();
-
-    // На момент запуска TCP-клиента, TCP-сервер может быть не запущен, поэтому
-    // мы по таймеру будем c интервалом, указанным в параметре интерфейса, вызывать
-    // функцию "checkConnection", которая
-    // будет проверять установлено ли TCP-соединение и, если оно не установлено, пытаться
-    // его установить:
-
-    // Устанавливаем параметры таймера, по срабатыванию которого, вызываем функцию "newData", которая
-    // устанавливает флаг "is_ready" и испускает сигнал "dataReaded".
-    // Более подробное описание см. в функции "SvTcpServer::read".
-    m_gap_timer = new QTimer;
-    m_gap_timer->setTimerType(Qt::PreciseTimer);
-    m_gap_timer->setInterval(m_params.grain_gap);
-    m_gap_timer->setSingleShot(true);
-    connect(m_gap_timer, &QTimer::timeout, this, &SvTcpClientMulti::newData);
-
-    return true;
+  return true;
 }
 
-
+// отслеживаем событие подключения для сокетов
 void SvTcpClientMulti::connected(void)
-// По подключению к серверу -> отображаем информацию об этом
-// в утилите "logview:
 {
-    emit message(QString("TCP-клиент: Успешно подключились к TCP-серверу"), lldbg, mtscc);
-    qDebug() << QString("TCP-клиент: Успешно подключились к TCP-серверу");
-}
+  QTcpSocket* socket = (QTcpSocket*)(sender());
 
+  if(socket) {
+
+//    for(int i = 0; i < m_params.connections.count(); i++) {
+
+//      if(m_params.connections.at(i).socket == socket) {
+
+    // задаем параметры сокета, такие, чтобы при потере соединения, сокет дисконнектился
+    // по умолчанию, сокет, даже при физическом разрыве соединения, показывает состояние ConnectedState
+    // решение взято отсюда:
+    // https://askdev.ru/q/sostoyanie-qtcpsocket-vsegda-podklyucheno-dazhe-otsoedinenie-ethernet-provoda-129854/
+    int fd = socket->socketDescriptor();
+    int enableKeepAlive = 1;
+    setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &enableKeepAlive, sizeof(enableKeepAlive));
+
+    int maxIdle = 2; /* seconds */
+    setsockopt(fd, IPPROTO_TCP, TCP_KEEPIDLE, &maxIdle, sizeof(maxIdle));
+
+    int count = 1;  // send up to 3 keepalive packets out, then disconnect if no response
+    setsockopt(fd, SOL_TCP, TCP_KEEPCNT, &count, sizeof(count));
+
+    int interval = 1;   // send a keepalive packet out every 2 seconds (after the 5 second idle period)
+    setsockopt(fd, SOL_TCP, TCP_KEEPINTVL, &interval, sizeof(interval));
+
+    QString m = QString("Успешно подключились к TCP-серверу %1:%2")
+                .arg(socket->peerAddress().toString())
+                .arg(socket->peerPort());
+
+//                    .arg(m_params.connections.at(i).host.toString())
+//                    .arg(m_params.connections.at(i).port);
+
+    emit message(m, lldbg, mtscc);
+    qDebug() << m;
+
+//      }
+//    }
+  }
+}
 
 void SvTcpClientMulti::disconnected (void)
-// По отключению от сервера -> отображаем информацию об этом
-// в утилите "logview":
 {
-    // Мы оказались в состоянии отлючения от сервера -> сбрасываем флаг "breakConnectionCommand",
-    // чтобы возобновить попытки установить соединение (этого требует проткол обмена с КСОН):
-//    p_is_active = false;
+  QTcpSocket* socket = (QTcpSocket*)(sender());
 
-    emit message(QString("TCP-клиент: Отключились от TCP-сервера"), lldbg, mtscc);
-    qDebug() << QString("TCP-клиент: Отключились от TCP-сервера");
+  if(socket) {
+
+    // если сокет, который дисконнектнулся, относится к текущему подключению, то
+    // отключаем этот сокет от слота read и обнуляем текущее подключение (текущего подключения нет)
+    if(m_current_connection && (m_current_connection->socket == socket)) {
+
+      disconnect(m_current_connection->socket,     &QTcpSocket::readyRead,       this, &SvTcpClientMulti::read );
+      m_current_connection = nullptr;
+    }
+
+    QString m = QString("Отключились от TCP-сервера %1:%2")
+                .arg(socket->peerAddress().toString())
+                .arg(socket->peerPort());
+
+    emit message(m, lldbg, mtscc);
+    qDebug() << m;
+
+  }
 }
-
 
 void SvTcpClientMulti::socketError(QAbstractSocket::SocketError err)
 // Отображение в утилите "logview" ошибки сокета.
@@ -151,103 +186,120 @@ void SvTcpClientMulti::checkConnection(void)
 // будет проверять установлено ли TCP-соединение и, если оно не установлено, пытаться
 // его установить:
 {
-
+  // массив для хранения текущих состояний подключений
+  // после прохода по всем сокетам, заполняется состояниями и отправляется в протокольный модуль
   char states[m_params.connections.count()];
   memset(&states[0], 0, m_params.connections.count());
 
   // Если выполняется команда разрыва TCP-соединения с сервером, то до того, как
   // соединение будет разорвано, пытаться его установить - не нужно:
-  if (p_is_active && m_client) {
+  if (p_is_active) {
 
-     qDebug() << "TCP-клиент: выполняется проверка соединения с сервером"; // << m_params.connections.count();
+    qDebug() << "TCP-клиент: выполняется проверка соединения с сервером";
 
-     // Если соединение с сервером не установлено, то пытаемся его установить:
-     // пытаемся по очереди подключиться к серверам, заданным в списке connections
-     for(int i = 0; i < m_params.connections.count(); i++) {
-qDebug() << 0 << "i=" << i << m_client->state();
-       if(m_client->state() == QAbstractSocket::ConnectedState) {
+    // проходим по очереди по всем подключениям, заданным в списке connections
+    // анализируем и назначаем текущее подключение
+    for(int i = 0; i < m_params.connections.count(); i++) {
 
-         if(m_params.connections.at(i).socketDescriptor == m_client->socketDescriptor()) {
+      tcp::CanEntryConnection*  connection  = &m_params.connections[i];
+      QTcpSocket*               client      = connection->socket;
 
-           states[i] = 2;
-           continue;
-         }
-         else {
+      switch (client->state()) {
 
-           // проверяем доступность очередного сервера
-           m_params.connections[i].socket = new QTcpSocket;
-           m_params.connections[i].socket ->connectToHost(m_params.connections.at(i).host, m_params.connections.at(i).port);
-           states[i] = m_params.connections[i].socket->waitForConnected(1000) ? 1 : 0;
+        // если для данного сокета не было установлено соединение
+        case QAbstractSocket::UnconnectedState:
+        {
+          // отдельно пррверяем вариант, когда соединение было (и оно было текущим), но произошел разрыв.
+          // тогда отключаем данный сокет от слота read и обнуляем текущее соединение (текущего соединения нет)
+          if(m_current_connection && (m_current_connection->can_entry == connection->can_entry)) {
 
-           m_params.connections[i].socket->disconnectFromHost();
-           delete m_params.connections[i].socket;
-           m_params.connections[i].socket = nullptr;
-           m_params.connections[i].socketDescriptor = -1;
+            // отключаемся от слота read
+            disconnect(m_current_connection->socket,     &QTcpSocket::readyRead,       this, &SvTcpClientMulti::read );
+            m_current_connection = nullptr;
+          }
 
-qDebug() << 2 << "i=" << i << m_params.connections.at(i).host.toString() << m_params.connections.at(i).port;
-         }
-       }
-       else {
+          // даем команду на подключение
+          // данную команду выполняем асинхронно. здесь не ждем подключения, чтобы не блокировать поток
+          // если ждать подключение здесь, то интервал ожидания (для 4 подключений) превышает
+          // timeout сигналов и данные на экране мигают (становятся серыми, как будто нет данных, потом восстанавливаются)
+          // если соединение будет установлено, то для данного сокета будет вызван слот connected
+          // и при следующем вызове checkConnection, будет произведен его анализ
+          client->connectToHost(m_params.connections.at(i).host, m_params.connections.at(i).port);
 
-//         if(m_params.connections[i].socket) {
-//qDebug() << "magic" << i << m_params.connections[i].socket;
-//           try {
-//             delete m_params.connections[i].socket;
-//           }
-//           catch(...){
-//             qDebug() << "wrong tcp socket pointer";
-//           }
+          break;
+        }
 
-           m_params.connections[i].socketDescriptor = -1; //nullptr;
+        // если для данного сокета есть установленное соединение
+        case QAbstractSocket::ConnectedState:
+        {
+          // если это текущее соединение, то ничего не делаем
+          if(m_current_connection && (m_current_connection->can_entry == connection->can_entry))
+            break;
 
 
-//         }
-qDebug() << 1 << "i=" << i << m_params.connections.at(i).host.toString() << m_params.connections.at(i).port;
-         m_client->connectToHost(m_params.connections.at(i).host, m_params.connections.at(i).port);
+          // если текущее соединение (m_current_connection) имеет меньший приоритет, чем i-ый элемент,
+          // то перебрасываем текущее соединение на элемент с большим приоритетом
+          // для этого, сначала отключаем сокет от слота read и обнуляем текущее соединение
+          if(m_current_connection && (connection->can_entry < m_current_connection->can_entry)) {
 
-         if(m_client->waitForConnected(1000)) {
+            disconnect(m_current_connection->socket,     &QTcpSocket::readyRead,       this, &SvTcpClientMulti::read );
+            m_current_connection = nullptr;
+          }
 
-           int fd = m_client->socketDescriptor();
-           int enableKeepAlive = 1;
-           setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &enableKeepAlive, sizeof(enableKeepAlive));
+          // если текущее соединение не задано, то назначаем ему текущий элемент списка
+          // в данном случае текущий элемент будет иметь наибольший приоритет
+          if(!m_current_connection) {
 
-           int maxIdle = 2; /* seconds */
-           setsockopt(fd, IPPROTO_TCP, TCP_KEEPIDLE, &maxIdle, sizeof(maxIdle));
+            // в качестве ткущего подключения используем текущий элемент
+            m_current_connection = connection;
 
-           int count = 1;  // send up to 3 keepalive packets out, then disconnect if no response
-           setsockopt(fd, SOL_TCP, TCP_KEEPCNT, &count, sizeof(count));
+            // прикручиваем сокет текущего соединения к слоту read
+            connect(m_current_connection->socket,     &QTcpSocket::readyRead,       this, &SvTcpClientMulti::read );
 
-           int interval = 1;   // send a keepalive packet out every 2 seconds (after the 5 second idle period)
-           setsockopt(fd, SOL_TCP, TCP_KEEPINTVL, &interval, sizeof(interval));
+          }
 
-           m_params.connections[i].socketDescriptor = m_client->socketDescriptor();
-           states[i]  = 2;
-
-         }
-         else {
-
-           m_params.connections[i].socketDescriptor = -1;
-           // для серверов, к которым не удалось подключиться states[i] останется
-           // равным 0 - признак отстутствия подключения
+          break;
 
          }
-       }
-     }
+
+        // все другие состояния подключения игнорируем
+        default:
+          break;
+      }
+    }
+
+    // пооходим по списку подключений, смотрим состояние подключения и заполняем массив
+    for(int i = 0; i < m_params.connections.count(); i++) {
+
+      if(m_params.connections.at(i).socket->state() == QAbstractSocket::ConnectedState)
+        states[i] = m_params.connections.at(i).can_entry == m_current_connection->can_entry ? 2 : 1;
+
+      else
+        states[i] = 0;
+
+    }
   }
 
+  // отправляем массив с состояниями в протокольный модуль, для назначения значений сигналам
   p_io_buffer->state->mutex.lock();
   p_io_buffer->state->setData(&states[0], m_params.connections.count());
   p_io_buffer->state->mutex.unlock();
 
-  qDebug() << states[0] + 48 << states[1] + 48 << states[2] + 48 << states[3] + 48;
+  qDebug() << int(states[0]) << int(states[1]) << int(states[2]) << int(states[3]);
   emit p_io_buffer->notice(p_io_buffer->state);
 
-  m_connectionCheckTimer->start(m_params.reconnect_period);
+  // запускаем таймер проверки подключений, если не был вызван слот stop
+  if(p_is_active)
+    m_connectionCheckTimer->start(m_params.reconnect_period);
+
 }
 
 void SvTcpClientMulti::read()
 // Получение данных из сокета.
 {
+  if(!m_current_connection)
+    return;
+
     m_gap_timer->stop();
 
     p_io_buffer->input->mutex.lock();
@@ -260,11 +312,11 @@ void SvTcpClientMulti::read()
 
    // Если места в буфере на новые данные от сокета нет, то очищаем его содержимое и
    // сбрасываем флаг "is_ready":
-   if(p_io_buffer->input->offset + m_client->bytesAvailable() > p_config->bufsize)
+   if(p_io_buffer->input->offset + m_current_connection->socket->bytesAvailable() > p_config->bufsize)
         p_io_buffer->input->reset();
 
 
-   qint64 readed = m_client->read(&p_io_buffer->input->data[p_io_buffer->input->offset], p_config->bufsize - p_io_buffer->input->offset);
+   qint64 readed = m_current_connection->socket->read(&p_io_buffer->input->data[p_io_buffer->input->offset], p_config->bufsize - p_io_buffer->input->offset);
 
    if(p_io_buffer->input->offset == 0)
    { // Фиксируем момент НАЧАЛА чтения:
@@ -310,13 +362,13 @@ void SvTcpClientMulti::newData(void)
 void SvTcpClientMulti::write(modus::BUFF* buffer)
 // Запись данных в сокет:
 {
-  if(!buffer->isReady())
+  if(!buffer->isReady() || !m_current_connection)
   {
     // Если данных для передачи нет, то нечего и передавать (выходим из функции):
     return;
   }
 
-  if (m_client -> state() != QAbstractSocket::ConnectedState)
+  if (m_current_connection->socket->state() != QAbstractSocket::ConnectedState)
   {
       // Если соединения с сервером не установлено, то некому и передавать (выходим из функции):
       return;
@@ -324,8 +376,8 @@ void SvTcpClientMulti::write(modus::BUFF* buffer)
 
   buffer->mutex.lock();
 
-  bool written = m_client->write((const char*)&buffer->data[0], buffer->offset) > 0;
-  m_client->flush();
+  bool written = m_current_connection->socket->write((const char*)&buffer->data[0], buffer->offset) > 0;
+  m_current_connection->socket->flush();
 
   if(written)
   {
@@ -382,8 +434,17 @@ void SvTcpClientMulti::stop()
   m_connectionCheckTimer = nullptr;
 
   // Даём команду на отключение от TCP-сервера:
-  if(m_client && m_client->state() == QAbstractSocket::ConnectedState)
-    m_client->disconnectFromHost();
+  for(auto c: m_params.connections) {
+
+    if(c.socket) {
+
+      if(c.socket->state() == QAbstractSocket::ConnectedState)
+        c.socket->disconnectFromHost();
+
+      delete c.socket;
+
+    }
+  }
 
 }
 
