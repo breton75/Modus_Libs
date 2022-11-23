@@ -2,16 +2,16 @@ QT -= gui
 QT += network
 
 TEMPLATE = lib
-DEFINES += TCP_CLIENT_MULTI_LIBRARY
+DEFINES += TCP_SERVER_LIBRARY
 
 CONFIG += c++11 plugin
 
+TARGET = /home/user/Modus/lib/interfaces/tcp_server_m
 
-VERSION =   1.2.0    # major.minor.patch
+VERSION =   1.0.0    # major.minor.patch
 DEFINES +=  LIB_VERSION=\\\"$$VERSION\\\"
-DEFINES += "LIB_AUTHOR=\"\\\"Свиридов С. А.\\\"\""
+DEFINES += "LIB_AUTHOR=\"\\\"Свиридов С. А., Кон А. М.\\\"\""
 
-TARGET = /home/user/Modus/lib/interfaces/tcp_client_multi
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
@@ -36,13 +36,13 @@ QMAKE_LFLAGS += -Wno-unused-variable, -Wl,--no-undefined
 #}
 
 SOURCES += \
-    tcp_client_multi.cpp
+    sv_tcp_server.cpp
 
 HEADERS += \
     ../../../../Modus/global/device/interface/sv_abstract_interface.h \
-    tcp_client_multi_defs.h \
-    tcp_client_multi.h \
-    tcp_client_multi_global.h \
+    sv_tcp_server.h \
+    tcp_server_defs.h \
+    tcp_server_global.h \
     ../../../../Modus/global/device/device_defs.h
 
 # Default rules for deployment.

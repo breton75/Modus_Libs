@@ -186,17 +186,17 @@ struct UdpParams {
           throw SvException(QString(IMPERMISSIBLE_VALUE).arg(P).arg(json)
                              .arg("Номер порта должен быть задан целым положительным числом в диапазоне [1..65535]"));
 
-        p.forward_port = fo.value(P).toInt(0);
+        p.forward_port = fo.value(P).toInt(p.recv_port);
 
       }
       else
-        p.forward_port = 0;
+        p.forward_port = p.recv_port;
 
     }
     else {
 
       p.forward_host = QHostAddress();
-      p.forward_port = modus::HEX;
+      p.forward_port = 0;
 
     }
 
