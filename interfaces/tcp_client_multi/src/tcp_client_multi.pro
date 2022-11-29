@@ -7,7 +7,7 @@ DEFINES += TCP_CLIENT_MULTI_LIBRARY
 CONFIG += c++11 plugin
 
 
-VERSION =   1.2.0    # major.minor.patch
+VERSION =   1.3.0    # major.minor.patch
 DEFINES +=  LIB_VERSION=\\\"$$VERSION\\\"
 DEFINES += "LIB_AUTHOR=\"\\\"Свиридов С. А.\\\"\""
 

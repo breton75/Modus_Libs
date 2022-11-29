@@ -12,25 +12,34 @@
 #include "../../../../svlib/SvException/svexception.h"
 #include "../../../../Modus/global/global_defs.h"
 
-#define P_HOST                    "host"
-#define P_RECONNECT_PERIOD        "reconnect_period"
-#define P_CONNECTIONS             "connections"
-#define P_CAN_ENTRY               "can_entry"
+#define P_HOST                      "host"
+#define P_RECONNECT_PERIOD          "reconnect_period"
+#define P_CONNECTIONS               "connections"
+#define P_PRIORITY                  "priority"
 
-#define P_HOST_DESC               "ip адрес, к которому клиент должен подключаться"
-#define P_TCP_PORT_DESC           "порт, к которому клиент должен подключаться"
-#define P_RECONNECT_PERIOD_DESC   "период в милисекундах, с которым TCP-клиент осуществляет попытки установить соединение с сервером"
-#define P_GRAIN_GAP_DESC          "период (в милисекундах) ожидания частей пакета данных"
-#define P_FMT_DESC                "форматирование сообщений для логирования"
+#define P_CONNECTIONS_DESC          "список хостов, к которым должен подключаться клиент. должен содержать ip адрес, порт, приоритет подключения. флаг enable определяет, будет ли использоваться данное подключение"
+#define P_HOST_DESC                 "ip адрес, к которому клиент должен подключаться"
+#define P_TCP_PORT_DESC             "порт, к которому клиент должен подключаться"
+#define P_PRIORITY_DESC             "опреляет приоритет использования данного подключения. чем ниже число, тем выше приоритет. 0 - наивысший приоритет"
+#define P_RECONNECT_PERIOD_DESC     "период в милисекундах, с которым TCP-клиент осуществляет попытки установить соединение с сервером"
+#define P_GRAIN_GAP_DESC            "период (в милисекундах) ожидания частей пакета данных"
+#define P_FMT_DESC                  "форматирование сообщений для логирования"
 
 // дефолтное значение параметра "port" по умолчанию (то есть если оно не задано в конфигурационном файле):
-#define DEFAULT_PORT              10003
+#define DEFAULT_PORT                10000
+
+#define DEFAULT_UNDEFINED_PRIORITY  -1
 
 // дефолтное значение периода с которым TCP-клиент осуществляет попытки установить соединение с сервером,
-#define DEFAULT_RECONNECT_PERIOD  1000
+#define DEFAULT_RECONNECT_PERIOD    1000
+
+#define STATE_NO_CONNECTION         0
+#define STATE_HOST_ACCESIBLE        1
+#define STATE_HOST_IN_USE           2
 
 
-namespace tcp {
+
+namespace tcpclientm {
 
   /*** constants ***/
   enum ResponseAwaiting {
@@ -88,22 +97,18 @@ namespace tcp {
                                                                     {"any",       QHostAddress::Any},
                                                                     {"broadcast", QHostAddress::Broadcast}};
 
-  struct CanEntryConnection {
+  struct ConnectionItem {
 
-    // номер точки подключения. по умолчанию -1, не валидное
-    quint8       can_entry  = -1;
+    // приоритет подключения. по умолчанию -1, не определен
+    int          priority  = DEFAULT_UNDEFINED_PRIORITY;
 
-    // Адрес, к которому должен подключаться клиент:
+    // Адрес и порт, к которому должен подключаться клиент:
     QHostAddress host       = QHostAddress::Null;
-
-    // Порт, к которому должен подключаться клиент:
     quint16      port       = DEFAULT_PORT;
 
     bool         enable     = true;
-
     QTcpSocket*  socket     = nullptr;
-    int          socketDescriptor = -1;
-    int          state      = -1;
+    int          state      = STATE_NO_CONNECTION;
 
   };
 
@@ -111,7 +116,7 @@ namespace tcp {
   struct Params
   {
 
-    QList<CanEntryConnection> connections = QList<CanEntryConnection>();
+    QList<ConnectionItem> connections = QList<ConnectionItem>();
 
     // Формат данных в сообщениях, отображаемых в утилите "logview":
     quint16      fmt              = modus::HEX;
@@ -130,8 +135,10 @@ namespace tcp {
         fmts.append(key);
 
       QString result = QString("\"params\": [\n")
+        .append(MAKE_PARAM_STR(P_CONNECTIONS,       P_CONNECTIONS_DESC,       "string",   "true", "NULL",                     "json массив", ",\n"))
         .append(MAKE_PARAM_STR(P_HOST,              P_HOST_DESC,              "string",   "true", "NULL",                     "ip адреса в формате xxx.xxx.xxx.xxx, localhost", ",\n"))
         .append(MAKE_PARAM_STR(P_PORT,              P_TCP_PORT_DESC,          "quint16",  "false", DEFAULT_PORT,              "1 - 65535", ",\n"))
+        .append(MAKE_PARAM_STR(P_PRIORITY,          P_PRIORITY_DESC,          "int",      "false", DEFAULT_UNDEFINED_PRIORITY,"", ",\n"))
         .append(MAKE_PARAM_STR(P_RECONNECT_PERIOD,  P_RECONNECT_PERIOD_DESC,  "quint16",  "false", DEFAULT_RECONNECT_PERIOD,  "1 - 65535", ",\n"))
         .append(MAKE_PARAM_STR(P_GRAIN_GAP,         P_GRAIN_GAP_DESC,         "quint16",  "false", DEFAULT_GRAIN_GAP,         "1 - 65535", ",\n"))
         .append(MAKE_PARAM_STR(P_FMT,               P_FMT_DESC,               "string",   "false", "hex",                     fmts, "\n"))
@@ -173,7 +180,7 @@ namespace tcp {
 
         QJsonArray ba = object.value(P).toArray();
 
-        CanEntryConnection connection;
+        ConnectionItem connection;
 
         for(QJsonValue mv: ba) {
 
@@ -190,18 +197,18 @@ namespace tcp {
             continue;
 
           // номер точки подключения к CAN, к которому должен подключаться клиент":
-          P = P_CAN_ENTRY;
+          P = P_PRIORITY;
           if(mo.contains(P)) {
 
-            if(mo.value(P).toInt(-1) < 0)
+            if(!mo.value(P).isDouble())
               throw SvException(QString(IMPERMISSIBLE_VALUE).arg(P).arg(json)
-                                 .arg("Номер точки подключения к CAN должен быть задан целым положительным числом"));
+                                 .arg("Приоритет подключения к хосту должен быть задан целым числом"));
 
-            connection.can_entry = mo.value(P).toInt();
+            connection.priority = mo.value(P).toInt(-1);
 
           }
           else
-             throw SvException(QString(MISSING_PARAM_DESC).arg(json).arg(P));
+            connection.priority = DEFAULT_UNDEFINED_PRIORITY;
 
           // Считываем значение параметра: "адрес к которому должен подключаться клиент":
           P = P_HOST;
@@ -309,10 +316,10 @@ namespace tcp {
       QJsonObject j;
       QJsonArray  a;
 
-      for(CanEntryConnection c: connections) {
+      for(ConnectionItem c: connections) {
 
         QJsonObject o;
-        o.insert(P_CAN_ENTRY, QJsonValue(c.can_entry).toInt());
+        o.insert(P_PRIORITY, QJsonValue(c.priority).toInt());
         o.insert(P_HOST,      QJsonValue(c.host.toString()).toString());
         o.insert(P_PORT,      QJsonValue(c.port).toInt());
         o.insert(P_ENABLE,    QJsonValue(c.enable).toBool());

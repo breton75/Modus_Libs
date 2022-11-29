@@ -3,7 +3,6 @@
 #define CURRENT_CAN_ENTRY "current_can_entry"
 
 SvTcpClientMulti::SvTcpClientMulti():
-  m_client_list(QList<QTcpSocket*>()),
   m_current_connection(nullptr),
   m_gap_timer(nullptr),
   m_connectionCheckTimer(nullptr)
@@ -29,7 +28,7 @@ bool SvTcpClientMulti::configure(modus::DeviceConfig* config, modus::IOBuffer*io
     p_config = config;
     p_io_buffer = iobuffer;
 
-    m_params = tcp::Params::fromJsonString(p_config->interface.params);
+    m_params = tcpclientm::Params::fromJsonString(p_config->interface.params);
 
     return true;
 
@@ -39,7 +38,6 @@ bool SvTcpClientMulti::configure(modus::DeviceConfig* config, modus::IOBuffer*io
     return false;
   }
 }
-
 
 bool SvTcpClientMulti::start()
 // Создание и инициализация объектов; создание подключений сигналов к слотам,
@@ -55,11 +53,6 @@ bool SvTcpClientMulti::start()
     connect(m_params.connections[i].socket,     &QTcpSocket::disconnected,    this, &SvTcpClientMulti::disconnected);
 
     // слот readyRead переключаем в функции checkConnection на сокет, который имеет наибольший приоритет
-//    connect(m_params.connections[i].socket,     &QTcpSocket::readyRead,       this, &SvTcpClientMulti::read );
-
-//    connect(m_params.connections[i].socket,     &QTcpSocket::stateChanged,    this, &SvTcpClientMulti::stateChanged);
-//    connect(client, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(socketError(QAbstractSocket::SocketError)));
-//    connect(client,     &QTcpSocket::error,           this, &SvTcpClientMulti::socketError);
   }
 
   // Когда протокольная часть сообщает, что поместила в буфер данные
@@ -104,10 +97,6 @@ void SvTcpClientMulti::connected(void)
 
   if(socket) {
 
-//    for(int i = 0; i < m_params.connections.count(); i++) {
-
-//      if(m_params.connections.at(i).socket == socket) {
-
     // задаем параметры сокета, такие, чтобы при потере соединения, сокет дисконнектился
     // по умолчанию, сокет, даже при физическом разрыве соединения, показывает состояние ConnectedState
     // решение взято отсюда:
@@ -129,14 +118,9 @@ void SvTcpClientMulti::connected(void)
                 .arg(socket->peerAddress().toString())
                 .arg(socket->peerPort());
 
-//                    .arg(m_params.connections.at(i).host.toString())
-//                    .arg(m_params.connections.at(i).port);
-
     emit message(m, lldbg, mtscc);
     qDebug() << m;
 
-//      }
-//    }
   }
 }
 
@@ -167,16 +151,16 @@ void SvTcpClientMulti::disconnected (void)
 void SvTcpClientMulti::socketError(QAbstractSocket::SocketError err)
 // Отображение в утилите "logview" ошибки сокета.
 {
-  emit message(QString ("TCP-клиент: ") + tcp::SocketErrors.value(err, QString("Неизвестная ошибка")), lldbg, mterr);
-  qDebug() << QString ("TCP-клиент: ") + tcp::SocketErrors.value(err, QString("Неизвестная ошибка"));
+  emit message(QString ("TCP-клиент: ") + tcpclientm::SocketErrors.value(err, QString("Неизвестная ошибка")), lldbg, mterr);
+  qDebug() << QString ("TCP-клиент: ") + tcpclientm::SocketErrors.value(err, QString("Неизвестная ошибка"));
 }
 
 
 void SvTcpClientMulti::stateChanged(QAbstractSocket::SocketState state)
 // Отображение в утилите "logview" изменившегося состояния подключения.
 {
-    emit message(QString ("TCP-клиент: ") + tcp::SocketStates.value(state, QString("Неизвестное состояние")), sv::log::llDebug, sv::log::mtConnection);
-    qDebug() << QString ("TCP-клиент: ") + tcp::SocketStates.value(state, QString("Неизвестное состояние"));
+    emit message(QString ("TCP-клиент: ") + tcpclientm::SocketStates.value(state, QString("Неизвестное состояние")), sv::log::llDebug, sv::log::mtConnection);
+    qDebug() << QString ("TCP-клиент: ") + tcpclientm::SocketStates.value(state, QString("Неизвестное состояние"));
 }
 
 void SvTcpClientMulti::checkConnection(void)
@@ -189,7 +173,9 @@ void SvTcpClientMulti::checkConnection(void)
   // массив для хранения текущих состояний подключений
   // после прохода по всем сокетам, заполняется состояниями и отправляется в протокольный модуль
   char states[m_params.connections.count()];
-  memset(&states[0], 0, m_params.connections.count());
+  memset(&states[0], STATE_NO_CONNECTION, m_params.connections.count());
+
+  QString states_msg = "Состояния подключений:";
 
   // Если выполняется команда разрыва TCP-соединения с сервером, то до того, как
   // соединение будет разорвано, пытаться его установить - не нужно:
@@ -201,8 +187,8 @@ void SvTcpClientMulti::checkConnection(void)
     // анализируем и назначаем текущее подключение
     for(int i = 0; i < m_params.connections.count(); i++) {
 
-      tcp::CanEntryConnection*  connection  = &m_params.connections[i];
-      QTcpSocket*               client      = connection->socket;
+      tcpclientm::ConnectionItem* connection  = &m_params.connections[i];
+      QTcpSocket*                 client      = connection->socket;
 
       switch (client->state()) {
 
@@ -211,7 +197,7 @@ void SvTcpClientMulti::checkConnection(void)
         {
           // отдельно пррверяем вариант, когда соединение было (и оно было текущим), но произошел разрыв.
           // тогда отключаем данный сокет от слота read и обнуляем текущее соединение (текущего соединения нет)
-          if(m_current_connection && (m_current_connection->can_entry == connection->can_entry)) {
+          if(m_current_connection && (m_current_connection == connection)) {
 
             // отключаемся от слота read
             disconnect(m_current_connection->socket,     &QTcpSocket::readyRead,       this, &SvTcpClientMulti::read );
@@ -233,14 +219,14 @@ void SvTcpClientMulti::checkConnection(void)
         case QAbstractSocket::ConnectedState:
         {
           // если это текущее соединение, то ничего не делаем
-          if(m_current_connection && (m_current_connection->can_entry == connection->can_entry))
+          if(m_current_connection && (m_current_connection == connection))
             break;
 
 
-          // если текущее соединение (m_current_connection) имеет меньший приоритет, чем i-ый элемент,
+          // если i-ый элемент имеет больший приоритет, чем текущее соединение (m_current_connection),
           // то перебрасываем текущее соединение на элемент с большим приоритетом
           // для этого, сначала отключаем сокет от слота read и обнуляем текущее соединение
-          if(m_current_connection && (connection->can_entry < m_current_connection->can_entry)) {
+          if((connection->priority > -1) && m_current_connection && (connection->priority < m_current_connection->priority)) {
 
             disconnect(m_current_connection->socket,     &QTcpSocket::readyRead,       this, &SvTcpClientMulti::read );
             m_current_connection = nullptr;
@@ -272,10 +258,12 @@ void SvTcpClientMulti::checkConnection(void)
     for(int i = 0; i < m_params.connections.count(); i++) {
 
       if(m_params.connections.at(i).socket->state() == QAbstractSocket::ConnectedState)
-        states[i] = m_params.connections.at(i).can_entry == m_current_connection->can_entry ? 2 : 1;
+        states[i] = &m_params.connections.at(i) == m_current_connection ? STATE_HOST_IN_USE : STATE_HOST_ACCESIBLE;
 
       else
-        states[i] = 0;
+        states[i] = STATE_NO_CONNECTION;
+
+      states_msg.append(QString(" %1").arg(int(states[i])));
 
     }
   }
@@ -285,7 +273,8 @@ void SvTcpClientMulti::checkConnection(void)
   p_io_buffer->state->setData(&states[0], m_params.connections.count());
   p_io_buffer->state->mutex.unlock();
 
-  qDebug() << int(states[0]) << int(states[1]) << int(states[2]) << int(states[3]);
+  emit message(states_msg, lldbg, mtdbg);
+//  qDebug() << int(states[0]) << int(states[1]) << int(states[2]) << int(states[3]);
   emit p_io_buffer->notice(p_io_buffer->state);
 
   // запускаем таймер проверки подключений, если не был вызван слот stop
@@ -489,7 +478,7 @@ const char* getVersion()
 
 const char* getParams()
 {
-  return tcp::Params::usage().toStdString().c_str();
+  return tcpclientm::Params::usage().toStdString().c_str();
 }
 
 const char* getInfo()
