@@ -478,7 +478,7 @@ const char* getVersion()
 
 const char* getParams()
 {
-  return tcpclientm::Params::usage().toStdString().c_str();
+  return tcpclientm::usage; //.toStdString().c_str(); // Params::usage().toStdString().c_str();
 }
 
 const char* getInfo()

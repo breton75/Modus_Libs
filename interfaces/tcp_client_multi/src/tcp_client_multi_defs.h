@@ -19,7 +19,7 @@
 
 #define P_CONNECTIONS_DESC          "список хостов, к которым должен подключаться клиент. должен содержать ip адрес, порт, приоритет подключения. флаг enable определяет, будет ли использоваться данное подключение"
 #define P_HOST_DESC                 "ip адрес, к которому клиент должен подключаться"
-#define P_TCP_PORT_DESC             "порт, к которому клиент должен подключаться"
+#define P_TCP_PORT_DESC             "порт, к которому клиент должен подключаться. по умолчанию 1000"
 #define P_PRIORITY_DESC             "опреляет приоритет использования данного подключения. чем ниже число, тем выше приоритет. 0 - наивысший приоритет"
 #define P_RECONNECT_PERIOD_DESC     "период в милисекундах, с которым TCP-клиент осуществляет попытки установить соединение с сервером"
 #define P_GRAIN_GAP_DESC            "период (в милисекундах) ожидания частей пакета данных"
@@ -40,6 +40,27 @@
 
 
 namespace tcpclientm {
+
+//  const QString usage = QString("\"params\": [\n")
+//                        .append(MAKE_PARAM_STR(P_CONNECTIONS,       P_CONNECTIONS_DESC,       "string",   "true", "NULL",                     "json массив", ",\n"))
+//                        .append(MAKE_PARAM_STR(P_HOST,              P_HOST_DESC,              "string",   "true", "NULL",                     "ip адреса в формате xxx.xxx.xxx.xxx, localhost", ",\n"))
+//                        .append(MAKE_PARAM_STR(P_PORT,              P_TCP_PORT_DESC,          "quint16",  "false", DEFAULT_PORT,              "1 - 65535", ",\n"))
+//                        .append(MAKE_PARAM_STR(P_PRIORITY,          P_PRIORITY_DESC,          "int",      "false", DEFAULT_UNDEFINED_PRIORITY,"", ",\n"))
+//                        .append(MAKE_PARAM_STR(P_RECONNECT_PERIOD,  P_RECONNECT_PERIOD_DESC,  "quint16",  "false", DEFAULT_RECONNECT_PERIOD,  "1 - 65535", ",\n"))
+//                        .append(MAKE_PARAM_STR(P_GRAIN_GAP,         P_GRAIN_GAP_DESC,         "quint16",  "false", DEFAULT_GRAIN_GAP,         "1 - 65535", ",\n"))
+//                        .append(MAKE_PARAM_STR(P_FMT,               P_FMT_DESC,               "string",   "false", "hex",                     "hex | ascii | len", "\n"))
+//                        .append("]");
+
+
+  const char* usage = "{\"params\": [\n"
+      MAKE_PARAM_STR_2(P_CONNECTIONS,      P_CONNECTIONS_DESC,       "string",   "true", "NULL",   "json массив", ",\n")\
+      MAKE_PARAM_STR_2(P_HOST,              P_HOST_DESC,              "string",   "true", "NULL",  "ip адреса в формате xxx.xxx.xxx.xxx, localhost", ",\n")\
+      MAKE_PARAM_STR_2(P_PORT,              P_TCP_PORT_DESC,          "quint16",  "false", "1000", "1 - 65535", ",\n")\
+      MAKE_PARAM_STR_2(P_PRIORITY,          P_PRIORITY_DESC,          "int",      "false", "-1",   "", ",\n")\
+      MAKE_PARAM_STR_2(P_RECONNECT_PERIOD,  P_RECONNECT_PERIOD_DESC,  "quint16",  "false", "1000",  "1 - 65535", ",\n")\
+      MAKE_PARAM_STR_2(P_GRAIN_GAP,         P_GRAIN_GAP_DESC,         "quint16",  "false", "10",         "1 - 65535", ",\n")\
+      MAKE_PARAM_STR_2(P_FMT,               P_FMT_DESC,               "string",   "false", "hex",                     "hex | ascii | len", "\n")\
+      "]}";
 
   /*** constants ***/
   enum ResponseAwaiting {
@@ -128,25 +149,25 @@ namespace tcpclientm {
     // Период с которым TCP-клиент осуществляет попытки установить соединение с сервером:
     quint16     reconnect_period  = DEFAULT_RECONNECT_PERIOD;
 
-    static QString usage()
-    {
-      QString fmts = QString();
-      for(auto key: modus::LogFormats.keys())
-        fmts.append(key);
+//    static QString usage()
+//    {
+//      QString fmts = QString();
+//      for(auto key: modus::LogFormats.keys())
+//        fmts.append(key);
 
-      QString result = QString("\"params\": [\n")
-        .append(MAKE_PARAM_STR(P_CONNECTIONS,       P_CONNECTIONS_DESC,       "string",   "true", "NULL",                     "json массив", ",\n"))
-        .append(MAKE_PARAM_STR(P_HOST,              P_HOST_DESC,              "string",   "true", "NULL",                     "ip адреса в формате xxx.xxx.xxx.xxx, localhost", ",\n"))
-        .append(MAKE_PARAM_STR(P_PORT,              P_TCP_PORT_DESC,          "quint16",  "false", DEFAULT_PORT,              "1 - 65535", ",\n"))
-        .append(MAKE_PARAM_STR(P_PRIORITY,          P_PRIORITY_DESC,          "int",      "false", DEFAULT_UNDEFINED_PRIORITY,"", ",\n"))
-        .append(MAKE_PARAM_STR(P_RECONNECT_PERIOD,  P_RECONNECT_PERIOD_DESC,  "quint16",  "false", DEFAULT_RECONNECT_PERIOD,  "1 - 65535", ",\n"))
-        .append(MAKE_PARAM_STR(P_GRAIN_GAP,         P_GRAIN_GAP_DESC,         "quint16",  "false", DEFAULT_GRAIN_GAP,         "1 - 65535", ",\n"))
-        .append(MAKE_PARAM_STR(P_FMT,               P_FMT_DESC,               "string",   "false", "hex",                     fmts, "\n"))
-        .append("]");
+//      QString result = QString("\"params\": [\n")
+//        .append(MAKE_PARAM_STR(P_CONNECTIONS,       P_CONNECTIONS_DESC,       "string",   "true", "NULL",                     "json массив", ",\n"))
+//        .append(MAKE_PARAM_STR(P_HOST,              P_HOST_DESC,              "string",   "true", "NULL",                     "ip адреса в формате xxx.xxx.xxx.xxx, localhost", ",\n"))
+//        .append(MAKE_PARAM_STR(P_PORT,              P_TCP_PORT_DESC,          "quint16",  "false", DEFAULT_PORT,              "1 - 65535", ",\n"))
+//        .append(MAKE_PARAM_STR(P_PRIORITY,          P_PRIORITY_DESC,          "int",      "false", DEFAULT_UNDEFINED_PRIORITY,"", ",\n"))
+//        .append(MAKE_PARAM_STR(P_RECONNECT_PERIOD,  P_RECONNECT_PERIOD_DESC,  "quint16",  "false", DEFAULT_RECONNECT_PERIOD,  "1 - 65535", ",\n"))
+//        .append(MAKE_PARAM_STR(P_GRAIN_GAP,         P_GRAIN_GAP_DESC,         "quint16",  "false", DEFAULT_GRAIN_GAP,         "1 - 65535", ",\n"))
+//        .append(MAKE_PARAM_STR(P_FMT,               P_FMT_DESC,               "string",   "false", "hex",                     fmts, "\n"))
+//        .append("]");
 
-      return result;
+//      return result;
 
-    }
+//    }
 
     static Params fromJsonString(const QString& json_string) //throw (SvException)
     {
