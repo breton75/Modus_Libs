@@ -135,14 +135,14 @@ namespace tcp {
     {
       Params p;
       QString P;
+      QString json = QString(QJsonDocument(object).toJson(QJsonDocument::Compact));
 
       // Считываем значение параметра "интерфейс, который сервер должен прослушивать":
       P = P_IFC_NAME;
       if(object.contains(P)) {
 
         if(!object.value(P).isString())
-          throw SvException(QString(IMPERMISSIBLE_VALUE)
-                            .arg(P).arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact)))
+          throw SvException(QString(IMPERMISSIBLE_VALUE).arg(P).arg(json)
                             .arg(QString("Имя интерфейса должно быть задано строковым значением.")));
 
         p.ifc_name = object.value(P).toString("");
@@ -181,8 +181,7 @@ namespace tcp {
           if(QHostAddress(listen_address).toIPv4Address() != 0) p.listen_address = QHostAddress(listen_address);
 
         else
-          throw SvException(QString(IMPERMISSIBLE_VALUE)
-                             .arg(P).arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact)))
+          throw SvException(QString(IMPERMISSIBLE_VALUE).arg(P).arg(json)
                              .arg("Допускаются ip адреса в формате 192.168.1.1, а также \"localhost\", \"any\", \"broadcast\""));
       }
       else
@@ -193,31 +192,27 @@ namespace tcp {
       if(object.contains(P))
       {
         if(object.value(P).toInt(-1) < 1)
-          throw SvException(QString(IMPERMISSIBLE_VALUE)
-                             .arg(P).arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact)))
+          throw SvException(QString(IMPERMISSIBLE_VALUE).arg(P).arg(json)
                              .arg("Номер порта должен быть задан целым положительным числом в диапазоне [1..65535]"));
 
         p.port = object.value(P).toInt(DEFAULT_PORT);
 
       }
       else
-         throw SvException(QString(MISSING_PARAM_DESC)
-                           .arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact))).arg(P));
+         throw SvException(QString(MISSING_PARAM_DESC).arg(json).arg(P));
 
       // Считываем значение параметра "формат данных в сообщениях, отображаемых в утилите "logview":
       P = P_TCP_FMT;
       if(object.contains(P)) {
 
         if(!object.value(P).isString())
-          throw SvException(QString(IMPERMISSIBLE_VALUE)
-                            .arg(P).arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact)))
+          throw SvException(QString(IMPERMISSIBLE_VALUE).arg(P).arg(json)
                             .arg(QString("Формат вывода данных должен быть задан строковым значением [\"hex\"|\"ascii\"|\"len\"]")));
 
         QString fmt = object.value(P).toString("hex").toLower();
 
         if(!modus::LogFormats.contains(fmt))
-          throw SvException(QString(IMPERMISSIBLE_VALUE)
-                            .arg(P).arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact)))
+          throw SvException(QString(IMPERMISSIBLE_VALUE).arg(P).arg(json)
                             .arg(QString("Не поддерживаемый формат вывода данных. Допустимые значения: [\"hex\"|\"ascii\"|\"len\"]")));
 
         p.fmt = modus::LogFormats.value(fmt);
@@ -231,9 +226,7 @@ namespace tcp {
       if(object.contains(P)) {
 
         if(object.value(P).toInt(-1) < 1)
-          throw SvException(QString(IMPERMISSIBLE_VALUE)
-                            .arg(P)
-                            .arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact)))
+          throw SvException(QString(IMPERMISSIBLE_VALUE).arg(P).arg(json)
                             .arg("Интервал ожидания частей пакета не может быть меньше 1 мсек."));
 
         p.grain_gap = object.value(P).toInt(DEFAULT_GRAIN_GAP);
@@ -256,10 +249,10 @@ namespace tcp {
     {
         QJsonObject j;
 
-        j.insert(P_TCP_LISTEN_ADDRESS,        QJsonValue(listen_address.toString()).toString());
-        j.insert(P_TCP_PORT,        QJsonValue(static_cast<int>(port)).toInt());
-        j.insert(P_GRAIN_GAP,       QJsonValue(grain_gap));
-        j.insert(P_TCP_FMT,         QJsonValue(static_cast<int>(fmt)).toInt());
+        j.insert(P_TCP_LISTEN_ADDRESS,  QJsonValue(listen_address.toString()).toString());
+        j.insert(P_TCP_PORT,            QJsonValue(static_cast<int>(port)).toInt());
+        j.insert(P_GRAIN_GAP,           QJsonValue(grain_gap));
+        j.insert(P_TCP_FMT,             QJsonValue(static_cast<int>(fmt)).toInt());
 
         return j;
     }
