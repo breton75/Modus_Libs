@@ -45,8 +45,8 @@ bool SvTcpServer::start()
     connect(p_io_buffer, &modus::IOBuffer::say, this, &SvTcpServer::say_WorkingOut);
 
     // Командуем ТСP-серверу начать прослушивать входящие соединения от клиента с
-    // адресом и портом, указанными в конфигурационном файле для данного интерфейса:
-    if (m_tcpServer->listen(m_params.listen_address, m_params.port) == false)
+    // адресом сервера и портом, указанными в конфигурационном файле для данного интерфейса:
+    if (m_tcpServer->listen(m_params.server_address, m_params.port) == false)
     {
         emit message(QString("TCP-сервер: Не удалось запустить TCP-сервер на прослушивание"), lldbg, mtfal);
         qDebug() << "TCP-сервер: Не удалось запустить TCP-сервер на прослушивание";
