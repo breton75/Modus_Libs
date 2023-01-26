@@ -41,17 +41,6 @@
 
 namespace tcpclientm {
 
-//  const QString usage = QString("\"params\": [\n")
-//                        .append(MAKE_PARAM_STR(P_CONNECTIONS,       P_CONNECTIONS_DESC,       "string",   "true", "NULL",                     "json массив", ",\n"))
-//                        .append(MAKE_PARAM_STR(P_HOST,              P_HOST_DESC,              "string",   "true", "NULL",                     "ip адреса в формате xxx.xxx.xxx.xxx, localhost", ",\n"))
-//                        .append(MAKE_PARAM_STR(P_PORT,              P_TCP_PORT_DESC,          "quint16",  "false", DEFAULT_PORT,              "1 - 65535", ",\n"))
-//                        .append(MAKE_PARAM_STR(P_PRIORITY,          P_PRIORITY_DESC,          "int",      "false", DEFAULT_UNDEFINED_PRIORITY,"", ",\n"))
-//                        .append(MAKE_PARAM_STR(P_RECONNECT_PERIOD,  P_RECONNECT_PERIOD_DESC,  "quint16",  "false", DEFAULT_RECONNECT_PERIOD,  "1 - 65535", ",\n"))
-//                        .append(MAKE_PARAM_STR(P_GRAIN_GAP,         P_GRAIN_GAP_DESC,         "quint16",  "false", DEFAULT_GRAIN_GAP,         "1 - 65535", ",\n"))
-//                        .append(MAKE_PARAM_STR(P_FMT,               P_FMT_DESC,               "string",   "false", "hex",                     "hex | ascii | len", "\n"))
-//                        .append("]");
-
-
   const char* usage = "{\"params\": [\n"
       MAKE_PARAM_STR_2(P_CONNECTIONS,      P_CONNECTIONS_DESC,       "string",   "true", "NULL",   "json массив", ",\n")\
       MAKE_PARAM_STR_2(P_HOST,              P_HOST_DESC,              "string",   "true", "NULL",  "ip адреса в формате xxx.xxx.xxx.xxx, localhost", ",\n")\

@@ -21,7 +21,7 @@ bool SvUdp::configure(modus::DeviceConfig* config, modus::IOBuffer*iobuffer)
     p_config = config;
     p_io_buffer = iobuffer;
 
-    m_params = UdpParams::fromJsonString(p_config->interface.params);
+    m_params = udp::Params::fromJsonString(p_config->interface.params);
 
     return true;
 
@@ -194,18 +194,22 @@ modus::SvAbstractInterface* create()
   modus::SvAbstractInterface* device = new SvUdp();
   return device;
 }
-
-const char* getDefaultParams()
+const char* getVersion()
 {
-  return "{ \"host\": \"172.16.4.11\", \"recv_port\": 6001, \"send_port\": 5001 }";
+  return LIB_VERSION;
 }
 
-const char* getName()
+const char* getParams()
 {
-  return "Драйвер для работы с UDP";
+  return udp::usage; //.toStdString().c_str(); // Params::usage().toStdString().c_str();
+}
+
+const char* getInfo()
+{
+  return LIB_SHORT_INFO;
 }
 
 const char* getDescription()
 {
-  return "Драйвер для работы с UDP";
+  return LIB_DESCRIPTION;
 }

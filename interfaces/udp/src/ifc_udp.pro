@@ -7,7 +7,8 @@ DEFINES += IFC_UDP_LIBRARY
 CONFIG += c++11 plugin
 
 VERSION = 1.1.0    # major.minor.patch
-DEFINES += APP_VERSION=\\\"$$VERSION\\\"
+DEFINES +=  LIB_VERSION=\\\"$$VERSION\\\"
+DEFINES += "LIB_AUTHOR=\"\\\"Свиридов С. А.\\\"\""
 
 TARGET = /home/user/Modus/lib/interfaces/udp
 # The following define makes your compiler emit warnings if you use
