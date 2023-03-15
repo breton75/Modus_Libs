@@ -39,10 +39,10 @@ SOURCES += \
     tcp_client_multi.cpp
 
 HEADERS += \
-    ../../../../Modus/global/device/interface/sv_abstract_interface.h \
     tcp_client_multi_defs.h \
     tcp_client_multi.h \
     tcp_client_multi_global.h \
+    ../../../../Modus/global/device/interface/sv_abstract_interface.h \
     ../../../../Modus/global/device/device_defs.h
 
 # Default rules for deployment.
