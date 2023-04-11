@@ -48,8 +48,8 @@ bool SvTcpServer::start()
 
 >>>>>>> kon
     // Командуем ТСP-серверу начать прослушивать входящие соединения от клиента с
-    // адресом и портом, указанными в конфигурационном файле для данного интерфейса:
-    if (m_tcpServer->listen(m_params.listen_address, m_params.port) == false)
+    // адресом сервера и портом, указанными в конфигурационном файле для данного интерфейса:
+    if (m_tcpServer->listen(m_params.server_address, m_params.port) == false)
     {
 <<<<<<< HEAD
         emit message(QString("Не удалось запустить TCP сервер на прослушивание"), lldbg, mtfal);
@@ -314,19 +314,31 @@ void SvTcpServer::write(modus::BUFF* buffer)
     // Если данных для передачи нет, то нечего и передавать (выходим из функции):
       return;
   }
+
+  QMutexLocker(&(buffer->mutex));
+
   if (m_clientConnection == nullptr)
   {
-      // Если сокет сокет клиентского подключения не создан,
-      // то некому и передавать (выходим из функции):
-      return;
-  }
-  if (m_clientConnection -> state() != QAbstractSocket::ConnectedState)
-  {
-      // Если соединения с клиентом не установлено, то некому и передавать (выходим из функции):
+      // Если сокет сокет клиентского подключения не создан, то некому и передавать:
+      // 1. Очищаем буфер (если этого не делать, то когда соединение с TCP-клиентом будет
+      //    установлено, он получит УСТАРЕВШИЕ данные, оставшиеся в буфере).
+      buffer ->reset();
+
+      // 2. Выходим из функции:
       return;
   }
 
-  buffer->mutex.lock();
+  if (m_clientConnection -> state() != QAbstractSocket::ConnectedState)
+  {
+      // Если соединения с клиентом не установлено, то некому и передавать:
+      // 1. Очищаем буфер (если этого не делать, то когда соединение с TCP-клиентом будет
+      //    установлено, он получит УСТАРЕВШИЕ данные, оставшиеся в буфере).
+      buffer ->reset();
+
+      // 2. Выходим из функции:
+      return;
+  }
+
   bool written = m_clientConnection->write((const char*)&buffer->data[0], buffer->offset) > 0;
   m_clientConnection->flush();
 
@@ -346,8 +358,7 @@ void SvTcpServer::write(modus::BUFF* buffer)
 >>>>>>> kon
 
   buffer->reset();
-
-  buffer->mutex.unlock();
+  return;
 }
 
 
@@ -363,6 +374,13 @@ void SvTcpServer::say_WorkingOut(QByteArray command)
         // Отображаем информацию о закрытии клиентского подключения в утилите "logview":
         qDebug () << QString("TCP-сервер: закрываем клиентское подключение");
         emit message(QString("TCP-сервер: закрываем клиентское подключение"), lldbg, mtinf);
+
+        if (m_clientConnection == nullptr)
+        { // Если сокет клиентского подключения не создан, то нечего и закрывать ->
+            // выходим из функции:
+
+            return;
+        }
 
         // Даём команду на закрытие клиентского подключения:
         m_clientConnection->close();

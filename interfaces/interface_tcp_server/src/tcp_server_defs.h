@@ -10,8 +10,8 @@
 #include "../../../../svlib/SvException/svexception.h"
 #include "../../../../Modus/global/global_defs.h"
 
-// Параметр "listen_address" в конфигурационном файле определяет адрес, который сервер должен прослушивать:
-#define P_TCP_LISTEN_ADDRESS   "listen_address"
+// Параметр "server_address" в конфигурационном файле определяет адрес TCP-сервера:
+#define P_TCP_SERVER_ADDRESS   "server_address"
 
 // Параметр "port" в конфигурационном файле определяет адрес порта, который сервер должен прослушивать:
 #define P_TCP_PORT   "port"
@@ -91,8 +91,8 @@ namespace tcp {
 
   /** структура для хранения параметров протокольной части **/
   struct Params {
-    // Адрес, который сервер должен прослушивать TCP-сервер:
-    QHostAddress listen_address   = QHostAddress::Any;
+    // Адрес TCP-сервера:
+    QHostAddress server_address   = QHostAddress::Any;
 
     // Порт, который должен прослушивать TCP-сервер:
     quint16      port             = DEFAULT_PORT;
@@ -125,16 +125,16 @@ namespace tcp {
       Params p;
       QString P;
 
-      // Считываем значение параметра "адрес, который сервер должен прослушивать":
-      P = P_TCP_LISTEN_ADDRESS;
+      // Считываем значение параметра "адрес TCP-сервера":
+      P = P_TCP_SERVER_ADDRESS;
       if(object.contains(P)) {
 
-        QString listen_address = object.value(P).toString("").toLower();
+        QString server_address = object.value(P).toString("").toLower();
 
-        if(SpecialHosts.contains(listen_address)) p.listen_address = QHostAddress(SpecialHosts.value(listen_address));
+        if(SpecialHosts.contains(server_address)) p.server_address = QHostAddress(SpecialHosts.value(server_address));
 
         else
-          if(QHostAddress(listen_address).toIPv4Address() != 0) p.listen_address = QHostAddress(listen_address);
+          if(QHostAddress(server_address).toIPv4Address() != 0) p.server_address = QHostAddress(server_address);
 
         else
           throw SvException(QString(IMPERMISSIBLE_VALUE)
@@ -142,13 +142,13 @@ namespace tcp {
                              .arg("Допускаются ip адреса в формате 192.168.1.1, а также \"localhost\", \"any\", \"broadcast\""));
       }
       else
-        p.listen_address = QHostAddress::Any;
+        p.server_address = QHostAddress::Any;
 
       // Считываем значение параметра "порт, который сервер должен прослушивать"
       P = P_TCP_PORT;
       if(object.contains(P))
       {
-        if(object.value(P).toInt(-1) < 1)
+        if(object.value(P).toInt(-1) < 0)
           throw SvException(QString(IMPERMISSIBLE_VALUE)
                              .arg(P).arg(QString(QJsonDocument(object).toJson(QJsonDocument::Compact)))
                              .arg("Номер порта должен быть задан целым положительным числом в диапазоне [1..65535]"));
@@ -212,7 +212,7 @@ namespace tcp {
     {
         QJsonObject j;
 
-        j.insert(P_TCP_LISTEN_ADDRESS,        QJsonValue(listen_address.toString()).toString());
+        j.insert(P_TCP_SERVER_ADDRESS,        QJsonValue(server_address.toString()).toString());
         j.insert(P_TCP_PORT,        QJsonValue(static_cast<int>(port)).toInt());
         j.insert(P_GRAIN_GAP,       QJsonValue(grain_gap));
         j.insert(P_TCP_FMT,         QJsonValue(static_cast<int>(fmt)).toInt());
