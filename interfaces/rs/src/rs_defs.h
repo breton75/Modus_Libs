@@ -30,6 +30,7 @@
 #define P_SERIAL_STOPBITS "stopbits"
 #define P_SERIAL_FLOWCTRL "flowcontrol"
 #define P_SERIAL_FMT      "fmt"
+#define P_DTR_CONTROL     "dtr_control"
 
 
 const QList<int> Baudrates = {75, 115, 134, 150, 300, 600, 1200, 1800, 2400, 4800, 7200, 9600, 14400, 19200, 38400, 57600, 115200, 128000};
@@ -70,6 +71,7 @@ struct SerialParams {
   QSerialPort::FlowControl  flowcontrol =     QSerialPort::NoFlowControl;
   quint16                   fmt         =     modus::HEX;
   quint16                   grain_gap   =     DEFAULT_GRAIN_GAP;
+  bool                      dtr_control =     true;
 
   bool isValid = true;
 
@@ -218,6 +220,14 @@ struct SerialParams {
     }
     else
       p.grain_gap = quint16(DEFAULT_GRAIN_GAP);
+
+    /* DTR coontrol */
+    P = P_DTR_CONTROL;
+    if(object.contains(P))
+      p.dtr_control = object.value(P).toBool(true);
+
+    else
+      p.dtr_control = true;
 
     return p;
 

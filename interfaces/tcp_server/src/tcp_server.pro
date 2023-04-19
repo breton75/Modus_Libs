@@ -40,10 +40,10 @@ SOURCES += \
 
 HEADERS += \
     ../../../../Modus/global/device/interface/sv_abstract_interface.h \
+    ../../../../Modus/global/device/device_defs.h \
     sv_tcp_server.h \
     tcp_server_defs.h \
-    tcp_server_global.h \
-    ../../../../Modus/global/device/device_defs.h
+    tcp_server_global.h
 
 # Default rules for deployment.
 unix {

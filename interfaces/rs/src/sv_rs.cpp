@@ -39,6 +39,9 @@ bool SvRS::start()
     if(!m_port->open(QIODevice::ReadWrite))
       throw SvException(m_port->errorString());
 
+    if(m_params.dtr_control)
+      m_port->setDataTerminalReady(true);
+
     connect(m_port, &QSerialPort::readyRead, this, &SvRS::read);
     connect(p_io_buffer, &modus::IOBuffer::readyWrite, this, &SvRS::write);
 
@@ -97,6 +100,9 @@ void SvRS::write(modus::BUFF* buffer)
 
   buffer->mutex.lock();
 
+  if(m_params.dtr_control)
+    m_port->setDataTerminalReady(false);
+
   bool written = m_port->write(&buffer->data[0], buffer->offset) > 0;
   m_port->flush();
 
@@ -104,6 +110,9 @@ void SvRS::write(modus::BUFF* buffer)
     emit_message(QByteArray((const char*)&buffer->data[0], buffer->offset), sv::log::llDebug, sv::log::mtSend);
 
   buffer->reset();
+
+  if(m_params.dtr_control)
+    m_port->setDataTerminalReady(true);
 
   buffer->mutex.unlock();
 
