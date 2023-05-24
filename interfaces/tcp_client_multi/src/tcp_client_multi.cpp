@@ -481,6 +481,11 @@ const char* getParams()
   return tcpclientm::usage; //.toStdString().c_str(); // Params::usage().toStdString().c_str();
 }
 
+const char* getDefaultParams()
+{
+  return tcpclientm::usage; //.toStdString().c_str(); // Params::usage().toStdString().c_str();
+}
+
 const char* getInfo()
 {
   return LIB_SHORT_INFO;
