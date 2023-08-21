@@ -287,19 +287,19 @@ void SvTcpClientMulti::read()
   if(!m_current_connection)
     return;
 
-    m_gap_timer->stop();
+  m_gap_timer->stop();
 
-    p_io_buffer->input->mutex.lock();
+  p_io_buffer->input->mutex.lock();
 
-   // Если нам надо читать данные от сокета в буфер, а протокольная часть ещё не прочла
-   // прошлое содержание буфера, то сбрасываем флаг "is_ready", при этом данные,
-   // получаемые от сокета будут добавляться к тем данным, которые уже имеются в буфере:
-   if(p_io_buffer->input->isReady())
-       p_io_buffer->input->is_ready = false;
+  // Если нам надо читать данные от сокета в буфер, а протокольная часть ещё не прочла
+  // прошлое содержание буфера, то сбрасываем флаг "is_ready", при этом данные,
+  // получаемые от сокета будут добавляться к тем данным, которые уже имеются в буфере:
+  if(p_io_buffer->input->isReady())
+      p_io_buffer->input->is_ready = false;
 
-   // Если места в буфере на новые данные от сокета нет, то очищаем его содержимое и
-   // сбрасываем флаг "is_ready":
-   if(p_io_buffer->input->offset + m_current_connection->socket->bytesAvailable() > p_config->bufsize)
+  // Если места в буфере на новые данные от сокета нет, то очищаем его содержимое и
+  // сбрасываем флаг "is_ready":
+  if(p_io_buffer->input->offset + m_current_connection->socket->bytesAvailable() > p_config->bufsize)
         p_io_buffer->input->reset();
 
 
@@ -475,6 +475,11 @@ const char* getVersion()
 }
 
 const char* getParams()
+{
+  return tcpclientm::usage; //.toStdString().c_str(); // Params::usage().toStdString().c_str();
+}
+
+const char* getDefaultParams()
 {
   return tcpclientm::usage; //.toStdString().c_str(); // Params::usage().toStdString().c_str();
 }

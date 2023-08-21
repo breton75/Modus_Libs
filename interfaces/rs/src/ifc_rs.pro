@@ -6,7 +6,7 @@ DEFINES += IFC_RS_LIBRARY
 
 CONFIG += c++11 plugin
 
-VERSION = 1.0.1    # major.minor.patch
+VERSION = 1.0.2    # major.minor.patch
 DEFINES +=  LIB_VERSION=\\\"$$VERSION\\\"
 DEFINES += "LIB_AUTHOR=\"\\\"Свиридов С. А.\\\"\""
 
