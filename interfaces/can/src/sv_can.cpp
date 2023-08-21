@@ -201,6 +201,9 @@ bool SvCAN::start()
     usleep(interval);
 
   }
+
+  return true;
+
 }
 
 void SvCAN::emit_message(const QByteArray& bytes, sv::log::Level level, sv::log::MessageTypes type)

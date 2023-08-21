@@ -119,7 +119,7 @@ void SvTcpClientMulti::connected(void)
                 .arg(socket->peerPort());
 
     emit message(m, lldbg, mtscc);
-    qDebug() << m;
+//    qDebug() << m;
 
   }
 }
@@ -143,7 +143,7 @@ void SvTcpClientMulti::disconnected (void)
                 .arg(socket->peerPort());
 
     emit message(m, lldbg, mtscc);
-    qDebug() << m;
+//    qDebug() << m;
 
   }
 }
@@ -160,7 +160,7 @@ void SvTcpClientMulti::stateChanged(QAbstractSocket::SocketState state)
 // Отображение в утилите "logview" изменившегося состояния подключения.
 {
     emit message(QString ("TCP-клиент: ") + tcpclientm::SocketStates.value(state, QString("Неизвестное состояние")), sv::log::llDebug, sv::log::mtConnection);
-    qDebug() << QString ("TCP-клиент: ") + tcpclientm::SocketStates.value(state, QString("Неизвестное состояние"));
+//    qDebug() << QString ("TCP-клиент: ") + tcpclientm::SocketStates.value(state, QString("Неизвестное состояние"));
 }
 
 void SvTcpClientMulti::checkConnection(void)
@@ -180,8 +180,6 @@ void SvTcpClientMulti::checkConnection(void)
   // Если выполняется команда разрыва TCP-соединения с сервером, то до того, как
   // соединение будет разорвано, пытаться его установить - не нужно:
   if (p_is_active) {
-
-    qDebug() << "TCP-клиент: выполняется проверка соединения с сервером";
 
     // проходим по очереди по всем подключениям, заданным в списке connections
     // анализируем и назначаем текущее подключение
